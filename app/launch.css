@@ -92,7 +92,7 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .qaCategoryHero h1{margin:0!important;line-height:1!important}
 
 /* About locked layout: full cinematic hero + feathered chair inside story, at restrained scale. */
-.aboutHero{min-height:360px!important;background-image:linear-gradient(90deg,rgba(2,8,6,.96) 0%,rgba(2,8,6,.76) 35%,rgba(2,8,6,.12) 68%),url('/assets/about-event-clean.jpg')!important;background-size:auto 118%!important;background-position:right center!important;background-color:#020706!important;background-repeat:no-repeat!important}
+.aboutHero{min-height:360px!important;background-image:linear-gradient(90deg,rgba(2,8,6,.96) 0%,rgba(2,8,6,.76) 35%,rgba(2,8,6,.12) 68%),url('/assets/about-event-clean.jpg')!important;background-size:auto 118%!important;background-position:62% center!important;background-color:#020706!important;background-repeat:no-repeat!important}
 .aboutHeroInner{min-height:360px!important}
 .aboutStory{min-height:340px!important;position:relative!important;overflow:hidden!important;grid-template-columns:1fr!important}
 .aboutStoryCopy{position:relative!important;z-index:3!important;width:52%!important;padding:38px 0!important}
@@ -100,7 +100,7 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .aboutStats svg{display:block!important}
 
 /* Contact locked hero: chair is part of the hero image, not a narrow strip. */
-.contactHero{min-height:360px!important;background-image:linear-gradient(90deg,rgba(2,9,7,.97) 0%,rgba(2,9,7,.80) 34%,rgba(2,9,7,.12) 70%),url('/assets/director-chair-clean.jpg')!important;background-size:auto 118%!important;background-position:right center!important;background-color:#020706!important;background-repeat:no-repeat!important}
+.contactHero{min-height:360px!important;background-image:linear-gradient(90deg,rgba(2,9,7,.97) 0%,rgba(2,9,7,.80) 34%,rgba(2,9,7,.12) 70%),url('/assets/director-chair-clean.jpg')!important;background-size:auto 118%!important;background-position:62% center!important;background-color:#020706!important;background-repeat:no-repeat!important}
 .contactHeroInner{min-height:360px!important}
 .contactHeroInner{align-items:flex-start!important}
 .contactHero h1{font-size:56px!important;line-height:.94!important}
