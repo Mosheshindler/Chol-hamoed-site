@@ -107,9 +107,16 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .contactForm .btn{min-width:154px!important;height:44px!important;padding:0 22px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border:0!important;border-radius:999px!important;background:var(--mm-lime)!important;color:#061006!important;font-size:14px!important;font-weight:800!important}
 .contactMethods b svg{display:block!important}
 
+/* Hero photos fill their box edge-to-edge, matching the photo below them */
+.aboutHero,.aboutHeroInner{min-height:420px!important}
+.aboutHero{background-size:cover!important;background-position:center 46%!important}
+.contactHero,.contactHeroInner{min-height:420px!important}
+.contactHero{background-size:cover!important;background-position:center 50%!important}
+
 @media(max-width:900px){
   .collectionGridAll{grid-template-columns:1fr!important}
   .aboutStoryCopy{width:100%!important}
   .aboutChair{width:100%!important;opacity:.20!important}
   .socials{min-width:auto!important}
+  .aboutHero,.aboutHeroInner,.contactHero,.contactHeroInner{min-height:280px!important}
 }
