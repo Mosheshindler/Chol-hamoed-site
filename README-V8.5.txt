@@ -1,0 +1,11 @@
+Mint Media Site V8.5 — bundled fix pass
+- Rebuilt Featured hero carousel interaction: arrows + dots use explicit active slides and are clickable above all overlays.
+- Keeps category name Premium Content; Yidly remains branding inside premium viewer treatment only.
+- Reworked category icons to match the previously approved homepage family: film camera, popcorn, microphone/music notes, speech bubbles, director chair, event spotlights/crowd, diamond/sparkles.
+- Stories icon remains the exact locked supplied image asset.
+- Added Shorts category with a vertical-video/phone icon.
+- Added Shorts to header dropdown and Admin category list.
+- Premium Content restored in header/collections/metadata.
+- Category row arrow now actually scrolls the category strip.
+- Fixed Safari Categories button styling so it no longer resembles a native white control.
+- No new Supabase migration is required beyond V8.4 hero_image_url.

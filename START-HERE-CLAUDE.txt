@@ -1,0 +1,7 @@
+I am transferring an existing Mint Media video website project to you. The attached folder is the latest V9.5 codebase. Do NOT rebuild it or redesign it from scratch.
+
+First read CLAUDE-HANDOFF.md completely, then inspect the existing code and reference-designs folder. Treat every item marked LOCKED or ABSOLUTELY LOCKED as a hard constraint. Preserve the official Mint Media logo and category icon artwork exactly; do not redraw or restyle locked assets.
+
+We are currently at visual QA, not at a fresh build. V9.5 was created to fix: the missing homepage Q&A icon, Q&A spacing/title, missing Collections categories, invisible footer social icons, Contact hero chair/layout and Send Message button consistency, and About image placement/scale. I have NOT yet approved those V9.5 fixes.
+
+Please begin by helping me run/review the existing V9.5. Work one screen at a time. Do not make unrelated changes to already-approved pages. When code changes are needed, batch the approved fixes into one new version so I do not have to reinstall repeatedly.
