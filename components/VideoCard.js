@@ -1,2 +1,0 @@
-import Link from 'next/link'
-export default function VideoCard({video}){return <Link href={`/watch/${video.slug}`} className="card"><div className="thumb" style={{backgroundImage:`url(${video.thumbnail})`}}>{video.premium?<span className="premiumCardBadge">YIDLY PREMIUM</span>:null}{video.duration ? <span className="duration">{video.duration}</span> : null}</div><div className="cardTitle">{video.title}</div><div className="cardMeta">{video.category}</div></Link>}

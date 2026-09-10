@@ -1,0 +1,1447 @@
+/* [project]/app/launch.css [app-client] (css) */
+:root {
+  --mint: #88c040;
+  --mint2: #88c040;
+  --deep: #107838;
+  --mm-bg: #020706;
+  --mm-panel: #07110e;
+  --mm-line: #2f473d;
+  --mm-lime: #88c040;
+  --mm-deep: #107838;
+  --mm-text: #f5f7f5;
+  --mm-muted: #c5cec9;
+}
+
+body {
+  color: var(--mm-text);
+  background: radial-gradient(circle at 50% 0, #07140f 0, #030907 42%, #020504 100%);
+}
+
+.header {
+  z-index: 100;
+  background: #020706fa;
+}
+
+.brand, .footerLogo {
+  width: 220px !important;
+}
+
+.brand img, .footerLogo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.navDropMenu {
+  z-index: 500 !important;
+  top: 72px !important;
+}
+
+.homeHero.v9Hero {
+  border-bottom: 1px solid #6e8c8038;
+  height: 350px;
+  position: relative;
+  overflow: hidden;
+  background: #020504 !important;
+}
+
+.v9Hero .heroPhoto {
+  z-index: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 68%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.v9Hero .heroShade {
+  z-index: 1;
+  background: linear-gradient(90deg, #020504 0%, #020504fa 12%, #020504c7 38%, #0205041a 72%);
+  position: absolute;
+  inset: 0;
+}
+
+.v9Hero .heroMainLink {
+  z-index: 2;
+  position: absolute;
+  inset: 0;
+}
+
+.v9Hero .heroInner {
+  z-index: 3;
+  pointer-events: none;
+  position: relative;
+}
+
+.v9Hero .heroArrow, .v9Hero .dots {
+  pointer-events: auto;
+}
+
+.v9Hero .heroContent h1 {
+  letter-spacing: -2px;
+  margin: 6px 0 10px;
+  font-size: 58px;
+  line-height: 1.02;
+}
+
+.lockedCategoryGrid {
+  grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  display: grid !important;
+  overflow: visible !important;
+}
+
+.lockedCat {
+  border-radius: 11px !important;
+  height: 118px !important;
+  min-height: 118px !important;
+  padding: 10px 7px !important;
+}
+
+.lockedCatIcon img {
+  object-fit: contain !important;
+  filter: none !important;
+  image-rendering: auto !important;
+  width: auto !important;
+  max-width: 54px !important;
+  height: auto !important;
+  max-height: 54px !important;
+}
+
+.lockedCat span {
+  font-size: 12px;
+}
+
+.homeBody .cta {
+  background: linear-gradient(110deg, #071711, #091b15) !important;
+  border: 1px solid #88c040e6 !important;
+  border-radius: 14px !important;
+  grid-template-columns: 1fr 1px 1fr !important;
+  gap: 24px !important;
+  margin: 34px 0 30px !important;
+  padding: 22px 26px !important;
+}
+
+.homeBody .ctaPane {
+  grid-template-columns: 52px 1fr auto !important;
+  align-items: center !important;
+  gap: 17px !important;
+  display: grid !important;
+}
+
+.homeBody .ctaIcon {
+  width: 48px !important;
+  color: var(--mm-lime) !important;
+}
+
+.homeBody .ctaIcon svg {
+  width: 38px !important;
+  height: 38px !important;
+  display: block !important;
+}
+
+.homeBody .ctaIcon.waIcon svg {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+.homeBody .ctaTitle {
+  color: var(--mm-lime) !important;
+  font-size: 16px !important;
+}
+
+.homeBody .ctaSub {
+  max-width: 290px !important;
+  font-size: 12px !important;
+}
+
+.homeBody .followBtn {
+  background: var(--mm-lime) !important;
+  color: #061006 !important;
+  border-radius: 999px !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-width: 132px !important;
+  height: 45px !important;
+  margin: 0 !important;
+  display: flex !important;
+}
+
+.homeBody .ctaDivider {
+  background: #41574d !important;
+  height: 58px !important;
+}
+
+.aboutPage {
+  padding: 0 0 34px !important;
+}
+
+.aboutHero {
+  border-bottom: 1px solid #708b7f33;
+  background-image: linear-gradient(90deg, #020806fa 0%, #020806d1 34%, #0208061f 72%), url("/assets/about-event-clean.jpg") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  min-height: 430px !important;
+}
+
+.aboutHeroInner {
+  align-items: center !important;
+  min-height: 430px !important;
+  display: flex !important;
+}
+
+.aboutHero p {
+  color: #eef3f0 !important;
+  max-width: 590px !important;
+  font-size: 20px !important;
+  line-height: 1.5 !important;
+}
+
+.aboutStats {
+  grid-template-columns: repeat(4, 1fr) !important;
+  padding: 34px 0 40px !important;
+  display: grid !important;
+}
+
+.aboutStats > div {
+  text-align: center !important;
+  border-right: 1px solid #7e9d8e47 !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 3px !important;
+  min-height: 110px !important;
+  display: flex !important;
+}
+
+.aboutStats > div:last-child {
+  border-right: 0 !important;
+}
+
+.aboutStats span {
+  color: var(--mm-lime) !important;
+  font-size: 30px !important;
+}
+
+.aboutStats small {
+  color: #d5ddd9 !important;
+  font-size: 14px !important;
+}
+
+.aboutStats strong {
+  margin: 2px 0 !important;
+  font-size: 31px !important;
+  line-height: 1 !important;
+}
+
+.aboutStory {
+  border-top: 1px solid #708b7f1a;
+  grid-template-columns: 48% 52% !important;
+  align-items: center !important;
+  min-height: 430px !important;
+  display: grid !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.aboutStoryCopy {
+  z-index: 3 !important;
+  padding: 48px 0 !important;
+  position: relative !important;
+}
+
+.aboutStory p {
+  color: #d8e0dc !important;
+  max-width: 570px !important;
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+}
+
+.aboutChair {
+  opacity: .96 !important;
+  background-image: linear-gradient(90deg, #020706 0%, #020706d1 17%, #02070614 52%), url("/assets/director-chair-clean.jpg") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  width: 60% !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+}
+
+.aboutConnect {
+  background: linear-gradient(110deg, #092219, #0a1814) !important;
+  border: 1px solid #7e9d8e45 !important;
+  border-radius: 14px !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 30px !important;
+  min-height: 155px !important;
+  margin: 28px auto 38px !important;
+  padding: 32px 42px !important;
+  display: flex !important;
+}
+
+.aboutConnect .btn {
+  background: var(--mm-lime) !important;
+  color: #061006 !important;
+}
+
+.contactPage {
+  padding-bottom: 30px !important;
+}
+
+.contactHero {
+  border-bottom: 1px solid #708b7f33;
+  background-image: linear-gradient(90deg, #020907fa 0%, #020907c2 37%, #02090714 72%), url("/assets/director-chair-clean.jpg") !important;
+  background-position: 100% !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  min-height: 430px !important;
+}
+
+.contactHeroInner {
+  flex-direction: column !important;
+  justify-content: center !important;
+  min-height: 430px !important;
+  display: flex !important;
+}
+
+.contactHero h1 {
+  letter-spacing: -2px !important;
+  margin: 14px 0 !important;
+  font-size: 78px !important;
+  font-weight: 400 !important;
+  line-height: .9 !important;
+}
+
+.contactHero i {
+  background: var(--mm-lime) !important;
+  width: 48px !important;
+  height: 3px !important;
+  margin: 8px 0 22px !important;
+  display: block !important;
+}
+
+.contactHero p {
+  letter-spacing: 5px !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+.contactMethods {
+  grid-template-columns: repeat(3, 1fr) !important;
+  padding: 34px 0 !important;
+  display: grid !important;
+}
+
+.contactMethods a {
+  text-align: center !important;
+  border-right: 1px solid #7e9d8e47 !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-height: 112px !important;
+  display: flex !important;
+}
+
+.contactMethods a:last-child {
+  border-right: 0 !important;
+}
+
+.contactMethods b {
+  width: 54px !important;
+  height: 54px !important;
+  color: var(--mm-lime) !important;
+  background: #88c04014 !important;
+  border-radius: 50% !important;
+  place-items: center !important;
+  font-size: 27px !important;
+  display: grid !important;
+}
+
+.contactMethods span {
+  color: #f0f4f2 !important;
+  font-size: 15px !important;
+}
+
+.contactMethods a:last-child span {
+  color: var(--mm-lime) !important;
+  text-decoration: underline !important;
+}
+
+.contactFormPanel {
+  background: radial-gradient(circle at 66% 40%, #11563a2e, #0000 48%), linear-gradient(120deg, #071812, #092219) !important;
+  border: 1px solid #7e9d8e47 !important;
+  border-radius: 14px !important;
+  padding: 31px 36px 34px !important;
+}
+
+.contactFormPanel p {
+  color: #e0e6e3 !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+.contactForm {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 18px 30px !important;
+  margin-top: 22px !important;
+  display: grid !important;
+}
+
+.contactForm label {
+  flex-direction: column !important;
+  gap: 8px !important;
+  font-size: 13px !important;
+  display: flex !important;
+}
+
+.contactForm input, .contactForm textarea {
+  color: #fff !important;
+  background: #0b1c16 !important;
+  border: 1px solid #40594d !important;
+  border-radius: 9px !important;
+  width: 100% !important;
+  padding: 13px 14px !important;
+}
+
+.contactForm textarea {
+  resize: vertical !important;
+  height: 98px !important;
+}
+
+.contactForm .btn {
+  background: var(--mm-lime) !important;
+  color: #061006 !important;
+  justify-self: start !important;
+  margin-top: 2px !important;
+}
+
+.contactSignups {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px !important;
+  margin-top: 20px !important;
+  display: grid !important;
+}
+
+.signupCard {
+  background: radial-gradient(circle at 80% 25%, #235b4638, #0000 40%), linear-gradient(120deg, #081a14, #07110e) !important;
+  border: 1px solid #7e9d8e47 !important;
+  border-radius: 14px !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  gap: 18px !important;
+  min-height: 205px !important;
+  padding: 28px !important;
+  display: flex !important;
+}
+
+.signupCard p {
+  color: #d7dfdb !important;
+  max-width: 380px !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+.signupCard .btn {
+  background: var(--mm-lime) !important;
+  color: #061006 !important;
+  white-space: nowrap !important;
+}
+
+.whatsappCard {
+  background: radial-gradient(circle at 83% 42%, #88c0401f, #0000 30%), linear-gradient(120deg, #081a14, #07110e) !important;
+}
+
+.footer {
+  padding: 28px 0 20px !important;
+}
+
+.footerInner {
+  align-items: center !important;
+  gap: 30px !important;
+  display: flex !important;
+}
+
+.footerNav {
+  gap: 30px !important;
+  margin: auto !important;
+  font-size: 12px !important;
+  display: flex !important;
+}
+
+.socials a {
+  color: #e5ebe8 !important;
+  border: 1px solid #c5cec98c !important;
+  border-radius: 50% !important;
+  place-items: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: grid !important;
+}
+
+.socials a:hover {
+  color: var(--mm-lime) !important;
+  border-color: var(--mm-lime) !important;
+}
+
+.socials svg {
+  width: 17px !important;
+  height: 17px !important;
+  display: block !important;
+}
+
+.footerLegal {
+  color: #9aa8a1 !important;
+  border-top: 1px solid #6e8c802e !important;
+  justify-content: space-between !important;
+  margin-top: 18px !important;
+  padding-top: 16px !important;
+  font-size: 12px !important;
+  display: flex !important;
+}
+
+@media (max-width: 1200px) {
+  .lockedCategoryGrid {
+    grid-template-columns: repeat(10, 128px) !important;
+    overflow-x: auto !important;
+  }
+
+  .homeBody .cta {
+    grid-template-columns: 1fr !important;
+  }
+
+  .homeBody .ctaDivider {
+    display: none !important;
+  }
+
+  .contactSignups {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 850px) {
+  .wide {
+    width: min(100% - 28px, 1460px);
+  }
+
+  .homeHero.v9Hero {
+    height: 320px;
+  }
+
+  .v9Hero .heroPhoto {
+    background-position: 70%;
+    background-size: auto 100%;
+  }
+
+  .v9Hero .heroContent {
+    margin-left: 12px;
+  }
+
+  .v9Hero .heroContent h1 {
+    font-size: 42px;
+  }
+
+  .aboutHero h1 {
+    font-size: 52px !important;
+  }
+
+  .aboutStats {
+    grid-template-columns: 1fr 1fr !important;
+    row-gap: 20px !important;
+  }
+
+  .aboutStats > div:nth-child(2) {
+    border-right: 0 !important;
+  }
+
+  .aboutStory {
+    display: block !important;
+  }
+
+  .aboutChair {
+    opacity: .25 !important;
+    width: 100% !important;
+  }
+
+  .aboutStoryCopy {
+    padding-right: 8% !important;
+  }
+
+  .aboutConnect {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .contactHero h1 {
+    font-size: 60px !important;
+  }
+
+  .contactMethods {
+    grid-template-columns: 1fr !important;
+  }
+
+  .contactMethods a {
+    border-bottom: 1px solid #7e9d8e47 !important;
+    border-right: 0 !important;
+  }
+
+  .contactMethods a:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .contactForm {
+    grid-template-columns: 1fr !important;
+  }
+
+  .signupCard {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .footerInner {
+    flex-wrap: wrap !important;
+  }
+
+  .footerNav {
+    flex-wrap: wrap !important;
+    order: 3 !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+
+  .footerLegal {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .homeBody .ctaPane {
+    grid-template-columns: 48px 1fr !important;
+  }
+
+  .homeBody .followBtn {
+    grid-column: 2 !important;
+    width: max-content !important;
+  }
+}
+
+.homeHero.v9Hero {
+  height: 330px !important;
+}
+
+.v9Hero .heroContent h1 {
+  font-size: 52px !important;
+}
+
+.homeBody {
+  padding-top: 14px !important;
+}
+
+.lockedCat {
+  height: 112px !important;
+  min-height: 112px !important;
+}
+
+.aboutHero, .aboutHeroInner {
+  min-height: 390px !important;
+}
+
+.aboutHero h1 {
+  font-size: 60px !important;
+}
+
+.contactHero, .contactHeroInner {
+  min-height: 390px !important;
+}
+
+.contactHero h1 {
+  font-size: 68px !important;
+}
+
+.homeSignup {
+  max-width: 100% !important;
+}
+
+.homeSignup .ctaPane {
+  min-width: 0 !important;
+}
+
+.footerLogo {
+  width: 190px !important;
+}
+
+.footerNav {
+  gap: 26px !important;
+}
+
+.contactSignups .signupCard {
+  min-height: 180px !important;
+}
+
+.contactSignups .whatsappCard:before {
+  content: "";
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 6.5c-9.54 0-17.28 7.38-17.28 16.48 0 3.2.97 6.19 2.65 8.72L6.5 41.5l10.25-2.7A17.86 17.86 0 0024 40.33c9.54 0 17.28-7.38 17.28-16.48S33.54 6.5 24 6.5Z' fill='none' stroke='%2388C040' stroke-width='2.4'/%3E%3Cpath d='M17.2 14.8c.52-.05 1.04-.06 1.37.56l1.98 4.02c.25.5.17.84-.12 1.22l-1.36 1.66c-.27.33-.23.67-.05 1.03 1.23 2.4 3.3 4.48 5.74 5.75.34.18.68.2.98-.06l1.67-1.4c.37-.31.73-.39 1.23-.14l4.02 1.99c.6.3.66.84.56 1.36-.19 1.1-.95 2.46-2.05 3.15-1.06.66-2.35 1.02-3.57.75-2.08-.46-5.3-1.66-8.58-4.8-3.12-2.99-4.49-6.01-5.02-8.1-.32-1.24-.04-2.57.62-3.67.65-1.08 1.56-2.07 2.58-2.32Z' fill='%2388C040'/%3E%3C/svg%3E") center / contain no-repeat;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
+
+.contactSignups .whatsappCard {
+  grid-template-columns: 44px 1fr auto !important;
+  align-items: center !important;
+  display: grid !important;
+}
+
+.contactSignups .whatsappCard > div {
+  min-width: 0 !important;
+}
+
+.homeHero.v9Hero {
+  border-left: 1px solid #6e8c801f !important;
+  border-right: 1px solid #6e8c801f !important;
+  width: min(1460px, 100% - 74px) !important;
+  height: 310px !important;
+  margin: 0 auto !important;
+}
+
+.v9Hero .heroPhoto {
+  background-position: center !important;
+  background-size: cover !important;
+  width: 68% !important;
+}
+
+.v9Hero .heroContent {
+  max-width: 520px !important;
+  margin-left: 42px !important;
+}
+
+.v9Hero .heroContent h1 {
+  letter-spacing: -1.5px !important;
+  font-size: 48px !important;
+}
+
+.v9Hero .heroArrow {
+  width: 42px !important;
+  height: 42px !important;
+  font-size: 30px !important;
+}
+
+.v9Hero .heroArrow.left {
+  left: 2px !important;
+}
+
+.v9Hero .heroArrow.right {
+  right: 2px !important;
+}
+
+.v9Hero .dots {
+  bottom: 13px !important;
+}
+
+.lockedCat {
+  height: 108px !important;
+  min-height: 108px !important;
+  padding: 9px 6px !important;
+}
+
+.lockedCatIcon {
+  height: 54px !important;
+}
+
+.lockedCatIcon img {
+  object-fit: contain !important;
+  image-rendering: auto !important;
+  width: 50px !important;
+  max-width: 50px !important;
+  height: 50px !important;
+  max-height: 50px !important;
+  display: block !important;
+}
+
+.lockedCat span {
+  font-size: 11px !important;
+  line-height: 1.05 !important;
+}
+
+.socials {
+  gap: 18px !important;
+}
+
+.socials a {
+  color: #d9dfdc !important;
+  place-items: center !important;
+  width: 27px !important;
+  height: 27px !important;
+  display: grid !important;
+}
+
+.socials a img {
+  object-fit: contain !important;
+  filter: none !important;
+  width: 25px !important;
+  height: 25px !important;
+  display: block !important;
+}
+
+.collectionTile {
+  grid-template-rows: auto 1fr !important;
+  grid-template-columns: 58px 1fr !important;
+  align-items: start !important;
+  column-gap: 18px !important;
+  min-height: 160px !important;
+  padding: 22px !important;
+  display: grid !important;
+}
+
+.collectionIcon {
+  grid-row: 1 / 3;
+  object-fit: contain !important;
+  width: 52px !important;
+  height: 52px !important;
+}
+
+.collectionTile strong {
+  font-size: 19px !important;
+  display: block !important;
+}
+
+.collectionTile span {
+  margin-top: 5px !important;
+  font-size: 13px !important;
+  display: block !important;
+}
+
+.collectionTile b {
+  grid-column: 2 !important;
+  margin-top: 16px !important;
+  font-size: 13px !important;
+}
+
+.aboutHeroInner, .aboutStats, .aboutStory, .aboutConnect, .contactHeroInner, .contactMethods, .contactFormPanel, .contactSignups {
+  width: min(1180px, 100% - 40px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.aboutHero h1 {
+  letter-spacing: -1.3px !important;
+  margin: 10px 0 14px !important;
+  font-size: 52px !important;
+  line-height: .98 !important;
+}
+
+.aboutStats > div {
+  min-height: 88px !important;
+}
+
+.aboutStats span {
+  font-size: 22px !important;
+}
+
+.aboutStory p {
+  max-width: 500px !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+.aboutConnect {
+  min-height: 130px !important;
+  margin-top: 22px !important;
+  padding: 24px 30px !important;
+}
+
+.aboutConnect h2 {
+  font-size: 29px !important;
+}
+
+.contactHero i {
+  margin: 6px 0 17px !important;
+}
+
+.contactMethods a {
+  min-height: 88px !important;
+}
+
+.contactMethods b {
+  width: 44px !important;
+  height: 44px !important;
+  font-size: 21px !important;
+}
+
+.contactFormPanel h2 {
+  font-size: 27px !important;
+}
+
+.contactFormPanel p {
+  font-size: 13px !important;
+}
+
+.contactForm input, .contactForm textarea {
+  padding: 11px 12px !important;
+}
+
+.signupCard {
+  min-height: 155px !important;
+  padding: 22px !important;
+}
+
+.signupCard h2 {
+  font-size: 22px !important;
+}
+
+.signupCard p {
+  font-size: 13px !important;
+}
+
+@media (max-width: 900px) {
+  .homeHero.v9Hero {
+    width: min(100% - 28px, 1460px) !important;
+  }
+
+  .aboutHeroInner, .aboutStats, .aboutStory, .aboutConnect, .contactHeroInner, .contactMethods, .contactFormPanel, .contactSignups {
+    width: min(100% - 28px, 1180px) !important;
+  }
+}
+
+.cta.homeSignup {
+  background: linear-gradient(110deg, #071711, #091b15) !important;
+  border: 1px solid #88c040e6 !important;
+  border-radius: 13px !important;
+  grid-template-columns: 1fr 1px 1fr !important;
+  align-items: center !important;
+  gap: 22px !important;
+  margin: 28px 0 30px !important;
+  padding: 19px 23px !important;
+  display: grid !important;
+}
+
+.cta.homeSignup .ctaPane {
+  grid-template-columns: 46px 1fr auto !important;
+  align-items: center !important;
+  gap: 15px !important;
+  min-width: 0 !important;
+  display: grid !important;
+}
+
+.cta.homeSignup .ctaIcon {
+  width: 44px !important;
+  height: 44px !important;
+  color: var(--mm-lime) !important;
+  place-items: center !important;
+  display: grid !important;
+}
+
+.cta.homeSignup .ctaIcon svg {
+  width: 34px !important;
+  height: 34px !important;
+  display: block !important;
+}
+
+.cta.homeSignup .ctaIcon.waIcon svg {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.cta.homeSignup .ctaTitle {
+  color: var(--mm-lime) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+.cta.homeSignup .ctaSub {
+  color: #e2e8e5 !important;
+  max-width: 270px !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+}
+
+.cta.homeSignup .followBtn {
+  background: var(--mm-lime) !important;
+  color: #061006 !important;
+  border-radius: 999px !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-width: 126px !important;
+  height: 42px !important;
+  margin: 0 !important;
+  padding: 0 19px !important;
+  font-size: 14px !important;
+  display: flex !important;
+}
+
+.cta.homeSignup .ctaDivider {
+  background: #41574d !important;
+  height: 52px !important;
+}
+
+.socials {
+  align-items: center !important;
+  gap: 18px !important;
+  display: flex !important;
+}
+
+.socials a {
+  opacity: .95 !important;
+  place-items: center !important;
+  width: 25px !important;
+  height: 25px !important;
+  display: grid !important;
+}
+
+.socials a img {
+  object-fit: contain !important;
+  width: 23px !important;
+  height: 23px !important;
+  display: block !important;
+}
+
+.socials a:hover {
+  transform: translateY(-1px);
+  opacity: 1 !important;
+}
+
+.aboutShell {
+  width: min(1120px, 100% - 48px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.aboutHero {
+  background-color: #020706 !important;
+  background-position: 100% !important;
+  background-size: auto 100% !important;
+  min-height: 300px !important;
+}
+
+.aboutHeroInner > div {
+  max-width: 455px !important;
+}
+
+.aboutHero h1 {
+  letter-spacing: -1px !important;
+  margin: 9px 0 13px !important;
+  font-size: 46px !important;
+  font-weight: 650 !important;
+  line-height: .98 !important;
+}
+
+.aboutHero p {
+  max-width: 445px !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+.aboutStats {
+  padding: 22px 0 26px !important;
+}
+
+.aboutStats > div {
+  gap: 2px !important;
+  min-height: 80px !important;
+}
+
+.aboutStats svg {
+  fill: none !important;
+  width: 24px !important;
+  height: 24px !important;
+  stroke: var(--mm-lime) !important;
+  stroke-width: 1.8px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  margin-bottom: 3px !important;
+}
+
+.aboutStats small {
+  font-size: 11px !important;
+}
+
+.aboutStats strong {
+  font-size: 24px !important;
+}
+
+.aboutStory {
+  grid-template-columns: 49% 51% !important;
+  min-height: 320px !important;
+}
+
+.aboutStoryCopy {
+  padding: 28px 0 !important;
+}
+
+.aboutStory h2 {
+  margin: 6px 0 14px !important;
+  font-size: 31px !important;
+  line-height: 1.06 !important;
+}
+
+.aboutStory p {
+  max-width: 465px !important;
+  margin: 0 0 11px !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+}
+
+.aboutChair {
+  background-position: 100% !important;
+  background-size: auto 100% !important;
+  width: 53% !important;
+}
+
+.aboutConnect {
+  min-height: 116px !important;
+  margin: 18px auto 30px !important;
+  padding: 21px 27px !important;
+}
+
+.aboutConnect h2 {
+  margin: 4px 0 !important;
+  font-size: 27px !important;
+  line-height: 1.08 !important;
+}
+
+.aboutConnect .btn {
+  padding: 11px 18px !important;
+  font-size: 14px !important;
+}
+
+.contactShell {
+  width: min(1120px, 100% - 48px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.contactHero {
+  background-color: #020706 !important;
+  background-position: 100% !important;
+  background-size: auto 104% !important;
+  min-height: 300px !important;
+}
+
+.contactHero h1 {
+  letter-spacing: -1px !important;
+  margin: 9px 0 8px !important;
+  font-size: 48px !important;
+  line-height: .94 !important;
+}
+
+.contactHero i {
+  width: 34px !important;
+  height: 2px !important;
+  margin: 5px 0 14px !important;
+}
+
+.contactHero p {
+  letter-spacing: 3.5px !important;
+  font-size: 10px !important;
+}
+
+.contactMethods {
+  padding: 20px 0 !important;
+}
+
+.contactMethods a {
+  gap: 4px !important;
+  min-height: 72px !important;
+}
+
+.contactMethods b {
+  width: 34px !important;
+  height: 34px !important;
+  color: var(--mm-lime) !important;
+  background: #88c0400f !important;
+  border-radius: 50% !important;
+  place-items: center !important;
+  display: grid !important;
+}
+
+.contactMethods b svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.contactMethods strong {
+  font-size: 15px !important;
+}
+
+.contactMethods span {
+  font-size: 12px !important;
+}
+
+.contactFormPanel {
+  padding: 21px 24px 24px !important;
+}
+
+.contactFormPanel h2 {
+  margin: 5px 0 !important;
+  font-size: 24px !important;
+}
+
+.contactFormPanel p {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.contactForm {
+  gap: 12px 20px !important;
+  margin-top: 14px !important;
+}
+
+.contactForm label {
+  gap: 6px !important;
+  font-size: 11px !important;
+}
+
+.contactForm input, .contactForm textarea {
+  padding: 9px 10px !important;
+  font-size: 12px !important;
+}
+
+.contactForm textarea {
+  height: 76px !important;
+}
+
+.contactForm .btn {
+  padding: 10px 17px !important;
+  font-size: 13px !important;
+}
+
+.contactSignups {
+  gap: 14px !important;
+  margin-top: 14px !important;
+}
+
+.signupCard {
+  align-items: center !important;
+  min-height: 132px !important;
+  padding: 19px !important;
+}
+
+.signupCard h2 {
+  margin: 4px 0 6px !important;
+  font-size: 20px !important;
+}
+
+.signupCard p {
+  max-width: 330px !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+.signupCard .btn {
+  padding: 10px 16px !important;
+  font-size: 13px !important;
+}
+
+@media (max-width: 900px) {
+  .cta.homeSignup {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cta.homeSignup .ctaDivider {
+    display: none !important;
+  }
+
+  .aboutShell, .contactShell {
+    width: min(100% - 28px, 1120px) !important;
+  }
+
+  .aboutHero, .aboutHeroInner, .contactHero, .contactHeroInner {
+    min-height: 280px !important;
+  }
+
+  .aboutStory {
+    display: block !important;
+  }
+
+  .aboutChair {
+    opacity: .25 !important;
+    width: 100% !important;
+  }
+
+  .contactMethods, .contactSignups {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.socials {
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 17px !important;
+  min-width: 145px !important;
+  display: flex !important;
+}
+
+.socials a {
+  color: #f2f6f2 !important;
+  opacity: .96 !important;
+  place-items: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: grid !important;
+}
+
+.socials svg {
+  fill: currentColor !important;
+  stroke: none !important;
+  width: 25px !important;
+  height: 25px !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+.socials .socialCut {
+  fill: #020706 !important;
+  stroke: #020706 !important;
+}
+
+.socials a:hover {
+  color: var(--mm-lime) !important;
+  opacity: 1 !important;
+}
+
+.collectionGridAll {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.collectionGridAll .collectionTile {
+  min-height: 142px !important;
+}
+
+.collectionGridAll .collectionIcon {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.qaCategoryHero {
+  gap: 20px !important;
+}
+
+.qaCategoryHero .lockedBigIcon {
+  flex: 0 0 76px !important;
+  width: 76px !important;
+  height: 62px !important;
+}
+
+.qaCategoryHero .lockedBigIcon img {
+  object-fit: contain !important;
+  width: 72px !important;
+  height: 56px !important;
+}
+
+.qaCategoryHero h1 {
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.aboutHero {
+  background-image: linear-gradient(90deg, #020806f5 0%, #020806c2 35%, #0208061f 68%), url("/assets/about-event-clean.jpg") !important;
+  background-position: 50% 48% !important;
+  background-size: cover !important;
+  min-height: 360px !important;
+}
+
+.aboutHeroInner {
+  min-height: 360px !important;
+}
+
+.aboutStory {
+  grid-template-columns: 1fr !important;
+  min-height: 340px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.aboutStoryCopy {
+  z-index: 3 !important;
+  width: 52% !important;
+  padding: 38px 0 !important;
+  position: relative !important;
+}
+
+.aboutChair {
+  z-index: 1 !important;
+  opacity: .95 !important;
+  background-image: linear-gradient(90deg, #020706 0%, #020706e6 15%, #02070659 38%, #02070608 68%), url("/assets/director-chair-clean.jpg") !important;
+  background-position: center !important;
+  background-size: cover !important;
+  width: 62% !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+}
+
+.aboutStats svg {
+  display: block !important;
+}
+
+.contactHero {
+  background-image: linear-gradient(90deg, #020907f7 0%, #020907cc 34%, #0209071f 70%), url("/assets/director-chair-clean.jpg") !important;
+  background-position: 50% 52% !important;
+  background-size: cover !important;
+  min-height: 360px !important;
+}
+
+.contactHeroInner {
+  align-items: flex-start !important;
+  min-height: 360px !important;
+}
+
+.contactHero h1 {
+  font-size: 56px !important;
+  line-height: .94 !important;
+}
+
+.contactForm .btn {
+  background: var(--mm-lime) !important;
+  color: #061006 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-width: 154px !important;
+  height: 44px !important;
+  padding: 0 22px !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+}
+
+.contactMethods b svg {
+  display: block !important;
+}
+
+@media (max-width: 900px) {
+  .collectionGridAll {
+    grid-template-columns: 1fr !important;
+  }
+
+  .aboutStoryCopy {
+    width: 100% !important;
+  }
+
+  .aboutChair {
+    opacity: .2 !important;
+    width: 100% !important;
+  }
+
+  .socials {
+    min-width: auto !important;
+  }
+}
+
+/*# sourceMappingURL=app_launch_css_1igg3k2._.single.css.map*/

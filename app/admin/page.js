@@ -115,6 +115,22 @@ export default function AdminPage(){
     setForm({...emptyForm,...v,categories:(Array.isArray(v.categories)&&v.categories.length?v.categories:[v.category].filter(Boolean)),duration_seconds:v.duration_seconds??''});setThumbFile(null);setHeroFile(null);setMessage('Editing video.');window.scrollTo({top:0,behavior:'smooth'})
   }
 
+  async function moveVideo(index,direction){
+    const target=index+direction
+    if(target<0 || target>=videos.length) return
+    const reordered=[...videos]
+    const [moved]=reordered.splice(index,1)
+    reordered.splice(target,0,moved)
+    setVideos(reordered)
+    setBusy(true);setMessage('Saving new order…')
+    try{
+      await Promise.all(reordered.map((v,i)=>supabase.from('videos').update({sort_order:i}).eq('id',v.id)))
+      setMessage('Order updated.')
+      await loadVideos()
+    }catch(err){setMessage(err.message||'Could not save new order.');await loadVideos()}
+    finally{setBusy(false)}
+  }
+
   async function removeVideo(v){
     if(!confirm(`Delete “${v.title}”?`)) return
     const {error}=await supabase.from('videos').delete().eq('id',v.id)
@@ -138,6 +154,6 @@ export default function AdminPage(){
         <button className="adminPrimary" disabled={busy}>{busy?'Saving…':form.id?'Save Changes':'Publish Video'}</button>
       </form>
     </section>
-    <section className="adminPanel adminLibrary"><div className="adminPanelHead"><h2>Existing Videos</h2><span>{videos.length} videos</span></div>{videos.length===0?<p>No videos yet.</p>:videos.map(v=><div className="adminVideoRow" key={v.id}><div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{v.client||'Mint Media'} · {(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span></div><div className="adminBadges">{v.featured&&<span className="adminBadge">Featured</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={()=>editVideo(v)}>Edit</button><button className="adminDanger" onClick={()=>removeVideo(v)}>Delete</button></div>)}</section>
+    <section className="adminPanel adminLibrary"><div className="adminPanelHead"><h2>Existing Videos</h2><span>{videos.length} videos</span></div>{videos.length===0?<p>No videos yet.</p>:videos.map((v,i)=><div className="adminVideoRow" key={v.id}><div className="adminReorder"><button type="button" className="adminGhost adminReorderBtn" disabled={i===0||busy} onClick={()=>moveVideo(i,-1)} aria-label="Move up">↑</button><button type="button" className="adminGhost adminReorderBtn" disabled={i===videos.length-1||busy} onClick={()=>moveVideo(i,1)} aria-label="Move down">↓</button></div><div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{v.client||'Mint Media'} · {(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span></div><div className="adminBadges">{v.featured&&<span className="adminBadge">Featured</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={()=>editVideo(v)}>Edit</button><button className="adminDanger" onClick={()=>removeVideo(v)}>Delete</button></div>)}</section>
   </main><Footer/></>
 }
