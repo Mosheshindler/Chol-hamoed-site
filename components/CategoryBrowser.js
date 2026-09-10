@@ -44,7 +44,7 @@ function matchesSearch(video,query){
   if(q==='under 5 min' || q==='under 5 minutes') return seconds>0 && seconds<300
   if(q==='long form' || q==='longform') return seconds>=300
   if(q==='premium' || q==='yidly' || q==='yidly premium') return Boolean(video.premium)
-  const hay=norm(`${video.title} ${video.client} ${(video.categories||[]).join(' ')} ${video.category||''} ${video.premium?'premium yidly':''}`)
+  const hay=norm(`${video.title} ${video.client} ${(video.categories||[]).join(' ')} ${video.category||''} ${(video.tags||[]).join(' ')} ${video.premium?'premium yidly':''}`)
   return q.split(' ').every(word=>hay.includes(word))
 }
 
@@ -60,7 +60,7 @@ export default function CategoryBrowser({slug,name,videos,initialQuery='',autoFo
   const shown=filtered.slice(0,visible)
 
   return <>
-    <section className={`categoryHero ${slug==='qanda'||slug==='q-and-a'?'qaCategoryHero':''}`}><div className="bigIcon lockedBigIcon"><img src={`/assets/category-icons-svg/${slug==='qanda'?'q-and-a':slug}.svg`} alt=""/></div><div><h1>{slug==='qanda'||slug==='q-and-a'?'Q&A':name}</h1><p>{slug==='all-videos'?'Search and browse the complete Mint Media library':`Explore ${(slug==='qanda'||slug==='q-and-a'?'Q&A':name).toLowerCase()} from Mint Media`}</p></div></section>
+    <section className={`categoryHero ${slug==='qanda'||slug==='q-and-a'?'qaCategoryHero':''}`}><div className="bigIcon lockedBigIcon"><img src={`/assets/category-icons-svg/${slug==='qanda'?'q-and-a':slug}.svg`} alt=""/></div><div><h1>{slug==='qanda'||slug==='q-and-a'?'Q&A':name}</h1><p>{slug==='all-videos'?'Search and browse the complete Mint Media library':(slug==='qanda'||slug==='q-and-a'?'Explore Q&A from Mint Media':`Explore ${name.toLowerCase()} from Mint Media`)}</p></div></section>
     <div className="search"><span className="searchGlyph">⌕</span><input ref={searchRef} value={q} onChange={e=>{setQ(e.target.value);setVisible(12)}} placeholder={slug==='all-videos'?'Search by title, client, or category...':`Search ${name.toLowerCase()}...`} aria-label="Search videos"/>{q?<button className="searchClear" type="button" onClick={()=>setQ('')} aria-label="Clear search">×</button>:null}</div>
     <div className="searchSummary"><span>{filtered.length} {filtered.length===1?'video':'videos'}{q?` found for “${q}”`:''}</span>{q?<button type="button" onClick={()=>setQ('')}>Clear search</button>:null}</div>
     {shown.length?<div className="cards categoryCards">{shown.map(v=><VideoCard video={v} key={v.slug}/>)}</div>:<div className="emptyResults"><strong>No videos found.</strong><span>Try a title, client name, category, or a broader search.</span></div>}

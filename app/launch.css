@@ -113,6 +113,11 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .contactHero,.contactHeroInner{min-height:420px!important}
 .contactHero{background-size:cover!important;background-position:center 50%!important}
 
+/* Admin tags field + tag chips in the video list */
+.adminTagsField{grid-column:1/-1!important}
+.adminTagsList{display:flex!important;flex-wrap:wrap!important;gap:6px!important;margin-top:4px!important}
+.adminTagChip{font-style:normal!important;font-size:11px!important;padding:2px 8px!important;border-radius:999px!important;background:rgba(136,192,64,.12)!important;color:var(--mm-lime)!important;border:1px solid rgba(136,192,64,.3)!important}
+
 @media(max-width:900px){
   .collectionGridAll{grid-template-columns:1fr!important}
   .aboutStoryCopy{width:100%!important}
