@@ -153,8 +153,3 @@
 .dots .heroPlayToggle{width:20px;height:20px;border-radius:50%;background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;display:flex;align-items:center;justify-content:center;margin-left:8px;padding:0;cursor:pointer}
 .dots .heroPlayToggle:hover{border-color:var(--mint);color:var(--mint)}
 .dots .heroPlayToggle svg{display:block}
-
-/* Admin: site-wide toggles */
-.adminToggleRow{display:flex!important;align-items:center;gap:10px;font-size:13px;font-weight:700;color:#dfe5e2;cursor:pointer}
-.adminToggleRow input{width:18px!important;height:18px;accent-color:var(--mint);cursor:pointer}
-.adminToggleHint{color:var(--muted);font-size:12px;font-weight:500;margin-top:4px}

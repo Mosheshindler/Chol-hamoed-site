@@ -7,7 +7,7 @@ function PlayIcon(){return <svg width="13" height="13" viewBox="0 0 24 24" fill=
 
 const AUTOPLAY_MS=5500
 
-export default function HeroCarousel({videos=[],showJustMinted=true}){
+export default function HeroCarousel({videos=[]}){
   const slides=useMemo(()=>videos.filter(Boolean).slice(0,5),[videos])
   const [index,setIndex]=useState(0)
   const [playing,setPlaying]=useState(true)
@@ -22,7 +22,7 @@ export default function HeroCarousel({videos=[],showJustMinted=true}){
   const current=slides[index%slides.length]
   const image=(current.heroImage&&current.heroImage.trim())||(current.thumbnail&&current.thumbnail.trim())||'/assets/hero-camera.jpg'
   const go=(d)=>setIndex(i=>(i+d+slides.length)%slides.length)
-  const eyebrow=current.premium?'PREMIUM CONTENT':(showJustMinted?'JUST MINTED':'')
+  const eyebrow=current.premium?'PREMIUM CONTENT':(current.showJustMinted!==false?'JUST MINTED':'')
   return <section className="homeHero dynamicHero v9Hero">
     <div className="heroPhoto" style={{backgroundImage:`url(${JSON.stringify(image)})`}}/>
     <div className="heroShade"/>
