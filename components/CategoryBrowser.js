@@ -22,7 +22,7 @@ function durationSeconds(duration=''){
 function inCategory(video,slug){
   if(slug==='all-videos') return true
   if(slug==='premium-content') return Boolean(video.premium) || norm([...(video.categories||[]),video.category||''].join(' ')).includes('premium') || norm(video.category).includes('yidly')
-  if(slug==='shorts') return norm([...(video.categories||[]),video.category||''].join(' ')).includes('short') || (video.durationSeconds && Number(video.durationSeconds)<=60)
+  if(slug==='shorts') return norm([...(video.categories||[]),video.category||''].join(' ')).includes('short')
   const c=norm([...(video.categories||[]),video.category||''].join(' '))
   const map={
     stories:['stories','story'],
@@ -48,14 +48,23 @@ function matchesSearch(video,query){
   return q.split(' ').every(word=>hay.includes(word))
 }
 
-export default function CategoryBrowser({slug,name,videos,initialQuery='',autoFocus=false}){
+export default function CategoryBrowser({slug,name,videos,categoryOrder={},initialQuery='',autoFocus=false}){
   const [q,setQ]=useState(initialQuery)
   const searchRef=useRef(null)
   const [visible,setVisible]=useState(12)
   useEffect(()=>{setQ(initialQuery);setVisible(12)},[initialQuery,slug])
   useEffect(()=>{if(autoFocus) setTimeout(()=>searchRef.current?.focus(),50)},[autoFocus])
 
-  const categoryVideos=useMemo(()=>videos.filter(v=>inCategory(v,slug)),[videos,slug])
+  const categoryVideos=useMemo(()=>{
+    const matches=videos.filter(v=>inCategory(v,slug))
+    const hasOrder=categoryOrder && Object.keys(categoryOrder).length>0
+    if(!hasOrder) return matches
+    return [...matches].sort((a,b)=>{
+      const ao=a.id in categoryOrder?categoryOrder[a.id]:Infinity
+      const bo=b.id in categoryOrder?categoryOrder[b.id]:Infinity
+      return ao-bo
+    })
+  },[videos,slug,categoryOrder])
   const filtered=useMemo(()=>categoryVideos.filter(v=>matchesSearch(v,q)),[categoryVideos,q])
   const shown=filtered.slice(0,visible)
 

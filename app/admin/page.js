@@ -4,6 +4,7 @@ import {useEffect,useMemo,useState} from 'react'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import {getSupabaseBrowserClient} from '../../lib/supabaseClient'
+import {categorySlug} from '../../lib/site'
 
 const CATEGORY_OPTIONS=['Stories','Documentaries','Entertainment','Music Videos','Q&A','Behind the Scenes','Events & Highlights','Shorts','Premium Content','Inspirational','Fundraising Film','Schools & Yeshivos','Community','Education','Jewish Life','Event Opener']
 const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',client:'Mint Media',category:'Behind the Scenes',categories:['Behind the Scenes'],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0}
@@ -26,6 +27,24 @@ export default function AdminPage(){
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
   const [newTag,setNewTag]=useState('')
+  const [categoryOrderRows,setCategoryOrderRows]=useState([])
+
+  const categoryNames=useMemo(()=>{
+    const set=new Set()
+    videos.forEach(v=>(v.categories?.length?v.categories:[v.category]).filter(Boolean).forEach(c=>set.add(c)))
+    return Array.from(set).sort((a,b)=>a.localeCompare(b))
+  },[videos])
+
+  function videosForCategory(catName){
+    const slug=categorySlug(catName)
+    const inCat=videos.filter(v=>(v.categories?.length?v.categories:[v.category]).includes(catName))
+    const orderMap=new Map(categoryOrderRows.filter(r=>r.category===slug).map(r=>[r.video_id,r.sort_order]))
+    return [...inCat].sort((a,b)=>{
+      const ao=orderMap.has(a.id)?orderMap.get(a.id):Infinity
+      const bo=orderMap.has(b.id)?orderMap.get(b.id):Infinity
+      return ao-bo
+    })
+  }
 
   const allTags=useMemo(()=>{
     const set=new Set()
@@ -52,12 +71,36 @@ export default function AdminPage(){
     return ()=>subscription.unsubscribe()
   },[supabase])
 
-  useEffect(()=>{if(session) loadVideos()},[session])
+  useEffect(()=>{if(session){loadVideos();loadCategoryOrder()}},[session])
 
   async function loadVideos(){
     const {data,error}=await supabase.from('videos').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false})
     if(error){setMessage(error.message);return}
     setVideos(data||[])
+  }
+
+  async function loadCategoryOrder(){
+    const {data,error}=await supabase.from('video_category_order').select('*')
+    if(!error) setCategoryOrderRows(data||[])
+  }
+
+  async function moveVideoInCategory(catName,index,direction){
+    const slug=categorySlug(catName)
+    const list=videosForCategory(catName)
+    const target=index+direction
+    if(target<0 || target>=list.length) return
+    const reordered=[...list]
+    const [moved]=reordered.splice(index,1)
+    reordered.splice(target,0,moved)
+    setBusy(true);setMessage('Saving new order…')
+    try{
+      const results=await Promise.all(reordered.map((v,i)=>supabase.from('video_category_order').upsert({video_id:v.id,category:slug,sort_order:i},{onConflict:'video_id,category'})))
+      const failed=results.find(r=>r.error)
+      if(failed) throw failed.error
+      setMessage('Order updated.')
+      await loadCategoryOrder()
+    }catch(err){setMessage(err.message||'Could not save new order.')}
+    finally{setBusy(false)}
   }
 
   async function login(e){
@@ -178,6 +221,25 @@ export default function AdminPage(){
         <button className="adminPrimary" disabled={busy}>{busy?'Saving…':form.id?'Save Changes':'Publish Video'}</button>
       </form>
     </section>
-    <section className="adminPanel adminLibrary"><div className="adminPanelHead"><h2>Existing Videos</h2><span>{videos.length} videos</span></div>{videos.length===0?<p>No videos yet.</p>:videos.map((v,i)=><div className="adminVideoRow" key={v.id}><div className="adminReorder"><button type="button" className="adminGhost adminReorderBtn" disabled={i===0||busy} onClick={()=>moveVideo(i,-1)} aria-label="Move up">↑</button><button type="button" className="adminGhost adminReorderBtn" disabled={i===videos.length-1||busy} onClick={()=>moveVideo(i,1)} aria-label="Move down">↓</button></div><div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{v.client||'Mint Media'} · {(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span>{Array.isArray(v.tags)&&v.tags.length>0&&<span className="adminTagsList">{v.tags.map(t=><em key={t} className="adminTagChip">{t}</em>)}</span>}</div><div className="adminBadges">{v.featured&&<span className="adminBadge">Hero</span>}{v.featured_home&&<span className="adminBadge">Home</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={()=>editVideo(v)}>Edit</button><button className="adminDanger" onClick={()=>removeVideo(v)}>Delete</button></div>)}</section>
+    <section className="adminPanel adminLibrary">
+      <div className="adminPanelHead"><h2>Existing Videos</h2><span>{videos.length} videos</span></div>
+      {videos.length===0?<p>No videos yet.</p>:<>
+        <div className="adminCategoryGroup">
+          <h3 className="adminCategoryGroupTitle">All Videos <span className="adminCategoryGroupHint">— master list, this order is the site-wide default</span></h3>
+          {videos.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={videos.length} busy={busy} onUp={()=>moveVideo(i,-1)} onDown={()=>moveVideo(i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)}
+        </div>
+        {categoryNames.map(cat=>{
+          const list=videosForCategory(cat)
+          return <div className="adminCategoryGroup" key={cat}>
+            <h3 className="adminCategoryGroupTitle">{cat} <span className="adminCategoryGroupHint">— order used only on this category's page</span></h3>
+            {list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(cat,i,-1)} onDown={()=>moveVideoInCategory(cat,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)}
+          </div>
+        })}
+      </>}
+    </section>
   </main><Footer/></>
+}
+
+function VideoRow({v,index,total,busy,onUp,onDown,onEdit,onRemove}){
+  return <div className="adminVideoRow"><div className="adminReorder"><button type="button" className="adminGhost adminReorderBtn" disabled={index===0||busy} onClick={onUp} aria-label="Move up">↑</button><button type="button" className="adminGhost adminReorderBtn" disabled={index===total-1||busy} onClick={onDown} aria-label="Move down">↓</button></div><div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{v.client||'Mint Media'} · {(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span>{Array.isArray(v.tags)&&v.tags.length>0&&<span className="adminTagsList">{v.tags.map(t=><em key={t} className="adminTagChip">{t}</em>)}</span>}</div><div className="adminBadges">{v.featured&&<span className="adminBadge">Hero</span>}{v.featured_home&&<span className="adminBadge">Home</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={onEdit}>Edit</button><button className="adminDanger" onClick={onRemove}>Delete</button></div>
 }

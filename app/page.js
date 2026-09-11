@@ -6,13 +6,12 @@ import HomeSearch from '../components/HomeSearch'
 import HeroCarousel from '../components/HeroCarousel'
 import CategoryStrip from '../components/CategoryStrip'
 import Link from 'next/link'
-import {getVideos} from '../lib/data'
+import {getVideos,getPopularTags} from '../lib/data'
 import {categories} from '../lib/demoVideos'
-
-const searches=['Funny','Inspirational','Lessons','Music Video','Under 5 min','Long form','Behind the scenes','Kids','Motivational','Family']
 
 export default async function Home(){
   const videos=await getVideos()
+  const searches=getPopularTags(videos)
   const featuredVideos=videos.filter(v=>v.featured)
   const heroFillers=videos.filter(v=>!v.featured).slice(0,Math.max(0,8-featuredVideos.length))
   const heroVideos=[...featuredVideos,...heroFillers].slice(0,8)

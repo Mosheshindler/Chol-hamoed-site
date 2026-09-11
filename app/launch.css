@@ -180,6 +180,12 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .adminCheckGroup{display:flex!important;flex-direction:column!important;gap:8px!important}
 .adminCheckGroup .adminSubCheck{margin-left:26px!important;font-weight:500!important;color:var(--muted)!important;font-size:12px!important}
 
+/* Admin: Existing Videos split into per-category groups, each independently reorderable */
+.adminCategoryGroup{margin-top:26px!important;padding-top:20px!important;border-top:1px solid #263a32!important}
+.adminCategoryGroup:first-child{margin-top:0!important;padding-top:0!important;border-top:0!important}
+.adminCategoryGroupTitle{font-size:16px!important;font-weight:800!important;margin:0 0 6px!important;color:#fff!important}
+.adminCategoryGroupHint{font-size:12px!important;font-weight:500!important;color:var(--muted)!important}
+
 .aboutHero,.contactHero{width:min(1120px,calc(100% - 48px))!important;margin-left:auto!important;margin-right:auto!important}
 .aboutHeroInner,.contactHeroInner{width:auto!important;margin-left:0!important;margin-right:0!important}
 .aboutHero{background-size:auto 82%!important;background-position:right center!important}
