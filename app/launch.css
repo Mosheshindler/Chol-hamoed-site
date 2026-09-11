@@ -98,9 +98,9 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .aboutHeroInner{min-height:360px!important}
 .aboutStory{min-height:340px!important;position:relative!important;overflow:hidden!important;grid-template-columns:1fr!important}
 .aboutStoryCopy{position:relative!important;z-index:3!important;width:52%!important;padding:38px 0!important}
-/* Same low-resolution (512x438) source as the Contact hero — sized near its native
-   resolution and right-anchored instead of stretched to cover, so it stays sharp. */
-.aboutChair{position:absolute!important;z-index:1!important;right:0!important;top:0!important;bottom:0!important;width:62%!important;background-image:linear-gradient(90deg,#020706 0%,rgba(2,7,6,.90) 15%,rgba(2,7,6,.35) 38%,rgba(2,7,6,.03) 68%),url('/assets/director-chair-clean.jpg')!important;background-size:auto 80%!important;background-position:right center!important;background-repeat:no-repeat!important;opacity:.95!important}
+/* V9.7: new high-resolution (1991x789) director-chair photo, already naturally dark on
+   the left — fills the box edge-to-edge and fades under the copy without upscaling blur. */
+.aboutChair{position:absolute!important;z-index:1!important;right:0!important;top:0!important;bottom:0!important;width:62%!important;background-image:linear-gradient(90deg,#020706 0%,rgba(2,7,6,.90) 15%,rgba(2,7,6,.35) 38%,rgba(2,7,6,.03) 68%),url('/assets/director-chair-v2.jpg')!important;background-size:cover!important;background-position:right center!important;background-repeat:no-repeat!important;opacity:.95!important}
 .aboutStats svg{display:block!important}
 
 /* Contact locked hero: chair is part of the hero image, not a narrow strip. */
@@ -115,11 +115,9 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .aboutHero,.aboutHeroInner{min-height:420px!important}
 .aboutHero{background-size:cover!important;background-position:center 46%!important}
 .contactHero,.contactHeroInner{min-height:420px!important}
-/* The director-chair source photo is low-resolution (512x438); stretching it to fully
-   cover this wide hero (background-size:cover) blows it up well past its native size and
-   makes it look both oversized and blurry. Sizing it down closer to native resolution and
-   anchoring it to the right keeps it sharp while the dark gradient covers the rest. */
-.contactHero{background-size:auto 80%!important;background-position:right center!important}
+/* V9.7: new high-resolution (1991x789) director-chair photo, already naturally dark on
+   the left — fills the box edge-to-edge and fades under the copy without upscaling blur. */
+.contactHero{background-image:linear-gradient(90deg,rgba(2,9,7,.97) 0%,rgba(2,9,7,.80) 34%,rgba(2,9,7,.12) 70%),url('/assets/director-chair-v2.jpg')!important;background-size:cover!important;background-position:right center!important}
 
 /* Admin tags field + tag chips in the video list */
 .adminTagsField{grid-column:1/-1!important}
