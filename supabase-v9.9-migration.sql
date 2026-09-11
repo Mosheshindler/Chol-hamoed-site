@@ -21,3 +21,10 @@ create policy "Authenticated can manage video category order"
   on public.video_category_order for all
   using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
+
+-- RLS policies alone aren't enough in Postgres — the anon/authenticated roles also need
+-- the base table-level grant before RLS is even consulted. This was missing from the
+-- original version of this migration, causing "permission denied for table
+-- video_category_order" even after the table and policies above were created successfully.
+grant select on public.video_category_order to anon, authenticated;
+grant insert, update, delete on public.video_category_order to authenticated;

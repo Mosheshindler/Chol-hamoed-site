@@ -33,6 +33,9 @@ export async function POST(request){
     if(info.platform==='vimeo'){
       const target=new URL('https://vimeo.com/api/oembed.json')
       target.searchParams.set('url',url)
+      // Without a width, Vimeo's oEmbed defaults to a tiny ~295px-wide thumbnail that looks
+      // blurry once it's stretched to fill a normal-sized video card. Ask for a proper size.
+      target.searchParams.set('width','1280')
       const r=await fetch(target,{cache:'no-store'})
       if(!r.ok) return NextResponse.json({error:'Vimeo could not return details for this video.'},{status:400})
       const data=await r.json()
@@ -57,7 +60,7 @@ export async function POST(request){
       videoId:info.id,
       vimeoHash:'',
       title,
-      thumbnailUrl:`https://i.ytimg.com/vi/${info.id}/hqdefault.jpg`,
+      thumbnailUrl:`https://i.ytimg.com/vi/${info.id}/sddefault.jpg`,
       durationSeconds:null
     })
   }catch(error){

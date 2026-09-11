@@ -5,6 +5,7 @@ import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import {getSupabaseBrowserClient} from '../../lib/supabaseClient'
 import {categorySlug} from '../../lib/site'
+import {sharpenThumbnail} from '../../lib/data'
 
 const CATEGORY_OPTIONS=['Stories','Documentaries','Entertainment','Music Videos','Q&A','Behind the Scenes','Events & Highlights','Shorts','Premium Content','Inspirational','Fundraising Film','Schools & Yeshivos','Community','Education','Jewish Life','Event Opener']
 const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',client:'Mint Media',category:'Behind the Scenes',categories:['Behind the Scenes'],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0}
@@ -76,7 +77,7 @@ export default function AdminPage(){
   async function loadVideos(){
     const {data,error}=await supabase.from('videos').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false})
     if(error){setMessage(error.message);return}
-    setVideos(data||[])
+    setVideos((data||[]).map(v=>({...v,thumbnail_url:sharpenThumbnail(v.thumbnail_url)})))
   }
 
   async function loadCategoryOrder(){
