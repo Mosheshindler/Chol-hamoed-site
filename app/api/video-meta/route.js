@@ -1,5 +1,34 @@
 import { NextResponse } from 'next/server'
 
+// Parses ISO 8601 durations ("PT3M59S", "PT1H2M3S") into whole seconds.
+function parseIsoDuration(iso){
+  const m=/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(iso||'')
+  if(!m) return null
+  const [,h,min,s]=m
+  const total=(Number(h)||0)*3600+(Number(min)||0)*60+(Number(s)||0)
+  return total>0?total:null
+}
+
+// Optional — YouTube's oEmbed endpoint (used for title/thumbnail) doesn't include
+// duration at all, unlike Vimeo's. When a YOUTUBE_API_KEY is configured, this fills
+// that gap via the official YouTube Data API v3. Never exposed to the browser.
+async function fetchYouTubeDuration(videoId){
+  const key=process.env.YOUTUBE_API_KEY
+  if(!key) return null
+  try{
+    const target=new URL('https://www.googleapis.com/youtube/v3/videos')
+    target.searchParams.set('id',videoId)
+    target.searchParams.set('part','contentDetails')
+    target.searchParams.set('key',key)
+    const r=await fetch(target,{cache:'no-store'})
+    if(!r.ok) return null
+    const data=await r.json()
+    return parseIsoDuration(data.items?.[0]?.contentDetails?.duration)
+  }catch{
+    return null
+  }
+}
+
 function identify(raw){
   const u=new URL(raw)
   const host=u.hostname.replace(/^www\./,'')
@@ -55,13 +84,14 @@ export async function POST(request){
     const r=await fetch(target,{cache:'no-store'})
     let title=''
     if(r.ok){ const data=await r.json(); title=data.title||'' }
+    const durationSeconds=await fetchYouTubeDuration(info.id)
     return NextResponse.json({
       platform:'youtube',
       videoId:info.id,
       vimeoHash:'',
       title,
       thumbnailUrl:`https://i.ytimg.com/vi/${info.id}/sddefault.jpg`,
-      durationSeconds:null
+      durationSeconds
     })
   }catch(error){
     return NextResponse.json({error:error.message||'Could not read video details.'},{status:400})
