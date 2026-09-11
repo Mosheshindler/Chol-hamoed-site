@@ -149,6 +149,19 @@
 @media(max-width:800px){.headerInner{gap:14px}.nav{display:none}.whatsapp{padding:9px 12px;font-size:0}.whatsapp svg{margin:0}.brand{width:180px;flex-basis:180px}.lockedCategoryGrid{grid-template-columns:repeat(2,1fr)}.homeHero{height:310px}.v9Hero{background-size:auto,auto 100%!important;background-position:left top,70% center!important}.homeHero h1{font-size:42px}.aboutHero h1{font-size:52px}.aboutStats{grid-template-columns:1fr 1fr;row-gap:28px}.aboutStats>div:nth-child(2){border-right:0}.aboutStory{display:block}.aboutStoryCopy{padding-right:10%}.aboutChair{opacity:.28;width:100%}.aboutConnect{align-items:flex-start;flex-direction:column;gap:20px}.contactHero h1{font-size:60px}.contactMethods{grid-template-columns:1fr;gap:24px}.contactMethods a{border-right:0;border-bottom:1px solid rgba(126,157,142,.25);padding-bottom:24px}.contactMethods a:last-child{border-bottom:0}.contactForm{grid-template-columns:1fr}.signupCard{align-items:flex-start;flex-direction:column}.footerInner{flex-wrap:wrap}.footerNav{order:3;width:100%;justify-content:center;flex-wrap:wrap}.footerLegal{flex-direction:column;gap:8px}.upNext{grid-template-columns:1fr}.lockedWatchMeta{align-items:flex-start;flex-direction:column}.adminCategoryChecks{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1200px) and (min-width:801px){.adminCategoryChecks{grid-template-columns:repeat(3,1fr)}}
 
+/* Vertical (portrait) videos: the aspect-ratio is set inline per-video once detected via
+   oEmbed, but a 9:16 video stretched to the full watch column width would be absurdly
+   tall, so cap the width and center it instead of letting it fill the row. */
+.playerVertical{max-width:min(420px,100%)!important;margin:0 auto!important}
+
+/* Watch-page Share button: it's a real <button> (unlike the other .btn usages, which are
+   all <a> tags), so the browser's native button border/appearance was leaking through
+   under the lime fill. It was also clearly meant to be a subtle outlined "ghost" button —
+   dead CSS for it still exists scoped to .watchWrap, a container class this page hasn't
+   used since a later structural pass renamed it to .watchLayout. */
+.shareOnly{appearance:none!important;-webkit-appearance:none!important;background:transparent!important;background-image:none!important;color:#f3f6f4!important;border:1px solid #75817c!important;box-shadow:none!important;padding:11px 20px!important;font-size:14px!important;font-weight:700!important}
+.shareOnly:hover{border-color:var(--mint)!important;color:var(--mint)!important}
+
 /* Hero autoplay pause/play control */
 .dots .heroPlayToggle{width:20px;height:20px;border-radius:50%;background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;display:flex;align-items:center;justify-content:center;margin-left:8px;padding:0;cursor:pointer}
 .dots .heroPlayToggle:hover{border-color:var(--mint);color:var(--mint)}

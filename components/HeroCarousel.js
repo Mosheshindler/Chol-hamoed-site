@@ -8,7 +8,7 @@ function PlayIcon(){return <svg width="13" height="13" viewBox="0 0 24 24" fill=
 const AUTOPLAY_MS=5500
 
 export default function HeroCarousel({videos=[]}){
-  const slides=useMemo(()=>videos.filter(Boolean).slice(0,5),[videos])
+  const slides=useMemo(()=>videos.filter(Boolean).slice(0,8),[videos])
   const [index,setIndex]=useState(0)
   const [playing,setPlaying]=useState(true)
 

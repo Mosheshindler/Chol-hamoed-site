@@ -176,6 +176,10 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
    already-shell-width parent, which was shrinking them a second time), fixes both. */
 .justMintedCardBadge{position:absolute!important;top:8px!important;left:8px!important;background:var(--mm-lime)!important;color:#061006!important;border-radius:999px!important;padding:5px 9px!important;font-size:9px!important;font-weight:900!important;letter-spacing:.8px!important;box-shadow:0 3px 14px rgba(0,0,0,.25)!important}
 
+/* Admin: pair each "Featured" checkbox with its own independent "Just Minted" toggle */
+.adminCheckGroup{display:flex!important;flex-direction:column!important;gap:8px!important}
+.adminCheckGroup .adminSubCheck{margin-left:26px!important;font-weight:500!important;color:var(--muted)!important;font-size:12px!important}
+
 .aboutHero,.contactHero{width:min(1120px,calc(100% - 48px))!important;margin-left:auto!important;margin-right:auto!important}
 .aboutHeroInner,.contactHeroInner{width:auto!important;margin-left:0!important;margin-right:0!important}
 .aboutHero{background-size:auto 82%!important;background-position:right center!important}
