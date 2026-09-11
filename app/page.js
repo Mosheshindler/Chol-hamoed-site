@@ -14,8 +14,11 @@ const searches=['Funny','Inspirational','Lessons','Music Video','Under 5 min','L
 export default async function Home(){
   const videos=await getVideos()
   const featuredVideos=videos.filter(v=>v.featured)
-  const fillers=videos.filter(v=>!v.featured).slice(0,Math.max(0,5-featuredVideos.length))
-  const heroVideos=[...featuredVideos,...fillers].slice(0,5)
+  const heroFillers=videos.filter(v=>!v.featured).slice(0,Math.max(0,5-featuredVideos.length))
+  const heroVideos=[...featuredVideos,...heroFillers].slice(0,5)
+  const featuredHome=videos.filter(v=>v.featuredHome)
+  const homeFillers=videos.filter(v=>!v.featuredHome).slice(0,Math.max(0,5-featuredHome.length))
+  const homeVideos=[...featuredHome,...homeFillers].slice(0,5)
   return <><Header/><main>
     <HeroCarousel videos={heroVideos}/>
     <div className="wide homeBody">
@@ -23,7 +26,7 @@ export default async function Home(){
       <div className="sectionHead"><h2>BROWSE BY CATEGORY</h2></div>
       <CategoryStrip categories={categories}/>
       <div className="sectionHead justHead"><h2>JUST MINTED</h2><a href="/category/all-videos">View all&nbsp; →</a></div>
-      <div className="cards homeCards">{videos.slice(0,5).map(v=><VideoCard video={v} key={v.slug}/>)}</div>
+      <div className="cards homeCards">{homeVideos.map(v=><VideoCard video={v} justMinted={v.featuredHome&&v.showJustMinted!==false} key={v.slug}/>)}</div>
       <SignupCTA/>
     </div>
    </main><Footer/></>}

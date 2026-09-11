@@ -163,3 +163,20 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
   .contactSignups .whatsappCard{grid-template-columns:1fr!important}
   .contactSignups .whatsappCard:before{margin-bottom:6px!important}
 }
+
+/* V9.8: align the top hero photo with the bottom/story photo on About and Contact.
+   .aboutHero/.contactHero never picked up the newer .aboutShell/.contactShell class
+   (width:min(1120px,calc(100% - 48px))) that .aboutHeroInner/.aboutStory/.contactHeroInner
+   use — they were still sized off an older, slightly wider min(1180px,calc(100% - 40px))
+   rule from earlier in this file. On wide screens that put the top photo's right edge up
+   to 60px further out than the story-section photo below it, so they never lined up, and
+   the About hero's low-res source (594x388) was being stretched wider than it needed to be.
+   Matching the same shell width here, and letting the *Inner children just fill that
+   corrected box (rather than independently recalculating their own shell width against an
+   already-shell-width parent, which was shrinking them a second time), fixes both. */
+.justMintedCardBadge{position:absolute!important;top:8px!important;left:8px!important;background:var(--mm-lime)!important;color:#061006!important;border-radius:999px!important;padding:5px 9px!important;font-size:9px!important;font-weight:900!important;letter-spacing:.8px!important;box-shadow:0 3px 14px rgba(0,0,0,.25)!important}
+
+.aboutHero,.contactHero{width:min(1120px,calc(100% - 48px))!important;margin-left:auto!important;margin-right:auto!important}
+.aboutHeroInner,.contactHeroInner{width:auto!important;margin-left:0!important;margin-right:0!important}
+.aboutHero{background-size:auto 82%!important;background-position:right center!important}
+.contactHero{background-image:linear-gradient(90deg,rgba(2,9,7,.97) 0%,rgba(2,9,7,.80) 34%,rgba(2,9,7,.12) 70%),url('/assets/director-chair-v2.jpg')!important;background-size:cover!important;background-position:right center!important}
