@@ -34,12 +34,15 @@ export default function AdminPage(){
   },[videos])
 
   function toggleTag(t){
-    setForm(f=>({...f,tags:(f.tags||[]).includes(t)?(f.tags||[]).filter(x=>x!==t):[...(f.tags||[]),t]}))
+    setForm(f=>{
+      const has=(f.tags||[]).some(x=>x.toLowerCase()===t.toLowerCase())
+      return {...f,tags:has?(f.tags||[]).filter(x=>x.toLowerCase()!==t.toLowerCase()):[...(f.tags||[]),t]}
+    })
   }
   function addCustomTag(){
     const t=newTag.trim()
     if(!t) return
-    setForm(f=>(f.tags||[]).includes(t)?f:{...f,tags:[...(f.tags||[]),t]})
+    setForm(f=>(f.tags||[]).some(x=>x.toLowerCase()===t.toLowerCase())?f:{...f,tags:[...(f.tags||[]),t]})
     setNewTag('')
   }
 

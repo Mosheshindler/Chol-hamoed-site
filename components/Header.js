@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
-import {useState} from 'react'
+import {useEffect,useState} from 'react'
 import {ALL_CATEGORIES,categorySlug,SITE_LINKS} from '../lib/site'
 
 function SearchIcon(){return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/></svg>}
@@ -10,7 +10,9 @@ function WhatsAppIcon(){return <svg width="20" height="20" viewBox="0 0 24 24" f
 export default function Header(){
   const pathname=usePathname()||'/'
   const [open,setOpen]=useState(false)
+  const [mobileOpen,setMobileOpen]=useState(false)
   const active=(href)=>href==='/'?pathname==='/':pathname===href||pathname.startsWith(href+'/')
+  useEffect(()=>{setMobileOpen(false);setOpen(false)},[pathname])
   return <header className="header"><div className="wide headerInner">
     <Link href="/" className="brand" aria-label="Mint Media home"><img src="/assets/mint-media-logo.png" alt="Mint Media"/></Link>
     <nav className="nav" aria-label="Primary navigation">
@@ -27,5 +29,16 @@ export default function Header(){
     <div className="spacer"/>
     <Link className="searchIcon" href="/category/all-videos?focus=1" aria-label="Search videos"><SearchIcon/></Link>
     <a className="whatsapp" href={SITE_LINKS.whatsapp} target="_blank" rel="noreferrer"><WhatsAppIcon/> Follow on WhatsApp</a>
-  </div></header>
+    <button className={`navBurger${mobileOpen?' open':''}`} type="button" onClick={()=>setMobileOpen(v=>!v)} aria-expanded={mobileOpen} aria-label="Toggle menu"><span/></button>
+  </div>
+  {mobileOpen&&<nav className="mobileNavPanel" aria-label="Mobile navigation">
+    <Link className={active('/')?'active':''} href="/" onClick={()=>setMobileOpen(false)}>Browse</Link>
+    <Link className={active('/collections')?'active':''} href="/collections" onClick={()=>setMobileOpen(false)}>Collections</Link>
+    <Link className={active('/category/all-videos')?'active':''} href="/category/all-videos" onClick={()=>setMobileOpen(false)}>All Videos</Link>
+    <Link className={active('/about')?'active':''} href="/about" onClick={()=>setMobileOpen(false)}>About</Link>
+    <Link className={active('/contact')?'active':''} href="/contact" onClick={()=>setMobileOpen(false)}>Contact</Link>
+    <div className="mobileNavLabel">Categories</div>
+    <div className="mobileNavCats">{ALL_CATEGORIES.map(label=><Link key={label} href={`/category/${categorySlug(label)}`} onClick={()=>setMobileOpen(false)}>{label}</Link>)}</div>
+  </nav>}
+  </header>
 }
