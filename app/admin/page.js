@@ -26,6 +26,8 @@ export default function AdminPage(){
   const [busy,setBusy]=useState(false)
   const [message,setMessage]=useState('')
   const [newTag,setNewTag]=useState('')
+  const [settings,setSettings]=useState({show_just_minted:true})
+  const [settingsBusy,setSettingsBusy]=useState(false)
 
   const allTags=useMemo(()=>{
     const set=new Set()
@@ -52,12 +54,26 @@ export default function AdminPage(){
     return ()=>subscription.unsubscribe()
   },[supabase])
 
-  useEffect(()=>{if(session) loadVideos()},[session])
+  useEffect(()=>{if(session){loadVideos();loadSettings()}},[session])
 
   async function loadVideos(){
     const {data,error}=await supabase.from('videos').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false})
     if(error){setMessage(error.message);return}
     setVideos(data||[])
+  }
+
+  async function loadSettings(){
+    const {data,error}=await supabase.from('site_settings').select('*').eq('id',true).maybeSingle()
+    if(!error && data) setSettings(data)
+  }
+
+  async function toggleJustMinted(){
+    const next=!settings.show_just_minted
+    setSettings(s=>({...s,show_just_minted:next}))
+    setSettingsBusy(true)
+    const {error}=await supabase.from('site_settings').update({show_just_minted:next}).eq('id',true)
+    if(error) setMessage(error.message)
+    setSettingsBusy(false)
   }
 
   async function login(e){
@@ -162,6 +178,11 @@ export default function AdminPage(){
 
   return <><Header/><main className="adminPage wide">
     <div className="adminTop"><div><div className="eyebrow">MINT MEDIA ADMIN</div><h1>Video Library</h1><p>Add Vimeo or YouTube videos without touching code.</p></div><button className="adminGhost" onClick={()=>supabase.auth.signOut()}>Sign Out</button></div>
+    <section className="adminPanel">
+      <div className="adminPanelHead"><h2>Site Settings</h2></div>
+      <label className="adminToggleRow"><input type="checkbox" checked={Boolean(settings.show_just_minted)} disabled={settingsBusy} onChange={toggleJustMinted}/> Show “Just Minted” wording on the homepage</label>
+      <div className="adminToggleHint">Turns off the “JUST MINTED” label above the hero and the video row heading. The section itself stays — only that wording is hidden.</div>
+    </section>
     <section className="adminPanel">
       <div className="adminPanelHead"><h2>{form.id?'Edit Video':'Add Video'}</h2>{form.id&&<button className="adminGhost" onClick={()=>{setForm(emptyForm);setThumbFile(null);setHeroFile(null);setMessage('')}}>Cancel Edit</button>}</div>
       <form className="adminForm" onSubmit={saveVideo}>
