@@ -6,16 +6,24 @@ import HomeSearch from '../components/HomeSearch'
 import HeroCarousel from '../components/HeroCarousel'
 import CategoryStrip from '../components/CategoryStrip'
 import Link from 'next/link'
-import {getVideos,getPopularTags} from '../lib/data'
+import {getVideos,getPopularTags,getCategoryOrder} from '../lib/data'
 import {categories} from '../lib/demoVideos'
 
 export default async function Home(){
-  const videos=await getVideos()
+  const [videos,homeOrder]=await Promise.all([getVideos(),getCategoryOrder('home-just-minted')])
   const searches=getPopularTags(videos)
   const featuredVideos=videos.filter(v=>v.featured)
   const heroFillers=videos.filter(v=>!v.featured).slice(0,Math.max(0,8-featuredVideos.length))
   const heroVideos=[...featuredVideos,...heroFillers].slice(0,8)
-  const featuredHome=videos.filter(v=>v.featuredHome)
+  // Admin can reorder this row (independent of the site-wide All Videos order) from the
+  // "Homepage (Just Minted)" group in /admin — see getCategoryOrder.
+  const hasHomeOrder=homeOrder && Object.keys(homeOrder).length>0
+  const featuredHomeRaw=videos.filter(v=>v.featuredHome)
+  const featuredHome=hasHomeOrder ? [...featuredHomeRaw].sort((a,b)=>{
+    const ao=a.id in homeOrder?homeOrder[a.id]:Infinity
+    const bo=b.id in homeOrder?homeOrder[b.id]:Infinity
+    return ao-bo
+  }) : featuredHomeRaw
   const homeFillers=videos.filter(v=>!v.featuredHome).slice(0,Math.max(0,5-featuredHome.length))
   const homeVideos=[...featuredHome,...homeFillers].slice(0,5)
   return <><Header/><main>

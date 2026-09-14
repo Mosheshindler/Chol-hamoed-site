@@ -12,6 +12,10 @@ import {sharpenThumbnail} from '../../lib/data'
 // uses (Inspirational, Fundraising Film, etc.), which is why the admin's per-category
 // sorting groups didn't match the site's real categories.
 const CATEGORY_OPTIONS=CATEGORIES
+// A virtual "category" for reordering the homepage Just Minted row, reusing the same
+// video_category_order table/UI as real categories instead of a separate mechanism.
+const HOME_GROUP='Homepage (Just Minted)'
+const HOME_SLUG='home-just-minted'
 const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'Behind the Scenes',categories:['Behind the Scenes'],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0}
 
 function slugify(value){
@@ -41,8 +45,10 @@ export default function AdminPage(){
   },[videos])
 
   function videosForCategory(catName){
-    const slug=categorySlug(catName)
-    const inCat=videos.filter(v=>(v.categories?.length?v.categories:[v.category]).includes(catName))
+    const slug=catName===HOME_GROUP?HOME_SLUG:categorySlug(catName)
+    const inCat=catName===HOME_GROUP
+      ? videos.filter(v=>v.featured_home)
+      : videos.filter(v=>(v.categories?.length?v.categories:[v.category]).includes(catName))
     const orderMap=new Map(categoryOrderRows.filter(r=>r.category===slug).map(r=>[r.video_id,r.sort_order]))
     return [...inCat].sort((a,b)=>{
       const ao=orderMap.has(a.id)?orderMap.get(a.id):Infinity
@@ -90,7 +96,7 @@ export default function AdminPage(){
   }
 
   async function moveVideoInCategory(catName,index,direction){
-    const slug=categorySlug(catName)
+    const slug=catName===HOME_GROUP?HOME_SLUG:categorySlug(catName)
     const list=videosForCategory(catName)
     const target=index+direction
     if(target<0 || target>=list.length) return
@@ -232,6 +238,13 @@ export default function AdminPage(){
         <div className="adminCategoryGroup">
           <h3 className="adminCategoryGroupTitle">All Videos <span className="adminCategoryGroupHint">— master list, this order is the site-wide default</span></h3>
           {videos.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={videos.length} busy={busy} onUp={()=>moveVideo(i,-1)} onDown={()=>moveVideo(i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)}
+        </div>
+        <div className="adminCategoryGroup">
+          <h3 className="adminCategoryGroupTitle">{HOME_GROUP} <span className="adminCategoryGroupHint">— only the top 5 here actually show on the homepage; reorder to control which</span></h3>
+          {(()=>{const list=videosForCategory(HOME_GROUP); return list.length
+            ? list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(HOME_GROUP,i,-1)} onDown={()=>moveVideoInCategory(HOME_GROUP,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)
+            : <p className="adminEmptyHint">No videos are checked "Featured on Homepage" yet — check that box when adding or editing a video to have it show up here.</p>
+          })()}
         </div>
         {categoryNames.map(cat=>{
           const list=videosForCategory(cat)
