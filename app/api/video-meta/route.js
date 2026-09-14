@@ -29,6 +29,26 @@ async function fetchYouTubeDuration(videoId){
   }
 }
 
+// YouTube always generates a small hqdefault.jpg (480x360), but the sharper sddefault.jpg
+// (640x480) and maxresdefault.jpg (1280x720) only exist for videos whose source resolution
+// supports them. When a size doesn't exist, YouTube doesn't error — it silently serves a
+// tiny ~1KB gray placeholder instead, which looks like a broken/missing thumbnail on the
+// site. So the sharpest real size is picked here (once, when the video is added/edited) by
+// actually checking it's a real image rather than that placeholder, instead of guessing.
+const YT_PLACEHOLDER_MAX_BYTES=2000
+async function pickYouTubeThumbnail(videoId){
+  for(const size of ['maxresdefault','sddefault']){
+    try{
+      const r=await fetch(`https://i.ytimg.com/vi/${videoId}/${size}.jpg`,{cache:'no-store'})
+      if(r.ok){
+        const buf=await r.arrayBuffer()
+        if(buf.byteLength>YT_PLACEHOLDER_MAX_BYTES) return `https://i.ytimg.com/vi/${videoId}/${size}.jpg`
+      }
+    }catch{}
+  }
+  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` // always available, real image
+}
+
 function identify(raw){
   const u=new URL(raw)
   const host=u.hostname.replace(/^www\./,'')
@@ -84,13 +104,13 @@ export async function POST(request){
     const r=await fetch(target,{cache:'no-store'})
     let title=''
     if(r.ok){ const data=await r.json(); title=data.title||'' }
-    const durationSeconds=await fetchYouTubeDuration(info.id)
+    const [durationSeconds,thumbnailUrl]=await Promise.all([fetchYouTubeDuration(info.id),pickYouTubeThumbnail(info.id)])
     return NextResponse.json({
       platform:'youtube',
       videoId:info.id,
       vimeoHash:'',
       title,
-      thumbnailUrl:`https://i.ytimg.com/vi/${info.id}/sddefault.jpg`,
+      thumbnailUrl,
       durationSeconds
     })
   }catch(error){
