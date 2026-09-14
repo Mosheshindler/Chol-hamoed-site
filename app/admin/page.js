@@ -16,7 +16,7 @@ const CATEGORY_OPTIONS=CATEGORIES
 // video_category_order table/UI as real categories instead of a separate mechanism.
 const HOME_GROUP='Homepage (Just Minted)'
 const HOME_SLUG='home-just-minted'
-const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'Behind the Scenes',categories:['Behind the Scenes'],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0}
+const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'',categories:[],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0}
 
 function slugify(value){
   return value.toLowerCase().trim().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'video'
