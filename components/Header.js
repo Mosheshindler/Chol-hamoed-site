@@ -29,7 +29,7 @@ export default function Header(){
     </nav>
     <div className="spacer"/>
     <Link className="searchIcon" href="/category/all-videos?focus=1" aria-label="Search videos"><SearchIcon/></Link>
-    <a className="whatsapp" href={SITE_LINKS.whatsapp} target="_blank" rel="noreferrer"><WhatsAppIcon/> Follow on WhatsApp</a>
+    <a className="whatsapp" href={SITE_LINKS.whatsapp} target="_blank" rel="noreferrer"><WhatsAppIcon/> Follow us on WhatsApp</a>
     <button className={`navBurger${mobileOpen?' open':''}`} type="button" onClick={()=>setMobileOpen(v=>!v)} aria-expanded={mobileOpen} aria-label="Toggle menu"><span/></button>
   </div>
   {mobileOpen&&<nav className="mobileNavPanel" aria-label="Mobile navigation">

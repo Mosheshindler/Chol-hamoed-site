@@ -81,6 +81,8 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .socials svg{width:25px!important;height:25px!important;display:block!important;fill:currentColor!important;stroke:none!important;overflow:visible!important}
 .socials .socialCut{fill:#020706!important;stroke:#020706!important}
 .socials a:hover{color:var(--mm-lime)!important;opacity:1!important}
+.footerWebsite{margin-left:6px!important;padding-left:17px!important;border-left:1px solid rgba(197,206,201,.3)!important;color:#d8dedb!important;font-size:13px!important;font-weight:600!important;white-space:nowrap!important}
+.footerWebsite:hover{color:var(--mm-lime)!important}
 
 /* All ten collections, with the exact category icon assets. */
 .collectionGridAll{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
