@@ -14,25 +14,18 @@ function parseIsoDuration(iso){
 // that gap via the official YouTube Data API v3. Never exposed to the browser.
 async function fetchYouTubeDuration(videoId){
   const key=process.env.YOUTUBE_API_KEY
-  // TEMPORARY diagnostics (remove once duration lookup is confirmed working end to end) —
-  // returning *why* it failed instead of silently swallowing it, since a bare `null` here
-  // is indistinguishable whether the key is missing, the request failed, or parsing failed.
-  if(!key) return {durationSeconds:null,debug:{step:'no-key'}}
+  if(!key) return null
   try{
     const target=new URL('https://www.googleapis.com/youtube/v3/videos')
     target.searchParams.set('id',videoId)
     target.searchParams.set('part','contentDetails')
     target.searchParams.set('key',key)
     const r=await fetch(target,{cache:'no-store'})
-    if(!r.ok){
-      const body=await r.text().catch(()=>'')
-      return {durationSeconds:null,debug:{step:'bad-response',status:r.status,body:body.slice(0,300)}}
-    }
+    if(!r.ok) return null
     const data=await r.json()
-    const iso=data.items?.[0]?.contentDetails?.duration
-    return {durationSeconds:parseIsoDuration(iso),debug:{step:'ok',itemsCount:data.items?.length??0,iso:iso||null}}
-  }catch(err){
-    return {durationSeconds:null,debug:{step:'threw',message:String(err?.message||err)}}
+    return parseIsoDuration(data.items?.[0]?.contentDetails?.duration)
+  }catch{
+    return null
   }
 }
 
@@ -91,15 +84,14 @@ export async function POST(request){
     const r=await fetch(target,{cache:'no-store'})
     let title=''
     if(r.ok){ const data=await r.json(); title=data.title||'' }
-    const {durationSeconds,debug}=await fetchYouTubeDuration(info.id)
+    const durationSeconds=await fetchYouTubeDuration(info.id)
     return NextResponse.json({
       platform:'youtube',
       videoId:info.id,
       vimeoHash:'',
       title,
       thumbnailUrl:`https://i.ytimg.com/vi/${info.id}/sddefault.jpg`,
-      durationSeconds,
-      _debug:debug
+      durationSeconds
     })
   }catch(error){
     return NextResponse.json({error:error.message||'Could not read video details.'},{status:400})
