@@ -33,7 +33,7 @@ export default async function Home(){
       <div className="sectionHead"><h2>BROWSE BY CATEGORY</h2></div>
       <CategoryStrip categories={categories}/>
       <div className="sectionHead justHead"><h2>JUST MINTED</h2><a href="/category/all-videos">View all&nbsp; →</a></div>
-      <div className="cards homeCards">{homeVideos.map(v=><VideoCard video={v} justMinted={v.featuredHome&&v.showJustMintedHome!==false} key={v.slug}/>)}</div>
+      <div className="cards homeCards">{homeVideos.map((v,i)=><VideoCard video={v} justMinted={v.featuredHome&&v.showJustMintedHome!==false} priority={i<2} key={v.slug}/>)}</div>
       <SignupCTA/>
     </div>
    </main><Footer/></>}
