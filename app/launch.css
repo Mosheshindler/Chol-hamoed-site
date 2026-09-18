@@ -9,7 +9,12 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 /* Hero slides: all render stacked, absolutely positioned in the same box .heroPhoto used,
    crossfading via opacity instead of the old instant background-image swap on one div. */
 .v9Hero .heroSlideStack{position:absolute;inset:0;z-index:0}
-.v9Hero .heroSlideStack .heroSlide{position:absolute;top:0;right:0;bottom:0;width:68%;background-position:center;background-size:cover;background-repeat:no-repeat;opacity:0;transition:opacity 900ms ease}
+/* left:auto explicitly overrides a leftover left:0 from the old dead .heroSlide{inset:0}
+   rule below in globals.css -- without it, having both left:0 (inherited) and right:0
+   (here) plus width:68% is over-constrained, and browsers resolve that by using
+   left+width and ignoring right, pinning the image to the left with the gap on the right
+   instead of flush against the right edge. */
+.v9Hero .heroSlideStack .heroSlide{position:absolute;top:0;right:0;bottom:0;left:auto;width:68%;background-position:center;background-size:cover;background-repeat:no-repeat;opacity:0;transition:opacity 900ms ease}
 .v9Hero .heroSlideStack .heroSlide.active{opacity:1;z-index:1}
 @media(max-width:850px){.v9Hero .heroSlideStack .heroSlide{width:100%;background-size:auto 100%;background-position:70% center}}
 @keyframes heroContentIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
