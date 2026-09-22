@@ -1,14 +1,23 @@
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
+import SafetyPageBody from './SafetyPageBody'
 
-// Not linked from the header nav on purpose — reachable only via the small link in the
-// footer, for content-filtering companies reviewing our policies. Placeholder copy below;
-// swap in the real policy text whenever it's ready.
-export default function Safety(){return <><Header/><main className="wide safetyPage">
-  <div className="eyebrow">SAFETY &amp; CONTENT POLICIES</div>
-  <h1>Safety &amp; Content Policies</h1>
-  <div className="safetyBody">
-    <p>This page will outline Mint Media's safety and content review policies. Full details coming soon.</p>
-    <p>For questions in the meantime, please <a href="/contact">contact us</a>.</p>
-  </div>
-</main><Footer/></>}
+// Deliberately kept off every nav, footer, search, and sitemap — reachable only by
+// visiting this URL directly (e.g. a filtering provider reviewing the site). noindex
+// keeps it out of search results too, without blocking direct access.
+export const metadata = {
+  title: "Content Standards | Entertain-Mint",
+  description: "Content safety and platform standards for Entertain-Mint.",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
+}
+
+export default function Safety(){return <><Header/><SafetyPageBody/><Footer/></>}
