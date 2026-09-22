@@ -43,7 +43,7 @@ export default function SafetyPageBody() {
           <p className="safetyEyebrow">Exclusively Mint Media</p>
           <h2 id="exclusive-title">Every video is produced by Mint Media.</h2>
           <p>
-            The platform features exclusively Mint Media content—there are no
+            The platform features exclusively Mint Media content. There are no
             third-party videos, public uploads, or outside content creators.
           </p>
           <p className="safetyIntroNote">
@@ -53,7 +53,7 @@ export default function SafetyPageBody() {
 
         <section className="safetyControls" aria-labelledby="controls-title">
           <p className="safetyEyebrow">How the platform is controlled</p>
-          <h2 id="controls-title">A curated destination—not an open network.</h2>
+          <h2 id="controls-title">A curated destination, not an open network.</h2>
 
           <div className="safetyGrid">
             {controls.map((item) => (
