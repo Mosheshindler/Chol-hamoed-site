@@ -81,15 +81,36 @@ export default function CategoryBrowser({slug,name,videos,categoryOrder={},initi
   const [q,setQ]=useState(initialQuery)
   const searchRef=useRef(null)
   const [visible,setVisible]=useState(PAGE_SIZE)
-  // Only meaningful on the All Videos page — lets people narrow the master list to one
-  // collection in-page instead of navigating away to that category's own page.
-  const [collectionFilter,setCollectionFilter]=useState('all-videos')
-  useEffect(()=>{setQ(initialQuery);setVisible(PAGE_SIZE);setCollectionFilter('all-videos')},[initialQuery,slug])
+  // Only meaningful on the All Videos page — lets people narrow the master list to any
+  // number of collections at once in-page, instead of navigating away to each category's
+  // own page. Empty selection means "no filter" (show everything).
+  const [selectedCats,setSelectedCats]=useState([])
+  const [filterOpen,setFilterOpen]=useState(false)
+  const filterRef=useRef(null)
+  useEffect(()=>{setQ(initialQuery);setVisible(PAGE_SIZE);setSelectedCats([])},[initialQuery,slug])
   useEffect(()=>{if(autoFocus) setTimeout(()=>searchRef.current?.focus(),50)},[autoFocus])
 
-  const effectiveSlug=slug==='all-videos'?collectionFilter:slug
+  useEffect(()=>{
+    if(!filterOpen) return
+    function onDocClick(e){ if(filterRef.current && !filterRef.current.contains(e.target)) setFilterOpen(false) }
+    function onKey(e){ if(e.key==='Escape') setFilterOpen(false) }
+    document.addEventListener('mousedown',onDocClick)
+    document.addEventListener('keydown',onKey)
+    return ()=>{ document.removeEventListener('mousedown',onDocClick); document.removeEventListener('keydown',onKey) }
+  },[filterOpen])
+
+  function toggleCat(catSlug){
+    setSelectedCats(prev=>prev.includes(catSlug)?prev.filter(s=>s!==catSlug):[...prev,catSlug])
+    setVisible(PAGE_SIZE)
+  }
+
   const categoryVideos=useMemo(()=>{
-    const matches=videos.filter(v=>inCategory(v,effectiveSlug))
+    let matches
+    if(slug==='all-videos'){
+      matches=selectedCats.length?videos.filter(v=>selectedCats.some(s=>inCategory(v,s))):videos
+    }else{
+      matches=videos.filter(v=>inCategory(v,slug))
+    }
     const hasOrder=categoryOrder && Object.keys(categoryOrder).length>0
     if(!hasOrder) return matches
     return [...matches].sort((a,b)=>{
@@ -97,7 +118,7 @@ export default function CategoryBrowser({slug,name,videos,categoryOrder={},initi
       const bo=b.id in categoryOrder?categoryOrder[b.id]:Infinity
       return ao-bo
     })
-  },[videos,effectiveSlug,categoryOrder])
+  },[videos,slug,selectedCats,categoryOrder])
   const filtered=useMemo(()=>categoryVideos.filter(v=>matchesSearch(v,q)),[categoryVideos,q])
   const shown=filtered.slice(0,visible)
 
@@ -121,9 +142,15 @@ export default function CategoryBrowser({slug,name,videos,categoryOrder={},initi
 
   return <>
     <section className={`categoryHero ${slug==='qanda'||slug==='q-and-a'?'qaCategoryHero':''}`}><div className="bigIcon lockedBigIcon"><img src={`/assets/category-icons-svg/${slug==='qanda'?'q-and-a':slug}.svg`} alt=""/></div><div><h1>{slug==='qanda'||slug==='q-and-a'?'Q&A':name}</h1><p>{slug==='all-videos'?'Search and browse the complete Mint Media library':(slug==='qanda'||slug==='q-and-a'?'Explore Q&A from Mint Media':`Explore ${name.toLowerCase()} from Mint Media`)}</p></div></section>
-    {slug==='all-videos'&&<div className="collectionFilterRow">
-      <button type="button" className={`collectionFilterChip${collectionFilter==='all-videos'?' active':''}`} onClick={()=>{setCollectionFilter('all-videos');setVisible(PAGE_SIZE)}}>All Videos</button>
-      {CATEGORIES.map(c=>{const s=categorySlug(c);return <button type="button" key={s} className={`collectionFilterChip${collectionFilter===s?' active':''}`} onClick={()=>{setCollectionFilter(s);setVisible(PAGE_SIZE)}}>{c}</button>})}
+    {slug==='all-videos'&&<div className="collectionFilterWrap" ref={filterRef}>
+      <button type="button" className={`collectionFilterBtn${selectedCats.length?' active':''}`} onClick={()=>setFilterOpen(o=>!o)} aria-expanded={filterOpen}>
+        {selectedCats.length?`${selectedCats.length} ${selectedCats.length===1?'category':'categories'}`:'Filter by category'}
+        <span className={`chev${filterOpen?' chevOpen':''}`}>▾</span>
+      </button>
+      {filterOpen&&<div className="collectionFilterMenu" role="menu">
+        {CATEGORIES.map(c=>{const s=categorySlug(c);return <label className="collectionFilterOption" key={s}><input type="checkbox" checked={selectedCats.includes(s)} onChange={()=>toggleCat(s)}/>{c}</label>})}
+        {selectedCats.length>0&&<button type="button" className="collectionFilterClear" onClick={()=>{setSelectedCats([]);setVisible(PAGE_SIZE)}}>Clear filters</button>}
+      </div>}
     </div>}
     <div className="search"><span className="searchGlyph">⌕</span><input ref={searchRef} value={q} onChange={e=>{setQ(e.target.value);setVisible(PAGE_SIZE)}} placeholder={slug==='all-videos'?'Search by title or category...':(slug==='qanda'||slug==='q-and-a'?'Search Q&A...':`Search ${name.toLowerCase()}...`)} aria-label="Search videos"/>{q?<button className="searchClear" type="button" onClick={()=>setQ('')} aria-label="Clear search">×</button>:null}</div>
     <div className="searchSummary"><span>{filtered.length} {filtered.length===1?'video':'videos'}{q?` found for “${q}”`:''}</span>{q?<button type="button" onClick={()=>setQ('')}>Clear search</button>:null}</div>
