@@ -38,9 +38,15 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 @media(max-width:850px){.wide{width:min(100% - 28px,1460px)}.homeHero.v9Hero{height:320px}.v9Hero .heroPhoto{background-size:auto 100%;background-position:70% center}.v9Hero .heroContent{margin-left:12px}.v9Hero .heroContent h1{font-size:42px}.aboutHero h1{font-size:52px!important}.aboutStats{grid-template-columns:1fr 1fr!important;row-gap:20px!important}.aboutStats>div:nth-child(2){border-right:0!important}.aboutStory{display:block!important}.aboutChair{width:100%!important;opacity:.25!important}.aboutStoryCopy{padding-right:8%!important}.aboutConnect{flex-direction:column!important;align-items:flex-start!important}.contactHero h1{font-size:60px!important}.contactMethods{grid-template-columns:1fr!important}.contactMethods a{border-right:0!important;border-bottom:1px solid rgba(126,157,142,.28)!important}.contactMethods a:last-child{border-bottom:0!important}.contactForm{grid-template-columns:1fr!important}.signupCard{flex-direction:column!important;align-items:flex-start!important}.footerInner{flex-wrap:wrap!important}.footerNav{order:3!important;width:100%!important;justify-content:center!important;flex-wrap:wrap!important}.footerLegal{flex-direction:column!important;gap:8px!important}.homeBody .ctaPane{grid-template-columns:48px 1fr!important}.homeBody .followBtn{grid-column:2!important;width:max-content!important}}
 
 /* V9.2 proportional polish */
-.homeHero.v9Hero{height:330px!important}.v9Hero .heroContent h1{font-size:52px!important}.homeBody{padding-top:14px!important}.lockedCat{height:112px!important;min-height:112px!important}.aboutHero,.aboutHeroInner{min-height:390px!important}.aboutHero h1{font-size:60px!important}.contactHero,.contactHeroInner{min-height:390px!important}.contactHero h1{font-size:68px!important}.homeSignup{max-width:100%!important}.homeSignup .ctaPane{min-width:0!important}.footerLogo{width:190px!important}.footerNav{gap:26px!important}.contactSignups .signupCard{min-height:180px!important}.contactSignups .whatsappCard:before{content:'';width:44px;height:44px;flex:0 0 44px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 6.5c-9.54 0-17.28 7.38-17.28 16.48 0 3.2.97 6.19 2.65 8.72L6.5 41.5l10.25-2.7A17.86 17.86 0 0024 40.33c9.54 0 17.28-7.38 17.28-16.48S33.54 6.5 24 6.5Z' fill='none' stroke='%2388C040' stroke-width='2.4'/%3E%3Cpath d='M17.2 14.8c.52-.05 1.04-.06 1.37.56l1.98 4.02c.25.5.17.84-.12 1.22l-1.36 1.66c-.27.33-.23.67-.05 1.03 1.23 2.4 3.3 4.48 5.74 5.75.34.18.68.2.98-.06l1.67-1.4c.37-.31.73-.39 1.23-.14l4.02 1.99c.6.3.66.84.56 1.36-.19 1.1-.95 2.46-2.05 3.15-1.06.66-2.35 1.02-3.57.75-2.08-.46-5.3-1.66-8.58-4.8-3.12-2.99-4.49-6.01-5.02-8.1-.32-1.24-.04-2.57.62-3.67.65-1.08 1.56-2.07 2.58-2.32Z' fill='%2388C040'/%3E%3C/svg%3E")}.contactSignups .whatsappCard{display:grid!important;grid-template-columns:44px 1fr auto!important;align-items:center!important}.contactSignups .whatsappCard>div{min-width:0!important}
+.homeBody{padding-top:14px!important}.lockedCat{height:112px!important;min-height:112px!important}.aboutHero,.aboutHeroInner{min-height:390px!important}.aboutHero h1{font-size:60px!important}.contactHero,.contactHeroInner{min-height:390px!important}.contactHero h1{font-size:68px!important}.homeSignup{max-width:100%!important}.homeSignup .ctaPane{min-width:0!important}.footerLogo{width:190px!important}.footerNav{gap:26px!important}.contactSignups .signupCard{min-height:180px!important}.contactSignups .whatsappCard:before{content:'';width:44px;height:44px;flex:0 0 44px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M24 6.5c-9.54 0-17.28 7.38-17.28 16.48 0 3.2.97 6.19 2.65 8.72L6.5 41.5l10.25-2.7A17.86 17.86 0 0024 40.33c9.54 0 17.28-7.38 17.28-16.48S33.54 6.5 24 6.5Z' fill='none' stroke='%2388C040' stroke-width='2.4'/%3E%3Cpath d='M17.2 14.8c.52-.05 1.04-.06 1.37.56l1.98 4.02c.25.5.17.84-.12 1.22l-1.36 1.66c-.27.33-.23.67-.05 1.03 1.23 2.4 3.3 4.48 5.74 5.75.34.18.68.2.98-.06l1.67-1.4c.37-.31.73-.39 1.23-.14l4.02 1.99c.6.3.66.84.56 1.36-.19 1.1-.95 2.46-2.05 3.15-1.06.66-2.35 1.02-3.57.75-2.08-.46-5.3-1.66-8.58-4.8-3.12-2.99-4.49-6.01-5.02-8.1-.32-1.24-.04-2.57.62-3.67.65-1.08 1.56-2.07 2.58-2.32Z' fill='%2388C040'/%3E%3C/svg%3E")}.contactSignups .whatsappCard{display:grid!important;grid-template-columns:44px 1fr auto!important;align-items:center!important}.contactSignups .whatsappCard>div{min-width:0!important}
 
-/* V9.3 precision pass — match locked desktop scale and proportions */
+/* V9.3 precision pass — match locked desktop scale and proportions. This whole block used
+   to apply at every width with no media query at all — since it's all !important, it beat
+   every mobile-specific override below it in the cascade (source order is the tiebreaker
+   between equal-specificity !important rules), pinning the hero to desktop sizing (48px
+   title, 310px height) even on a narrow phone. That's what was cramming multi-line titles
+   into a too-short box and making the whole hero look squashed on mobile. */
+@media(min-width:851px){
 .homeHero.v9Hero{width:min(1460px,calc(100% - 74px))!important;margin:0 auto!important;height:310px!important;border-left:1px solid rgba(110,140,128,.12)!important;border-right:1px solid rgba(110,140,128,.12)!important}
 .v9Hero .heroPhoto{width:68%!important;background-size:cover!important;background-position:center!important}
 .v9Hero .heroContent{margin-left:42px!important;max-width:520px!important}
@@ -48,6 +54,19 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .v9Hero .heroArrow{width:42px!important;height:42px!important;font-size:30px!important}
 .v9Hero .heroArrow.left{left:2px!important}.v9Hero .heroArrow.right{right:2px!important}
 .v9Hero .dots{bottom:13px!important}
+}
+/* Phone-specific: the ≤850px tier above still leaves a fairly tall box (320px) and a large
+   title (42px) relative to how narrow the hero gets on an actual phone — enough for a long
+   title to wrap into several lines and still feel cramped. Shrinking both further here
+   keeps the hero looking like a compact banner instead of a squashed near-square block. */
+@media(max-width:600px){
+.homeHero.v9Hero{height:220px!important}
+.v9Hero .heroContent{margin-left:16px!important;margin-top:0!important;max-width:80%!important}
+.v9Hero .heroContent h1{font-size:26px!important;line-height:1.1!important;letter-spacing:-.5px!important;margin:4px 0 6px!important}
+.v9Hero .eyebrow{font-size:11px!important;margin-bottom:2px!important}
+.v9Hero .meta{font-size:13px!important}
+.v9Hero .dots{bottom:10px!important}
+}
 
 .lockedCat{height:108px!important;min-height:108px!important;padding:9px 6px!important}
 .lockedCatIcon{height:54px!important}
