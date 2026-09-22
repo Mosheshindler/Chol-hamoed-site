@@ -13,11 +13,6 @@ const controls = [
     detail: "The viewing experience remains controlled, clean, and professionally managed.",
   },
   {
-    title: "No outside recommendations",
-    lead: "Viewers stay inside the curated library.",
-    detail: "The site does not direct visitors to unrelated or unreviewed videos.",
-  },
-  {
     title: "Manual content review",
     lead: "Nothing is published automatically.",
     detail: "Every video and thumbnail is reviewed and approved by Mint Media before publication.",
