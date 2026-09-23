@@ -1,6 +1,6 @@
 'use client'
 
-import {useEffect,useMemo,useRef,useState} from 'react'
+import {useEffect,useMemo,useState} from 'react'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import AdminTabs from '../../../components/AdminTabs'
@@ -54,11 +54,14 @@ export default function AdminLinksPage(){
   const [saveLabel,setSaveLabel]=useState('Save to my links')
   const [copiedId,setCopiedId]=useState(null)
 
+  // A link only exists once "Create Link" (or Enter) is hit — typing alone doesn't
+  // build or shorten anything, so nothing calls out until the name is finished.
+  const [created,setCreated]=useState(false)
+  const [createdFor,setCreatedFor]=useState('')
+  const [builtUrl,setBuiltUrl]=useState('')
   const [shortUrl,setShortUrl]=useState('')
   const [shortening,setShortening]=useState(false)
   const [shortenFailed,setShortenFailed]=useState(false)
-  const shortenTimer=useRef(null)
-  const shortenReqId=useRef(0)
 
   useEffect(()=>{
     supabase.auth.getSession().then(({data})=>{setSession(data.session);setAuthLoading(false)})
@@ -75,32 +78,31 @@ export default function AdminLinksPage(){
     setBusy(false)
   }
 
-  const campaignValue=slugify(name)||'untitled'
-  const builtUrl=`${BASE}/?utm_source=${UTM_SOURCE}&utm_medium=${UTM_MEDIUM}&utm_campaign=${encodeURIComponent(campaignValue)}`
+  function handleNameChange(e){
+    setName(e.target.value)
+    // The name changed since the last create — the old link no longer matches it,
+    // so hide it rather than show a link for a name that's since been edited.
+    if(created) setCreated(false)
+  }
 
-  // Auto-shorten whenever the built link changes, debounced so a link isn't requested
-  // on every keystroke while typing the name.
-  useEffect(()=>{
-    setShortUrl('');setShortenFailed(false)
-    if(shortenTimer.current) clearTimeout(shortenTimer.current)
-    const reqId=++shortenReqId.current
-    setShortening(true)
-    shortenTimer.current=setTimeout(async()=>{
-      try{
-        const r=await fetch('/api/shorten',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:builtUrl})})
-        const data=await r.json()
-        if(reqId!==shortenReqId.current) return
-        if(!r.ok||!data.shortUrl) throw new Error(data.error||'Could not shorten link.')
-        setShortUrl(data.shortUrl)
-      }catch(err){
-        if(reqId!==shortenReqId.current) return
-        setShortenFailed(true)
-      }finally{
-        if(reqId===shortenReqId.current) setShortening(false)
-      }
-    },700)
-    return ()=>clearTimeout(shortenTimer.current)
-  },[builtUrl])
+  async function handleCreate(e){
+    e.preventDefault()
+    if(!name.trim()) return
+    const campaignValue=slugify(name)||'untitled'
+    const url=`${BASE}/?utm_source=${UTM_SOURCE}&utm_medium=${UTM_MEDIUM}&utm_campaign=${encodeURIComponent(campaignValue)}`
+    setBuiltUrl(url);setCreatedFor(name.trim());setCreated(true)
+    setShortUrl('');setShortenFailed(false);setShortening(true)
+    try{
+      const r=await fetch('/api/shorten',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})})
+      const data=await r.json()
+      if(!r.ok||!data.shortUrl) throw new Error(data.error||'Could not shorten link.')
+      setShortUrl(data.shortUrl)
+    }catch(err){
+      setShortenFailed(true)
+    }finally{
+      setShortening(false)
+    }
+  }
 
   const copyValue=shortUrl||builtUrl
 
@@ -109,7 +111,7 @@ export default function AdminLinksPage(){
   }
   function handleSave(){
     const list=loadSaved()
-    list.push({id:Date.now()+'-'+Math.random().toString(36).slice(2,7),name:name.trim()||'Untitled link',url:copyValue,fullUrl:builtUrl,createdAt:Date.now()})
+    list.push({id:Date.now()+'-'+Math.random().toString(36).slice(2,7),name:createdFor||'Untitled link',url:copyValue,fullUrl:builtUrl,createdAt:Date.now()})
     persistSaved(list);setSaved(list)
     setSaveLabel('Saved ✓');setTimeout(()=>setSaveLabel('Save to my links'),1400)
   }
@@ -132,29 +134,35 @@ export default function AdminLinksPage(){
     <AdminTabs active="links"/>
 
     <section className="adminPanel">
-      <div className="adminForm">
+      <form className="adminForm" onSubmit={handleCreate}>
         <label>Name this link
-          <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Moshe's WhatsApp Status" autoFocus/>
+          <input type="text" value={name} onChange={handleNameChange} placeholder="e.g. Moshe's WhatsApp Status" autoFocus/>
         </label>
         <p className="linkHint">This is how you'll find it in your saved links and in Google Analytics.</p>
 
-        <div className="linkPreview" style={{marginTop:18}}>
-          <span className="linkPreviewLabel">{shortUrl?'Your link':shortening?'Shortening…':'Your link'}</span>
-          <div className="linkPreviewUrl">{shortUrl||builtUrl}</div>
-          {shortenFailed&&<div className="linkPreviewNote">Couldn't shorten it right now — the full link above still works and tracks the same.</div>}
+        <div className="linkActions" style={{marginTop:14}}>
+          <button type="submit" className="adminPrimary" disabled={!name.trim()}>Create Link</button>
         </div>
 
-        <div className="adminChecks" style={{marginTop:18}}>
-          <button type="button" className="adminPrimary" onClick={handleCopy}>{copyLabel}</button>
-          <button type="button" className="adminSecondary" onClick={handleSave}>{saveLabel}</button>
-        </div>
-      </div>
+        {created&&<>
+          <div className="linkPreview" style={{marginTop:18}}>
+            <span className="linkPreviewLabel">{shortening?'Shortening…':'Your link'}</span>
+            <div className="linkPreviewUrl">{shortUrl||builtUrl}</div>
+            {shortenFailed&&<div className="linkPreviewNote">Couldn't shorten it right now — the full link above still works and tracks the same.</div>}
+          </div>
+
+          <div className="linkActions" style={{marginTop:14}}>
+            <button type="button" className="adminPrimary" onClick={handleCopy}>{copyLabel}</button>
+            <button type="button" className="adminSecondary" onClick={handleSave}>{saveLabel}</button>
+          </div>
+        </>}
+      </form>
     </section>
 
     <section className="adminPanel adminLibrary">
       <div className="adminPanelHead"><h2>Your saved links</h2><span>Stored on this device only</span></div>
       {saved.length===0
-        ?<p className="adminEmptyHint">No saved links yet. Name one above and hit "Save to my links".</p>
+        ?<p className="adminEmptyHint">No saved links yet. Name one above and hit "Create Link".</p>
         :<div className="linkSavedList">{saved.slice().reverse().map(item=>{
           const d=new Date(item.createdAt)
           const dateStr=isNaN(d)?'':d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})
