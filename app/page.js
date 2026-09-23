@@ -12,9 +12,7 @@ import {categories} from '../lib/demoVideos'
 export default async function Home(){
   const [videos,homeOrder]=await Promise.all([getVideos(),getCategoryOrder('home-just-minted')])
   const searches=getPopularTags(videos,20)
-  const featuredVideos=videos.filter(v=>v.featured)
-  const heroFillers=videos.filter(v=>!v.featured).slice(0,Math.max(0,8-featuredVideos.length))
-  const heroVideos=[...featuredVideos,...heroFillers].slice(0,8)
+  const heroVideos=videos.filter(v=>v.featured).slice(0,8)
   // Admin can reorder this row (independent of the site-wide All Videos order) from the
   // "Homepage (Just Minted)" group in /admin — see getCategoryOrder.
   const hasHomeOrder=homeOrder && Object.keys(homeOrder).length>0
