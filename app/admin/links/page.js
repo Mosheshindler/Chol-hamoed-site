@@ -1,9 +1,9 @@
 'use client'
 
-import {useEffect,useMemo,useState} from 'react'
-import Link from 'next/link'
+import {useEffect,useMemo,useRef,useState} from 'react'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
+import AdminTabs from '../../../components/AdminTabs'
 import {getSupabaseBrowserClient} from '../../../lib/supabaseClient'
 
 const BASE='https://www.entertain-mint.com'
@@ -73,6 +73,12 @@ export default function AdminLinksPage(){
   const [saveLabel,setSaveLabel]=useState('Save to my links')
   const [copiedId,setCopiedId]=useState(null)
 
+  const [shortUrl,setShortUrl]=useState('')
+  const [shortening,setShortening]=useState(false)
+  const [shortenFailed,setShortenFailed]=useState(false)
+  const shortenTimer=useRef(null)
+  const shortenReqId=useRef(0)
+
   useEffect(()=>{
     supabase.auth.getSession().then(({data})=>{setSession(data.session);setAuthLoading(false)})
     const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,next)=>setSession(next))
@@ -96,12 +102,38 @@ export default function AdminLinksPage(){
   const campaignValue=slugify(campaign)||'untitled'
   const builtUrl=`${BASE}${path}?utm_source=${encodeURIComponent(sourceValue)}&utm_medium=${encodeURIComponent(mediumValue)}&utm_campaign=${encodeURIComponent(campaignValue)}`
 
+  // Auto-shorten whenever the built link changes, debounced so a link isn't requested
+  // on every keystroke while typing the campaign name.
+  useEffect(()=>{
+    setShortUrl('');setShortenFailed(false)
+    if(shortenTimer.current) clearTimeout(shortenTimer.current)
+    const reqId=++shortenReqId.current
+    setShortening(true)
+    shortenTimer.current=setTimeout(async()=>{
+      try{
+        const r=await fetch('/api/shorten',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:builtUrl})})
+        const data=await r.json()
+        if(reqId!==shortenReqId.current) return
+        if(!r.ok||!data.shortUrl) throw new Error(data.error||'Could not shorten link.')
+        setShortUrl(data.shortUrl)
+      }catch(err){
+        if(reqId!==shortenReqId.current) return
+        setShortenFailed(true)
+      }finally{
+        if(reqId===shortenReqId.current) setShortening(false)
+      }
+    },700)
+    return ()=>clearTimeout(shortenTimer.current)
+  },[builtUrl])
+
+  const copyValue=shortUrl||builtUrl
+
   function handleCopy(){
-    copyText(builtUrl,()=>{setCopyLabel('Copied ✓');setTimeout(()=>setCopyLabel('Copy link'),1600)})
+    copyText(copyValue,()=>{setCopyLabel('Copied ✓');setTimeout(()=>setCopyLabel('Copy link'),1600)})
   }
   function handleSave(){
     const list=loadSaved()
-    list.push({id:Date.now()+'-'+Math.random().toString(36).slice(2,7),name:campaign.trim()||'Untitled campaign',url:builtUrl,createdAt:Date.now()})
+    list.push({id:Date.now()+'-'+Math.random().toString(36).slice(2,7),name:campaign.trim()||'Untitled campaign',url:copyValue,fullUrl:builtUrl,createdAt:Date.now()})
     persistSaved(list);setSaved(list)
     setSaveLabel('Saved ✓');setTimeout(()=>setSaveLabel('Save to my links'),1400)
   }
@@ -119,8 +151,9 @@ export default function AdminLinksPage(){
   return <><Header/><main className="adminPage wide">
     <div className="adminTop">
       <div><div className="eyebrow">MINT MEDIA ADMIN</div><h1>Campaign Link Builder</h1><p>Name a campaign, pick where it's going and where you're sharing it, and get back a tracking link.</p></div>
-      <div className="adminTopActions"><Link href="/admin" className="adminGhost">← Video Library</Link><button className="adminGhost" onClick={()=>supabase.auth.signOut()}>Sign Out</button></div>
+      <button className="adminGhost" onClick={()=>supabase.auth.signOut()}>Sign Out</button>
     </div>
+    <AdminTabs active="links"/>
 
     <section className="adminPanel">
       <div className="adminForm">
@@ -142,8 +175,10 @@ export default function AdminLinksPage(){
         </div>}
 
         <div className="linkPreview">
-          <span className="linkPreviewLabel">Your tracking link</span>
-          <div className="linkPreviewUrl">{builtUrl}</div>
+          <span className="linkPreviewLabel">{shortUrl?'Your short link':shortening?'Shortening…':'Your tracking link'}</span>
+          <div className="linkPreviewUrl">{shortUrl||builtUrl}</div>
+          {shortUrl&&<div className="linkPreviewFull">Goes to: {builtUrl}</div>}
+          {shortenFailed&&<div className="linkPreviewNote">Couldn't shorten it right now — the full link above still works and tracks the same.</div>}
         </div>
 
         <div className="adminChecks" style={{marginTop:18}}>
