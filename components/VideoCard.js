@@ -6,7 +6,11 @@ import Image from 'next/image'
 // thumbnails run 100-200KB+ each) regardless of how small it actually renders on screen.
 // next/image resizes to the real display size and serves modern formats, and only the
 // first row (priority) skips lazy-loading so it doesn't compete with everything below it.
-export default function VideoCard({video,justMinted=false,priority=false}){
+export default function VideoCard({video,priority=false}){
+  // Driven entirely by the video's own "Featured on Homepage" + "Show Just Minted" admin
+  // checkboxes, so the badge follows the video wherever its thumbnail shows up — homepage,
+  // category pages, collections, search — not just the one row it was originally built for.
+  const justMinted=video.featuredHome && video.showJustMintedHome!==false
   return <Link href={`/watch/${video.slug}`} className="card">
     <div className="thumb">
       <Image
