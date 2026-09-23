@@ -55,14 +55,20 @@ function levenshtein(a,b){
   return prev[bl]
 }
 
-// Exact substring match first (fast path); falls back to edit-distance so a misspelled
-// word ("documentries", "shabos") still finds what someone meant. Allowed distance scales
-// with word length so short words still need to be close.
+// Exact substring match first (fast path) — only in the direction of a real haystack word
+// containing the search word (e.g. "doc" -> "documentary"), never the reverse. Matching
+// the reverse direction too meant any short, common word in a title (like a lone "a" or
+// "in") was a substring of almost any longer search term, so completely unrelated queries
+// ("chocolate", "pizza") were matching dozens of videos that just happened to share those
+// few letters somewhere. Falls back to edit-distance so a misspelled word ("documentries")
+// still finds what someone meant; allowed distance scales with word length so short words
+// still need to be close, and a minimum haystack word length keeps stray single letters
+// from fuzzy-matching everything.
 function fuzzyWordMatch(haystackWords,word){
-  if(haystackWords.some(w=>w.includes(word)||word.includes(w))) return true
+  if(haystackWords.some(w=>w.length>=2 && w.includes(word))) return true
   if(word.length<4) return false
   const maxDist=word.length<=6?1:2
-  return haystackWords.some(w=>Math.abs(w.length-word.length)<=maxDist && levenshtein(w,word)<=maxDist)
+  return haystackWords.some(w=>w.length>=2 && Math.abs(w.length-word.length)<=maxDist && levenshtein(w,word)<=maxDist)
 }
 
 function matchesSearch(video,query){
