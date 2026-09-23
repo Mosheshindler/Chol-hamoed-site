@@ -10,9 +10,17 @@ import {getVideos,getPopularTags,getCategoryOrder} from '../lib/data'
 import {categories} from '../lib/demoVideos'
 
 export default async function Home(){
-  const [videos,homeOrder]=await Promise.all([getVideos(),getCategoryOrder('home-just-minted')])
+  const [videos,homeOrder,heroOrder]=await Promise.all([getVideos(),getCategoryOrder('home-just-minted'),getCategoryOrder('hero-carousel')])
   const searches=getPopularTags(videos,20)
-  const heroVideos=videos.filter(v=>v.featured).slice(0,8)
+  // Admin can reorder this row (independent of the site-wide All Videos order) from the
+  // "Hero Carousel" group in /admin — see getCategoryOrder.
+  const hasHeroOrder=heroOrder && Object.keys(heroOrder).length>0
+  const heroFeatured=videos.filter(v=>v.featured)
+  const heroVideos=(hasHeroOrder ? [...heroFeatured].sort((a,b)=>{
+    const ao=a.id in heroOrder?heroOrder[a.id]:Infinity
+    const bo=b.id in heroOrder?heroOrder[b.id]:Infinity
+    return ao-bo
+  }) : heroFeatured).slice(0,8)
   // Admin can reorder this row (independent of the site-wide All Videos order) from the
   // "Homepage (Just Minted)" group in /admin — see getCategoryOrder.
   const hasHomeOrder=homeOrder && Object.keys(homeOrder).length>0

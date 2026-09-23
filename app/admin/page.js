@@ -13,10 +13,13 @@ import {sharpenThumbnail} from '../../lib/data'
 // uses (Inspirational, Fundraising Film, etc.), which is why the admin's per-category
 // sorting groups didn't match the site's real categories.
 const CATEGORY_OPTIONS=CATEGORIES
-// A virtual "category" for reordering the homepage Just Minted row, reusing the same
-// video_category_order table/UI as real categories instead of a separate mechanism.
+// Virtual "categories" for reordering the homepage Just Minted row and the hero carousel,
+// reusing the same video_category_order table/UI as real categories instead of a separate
+// mechanism.
 const HOME_GROUP='Homepage (Just Minted)'
 const HOME_SLUG='home-just-minted'
+const HERO_GROUP='Hero Carousel'
+const HERO_SLUG='hero-carousel'
 const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'',categories:[],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0}
 
 function slugify(value){
@@ -47,9 +50,11 @@ export default function AdminPage(){
   },[videos])
 
   function videosForCategory(catName){
-    const slug=catName===HOME_GROUP?HOME_SLUG:categorySlug(catName)
+    const slug=catName===HOME_GROUP?HOME_SLUG:catName===HERO_GROUP?HERO_SLUG:categorySlug(catName)
     const inCat=catName===HOME_GROUP
       ? videos.filter(v=>v.featured_home)
+      : catName===HERO_GROUP
+      ? videos.filter(v=>v.featured)
       : videos.filter(v=>(v.categories?.length?v.categories:[v.category]).includes(catName))
     const orderMap=new Map(categoryOrderRows.filter(r=>r.category===slug).map(r=>[r.video_id,r.sort_order]))
     return [...inCat].sort((a,b)=>{
@@ -107,7 +112,7 @@ export default function AdminPage(){
   }
 
   async function saveCategoryOrder(catName,reordered){
-    const slug=catName===HOME_GROUP?HOME_SLUG:categorySlug(catName)
+    const slug=catName===HOME_GROUP?HOME_SLUG:catName===HERO_GROUP?HERO_SLUG:categorySlug(catName)
     setBusy(true);setMessage('Saving new order…')
     try{
       const results=await Promise.all(reordered.map((v,i)=>supabase.from('video_category_order').upsert({video_id:v.id,category:slug,sort_order:i},{onConflict:'video_id,category'})))
@@ -285,6 +290,19 @@ export default function AdminPage(){
             onDragOverRow={e=>e.preventDefault()}
             onDropRow={()=>handleDropRow('master',videos,true,null,i)}
           />)}
+        </div>
+        <div className="adminCategoryGroup">
+          <h3 className="adminCategoryGroupTitle">{HERO_GROUP} <span className="adminCategoryGroupHint">(only the top 8 here actually show in the hero; reorder to control which, and what order they rotate in)</span></h3>
+          {(()=>{const list=videosForCategory(HERO_GROUP); return list.length
+            ? list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(HERO_GROUP,i,-1)} onDown={()=>moveVideoInCategory(HERO_GROUP,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
+                dragging={dragState?.groupKey===HERO_SLUG&&dragState.index===i}
+                onDragStart={()=>handleDragStart(HERO_SLUG,i)}
+                onDragEnd={clearDrag}
+                onDragOverRow={e=>e.preventDefault()}
+                onDropRow={()=>handleDropRow(HERO_SLUG,list,false,HERO_GROUP,i)}
+              />)
+            : <p className="adminEmptyHint">No videos are checked "Featured in Hero Carousel" yet. Check that box when adding or editing a video to have it show up here.</p>
+          })()}
         </div>
         <div className="adminCategoryGroup">
           <h3 className="adminCategoryGroupTitle">{HOME_GROUP} <span className="adminCategoryGroupHint">(only the top 5 here actually show on the homepage; reorder to control which)</span></h3>
