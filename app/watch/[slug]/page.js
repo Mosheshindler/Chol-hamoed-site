@@ -34,8 +34,7 @@ export default async function WatchPage({params}){
   const unrelated=others.filter(v=>!related.includes(v))
   const next=[...shuffle(related),...shuffle(unrelated)].slice(0,6)
   return <><Header/><main className="wide watchLayout">
-    <section className="watchMain"><BackButton/><Player video={video} aspect={aspect}/>
-      {video.premium&&<div className="scrollForFullVideo">↓ Scroll down for the full video</div>}
+    <section className="watchMain"><BackButton/><div className={video.premium?'premiumPlayerWrap':undefined}><Player video={video} aspect={aspect}/></div>
       {video.premium&&<section className="yidlyPurchasePanel"><div className="yidlyBrandBlock"><img src="/assets/yidly-logo.png" alt="Yidly" className="yidlyLogo"/><div className="yidlyPremiumWord">PREMIUM</div></div><div className="yidlyPreviewCopy"><div className="yidlyPreviewEyebrow">YIDLY PREMIUM</div><div className="yidlyPreviewTitle">You’re watching a preview.</div><p>Watch the complete Yidly production on Mostly Music.</p></div><div className="yidlyPurchaseAction">{video.purchaseUrl?<MostlyMusicButton video={video}/>:<span className="premiumMissing">Full video link coming soon</span>}<div className="mostlyMusicLockup"><img src="/assets/mostly-music-logo.webp" alt="Mostly Music"/><span>Available on Mostly Music ↗</span></div></div></section>}
       <div className="watchMeta lockedWatchMeta"><div>{video.premium&&<div className="yidlyPremiumBadge">YIDLY PREMIUM</div>}<h1>{video.title}</h1><div className="meta">{(video.categories?.[0]||video.category)}{video.duration?<> &nbsp;•&nbsp; {video.duration}</>:null} &nbsp;•&nbsp; HD</div></div><ShareButton video={video}/></div>
     </section>
