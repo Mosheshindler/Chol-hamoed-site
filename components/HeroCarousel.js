@@ -13,6 +13,7 @@ export default function HeroCarousel({videos=[]}){
   const [index,setIndex]=useState(0)
   const [playing,setPlaying]=useState(true)
   const touchStartX=useRef(null)
+  const touchStartY=useRef(null)
 
   useEffect(()=>{
     if(!playing || slides.length<2) return
@@ -25,13 +26,22 @@ export default function HeroCarousel({videos=[]}){
   const go=(d)=>setIndex(i=>(i+d+slides.length)%slides.length)
   const eyebrow=current.premium?'PREMIUM CONTENT':(current.showJustMinted!==false?'JUST MINTED':'')
 
-  // Swipe left/right to change slides on touch devices.
-  function onTouchStart(e){ touchStartX.current=e.touches[0].clientX }
+  // Swipe left/right to change slides on touch devices. A normal vertical scroll gesture
+  // almost always drifts sideways by a few dozen pixels too, so this only counts as a swipe
+  // when the horizontal movement clearly dominates the vertical — otherwise a routine
+  // downward scroll over the hero could cross the threshold and change the slide underneath
+  // the user's thumb, feeling like the page is dragging sideways instead of just scrolling.
+  function onTouchStart(e){
+    touchStartX.current=e.touches[0].clientX
+    touchStartY.current=e.touches[0].clientY
+  }
   function onTouchEnd(e){
     if(touchStartX.current==null) return
     const dx=e.changedTouches[0].clientX-touchStartX.current
-    if(Math.abs(dx)>SWIPE_THRESHOLD) go(dx<0?1:-1)
+    const dy=e.changedTouches[0].clientY-touchStartY.current
+    if(Math.abs(dx)>SWIPE_THRESHOLD && Math.abs(dx)>Math.abs(dy)) go(dx<0?1:-1)
     touchStartX.current=null
+    touchStartY.current=null
   }
 
   return <section className="homeHero dynamicHero v9Hero" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
