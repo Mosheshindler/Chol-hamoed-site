@@ -7,7 +7,6 @@ import AdminTabs from '../../../components/AdminTabs'
 import {getSupabaseBrowserClient} from '../../../lib/supabaseClient'
 
 const BASE='https://www.entertain-mint.com'
-const STORAGE_KEY='emAdminLinks'
 // Fixed since the tool no longer asks where the link is going or being shared — the
 // name the user gives it (utm_campaign) is what tells links apart in GA4's reports.
 const UTM_SOURCE='shared_link'
@@ -15,13 +14,6 @@ const UTM_MEDIUM='referral'
 
 function slugify(value){
   return (value||'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')
-}
-
-function loadSaved(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){return []}
-}
-function persistSaved(list){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(list))}catch(e){}
 }
 
 function copyText(text,onDone){
@@ -60,6 +52,7 @@ export default function AdminLinksPage(){
   const [createdFor,setCreatedFor]=useState('')
   const [builtUrl,setBuiltUrl]=useState('')
   const [shortUrl,setShortUrl]=useState('')
+  const [createdCode,setCreatedCode]=useState(null)
   const [creatingLink,setCreatingLink]=useState(false)
 
   useEffect(()=>{
@@ -68,7 +61,12 @@ export default function AdminLinksPage(){
     return ()=>subscription.unsubscribe()
   },[supabase])
 
-  useEffect(()=>{if(session) setSaved(loadSaved())},[session])
+  async function loadSaved(){
+    const {data,error}=await supabase.from('short_links').select('*').eq('saved',true).order('created_at',{ascending:false})
+    if(!error) setSaved(data||[])
+  }
+
+  useEffect(()=>{if(session) loadSaved()},[session])
 
   async function login(e){
     e.preventDefault();setAuthError('');setBusy(true)
@@ -100,7 +98,7 @@ export default function AdminLinksPage(){
     const campaignValue=slugify(name)||'untitled'
     const url=`${BASE}/?utm_source=${UTM_SOURCE}&utm_medium=${UTM_MEDIUM}&utm_campaign=${encodeURIComponent(campaignValue)}`
     setBuiltUrl(url);setCreatedFor(name.trim());setCreated(true)
-    setShortUrl('');setCreatingLink(true)
+    setShortUrl('');setCreatedCode(null);setCreatingLink(true)
     // A same-domain redirect instead of a third-party shortener — TinyURL's free,
     // unauthenticated links show a "click to continue" interstitial page before
     // reaching the destination, which meant every shared link took two clicks. The code
@@ -109,12 +107,14 @@ export default function AdminLinksPage(){
     let code=null
     for(let attempt=0;attempt<3 && !code;attempt++){
       const candidate=randomCode()
-      const {error}=await supabase.from('short_links').insert({code:candidate,campaign:campaignValue})
+      const {error}=await supabase.from('short_links').insert({code:candidate,campaign:campaignValue,display_name:name.trim()})
       if(!error) code=candidate
       else if(error.code!=='23505') break // not a code collision (e.g. table not set up yet) — stop retrying
     }
     // Falls back to the old (full-name) link if short_links isn't set up in Supabase yet,
-    // or the insert failed for some other reason — still works, just less short.
+    // or the insert failed for some other reason — still works, just less short. "Save to
+    // my links" needs a real row to mark saved, so it's disabled in that fallback case.
+    setCreatedCode(code)
     setShortUrl(`${BASE}/l/${code||campaignValue}`)
     setCreatingLink(false)
   }
@@ -124,18 +124,20 @@ export default function AdminLinksPage(){
   function handleCopy(){
     copyText(copyValue,()=>{setCopyLabel('Copied ✓');setTimeout(()=>setCopyLabel('Copy link'),1600)})
   }
-  function handleSave(){
-    const list=loadSaved()
-    list.push({id:Date.now()+'-'+Math.random().toString(36).slice(2,7),name:createdFor||'Untitled link',url:copyValue,fullUrl:builtUrl,createdAt:Date.now()})
-    persistSaved(list);setSaved(list)
+  async function handleSave(){
+    if(!createdCode) return
+    const {error}=await supabase.from('short_links').update({saved:true}).eq('code',createdCode)
+    if(error) return
     setSaveLabel('Saved ✓');setTimeout(()=>setSaveLabel('Save to my links'),1400)
+    await loadSaved()
   }
-  function handleDelete(id){
-    const list=loadSaved().filter(x=>x.id!==id)
-    persistSaved(list);setSaved(list)
+  async function handleDelete(item){
+    const {error}=await supabase.from('short_links').update({saved:false}).eq('code',item.code)
+    if(error) return
+    setSaved(list=>list.filter(x=>x.code!==item.code))
   }
   function handleItemCopy(item){
-    copyText(item.url,()=>{setCopiedId(item.id);setTimeout(()=>setCopiedId(null),1600)})
+    copyText(`${BASE}/l/${item.code}`,()=>{setCopiedId(item.code);setTimeout(()=>setCopiedId(null),1600)})
   }
 
   if(authLoading) return <><Header/><main className="adminPage wide"><div className="adminPanel">Loading admin…</div></main><Footer/></>
@@ -167,29 +169,29 @@ export default function AdminLinksPage(){
 
           <div className="linkActions" style={{marginTop:14}}>
             <button type="button" className="adminPrimary" onClick={handleCopy} disabled={creatingLink}>{copyLabel}</button>
-            <button type="button" className="adminSecondary" onClick={handleSave} disabled={creatingLink}>{saveLabel}</button>
+            <button type="button" className="adminSecondary" onClick={handleSave} disabled={creatingLink||!createdCode} title={createdCode?undefined:"Can't save — this link didn't get a database row (see the short link setup)"}>{saveLabel}</button>
           </div>
         </>}
       </form>
     </section>
 
     <section className="adminPanel adminLibrary">
-      <div className="adminPanelHead"><h2>Your saved links</h2><span>Stored on this device only</span></div>
+      <div className="adminPanelHead"><h2>Saved links</h2><span>Shared with anyone who logs into admin</span></div>
       {saved.length===0
         ?<p className="adminEmptyHint">No saved links yet. Name one above and hit "Create Link".</p>
-        :<div className="linkSavedList">{saved.slice().reverse().map(item=>{
-          const d=new Date(item.createdAt)
+        :<div className="linkSavedList">{saved.map(item=>{
+          const d=new Date(item.created_at)
           const dateStr=isNaN(d)?'':d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})
-          return <div className="linkItem" key={item.id}>
-            <div className="linkItemTop"><strong>{item.name}</strong><span className="linkItemDate">{dateStr}</span></div>
-            <div className="linkItemUrl">{item.url}</div>
+          return <div className="linkItem" key={item.code}>
+            <div className="linkItemTop"><strong>{item.display_name||item.campaign}</strong><span className="linkItemDate">{dateStr}</span></div>
+            <div className="linkItemUrl">{`${BASE}/l/${item.code}`}</div>
             <div className="linkItemActions">
-              <button type="button" className={`linkItemBtn${copiedId===item.id?' copied':''}`} onClick={()=>handleItemCopy(item)}>{copiedId===item.id?'Copied':'Copy'}</button>
-              <button type="button" className="linkItemBtn danger" onClick={()=>handleDelete(item.id)}>Delete</button>
+              <button type="button" className={`linkItemBtn${copiedId===item.code?' copied':''}`} onClick={()=>handleItemCopy(item)}>{copiedId===item.code?'Copied':'Copy'}</button>
+              <button type="button" className="linkItemBtn danger" onClick={()=>handleDelete(item)}>Delete</button>
             </div>
           </div>
         })}</div>}
-      <p className="linkFootnote">Clicks on these links show up in Google Analytics under Reports → Acquisition → Traffic acquisition — look for the name you gave it under Campaign. Saved links live only in this browser — they won't follow you to your phone or another computer.</p>
+      <p className="linkFootnote">Clicks on these links show up in Google Analytics under Reports → Acquisition → Traffic acquisition — look for the name you gave it under Campaign. Saved links are shared — anyone who logs into admin sees the same list, on any device.</p>
     </section>
   </main><Footer/></>
 }
