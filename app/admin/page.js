@@ -1,6 +1,7 @@
 'use client'
 
 import {useEffect,useMemo,useState} from 'react'
+import Link from 'next/link'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import {getSupabaseBrowserClient} from '../../lib/supabaseClient'
@@ -215,7 +216,7 @@ export default function AdminPage(){
   if(!session) return <><Header/><main className="adminPage wide"><section className="adminLogin adminPanel"><div className="eyebrow">MINT MEDIA ADMIN</div><h1>Sign in</h1><p>Use your Mint admin email and password.</p><form onSubmit={login}><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>{authError&&<div className="adminError">{authError}</div>}<button className="adminPrimary" disabled={busy}>{busy?'Signing in…':'Sign In'}</button></form></section></main><Footer/></>
 
   return <><Header/><main className="adminPage wide">
-    <div className="adminTop"><div><div className="eyebrow">MINT MEDIA ADMIN</div><h1>Video Library</h1><p>Add Vimeo or YouTube videos without touching code.</p></div><button className="adminGhost" onClick={()=>supabase.auth.signOut()}>Sign Out</button></div>
+    <div className="adminTop"><div><div className="eyebrow">MINT MEDIA ADMIN</div><h1>Video Library</h1><p>Add Vimeo or YouTube videos without touching code.</p></div><div className="adminTopActions"><Link href="/admin/links" className="adminGhost">Link Builder</Link><button className="adminGhost" onClick={()=>supabase.auth.signOut()}>Sign Out</button></div></div>
     <section className="adminPanel">
       <div className="adminPanelHead"><h2>{form.id?'Edit Video':'Add Video'}</h2>{form.id&&<button className="adminGhost" onClick={()=>{setForm(emptyForm);setThumbFile(null);setHeroFile(null);setMessage('')}}>Cancel Edit</button>}</div>
       <form className="adminForm" onSubmit={saveVideo}>
