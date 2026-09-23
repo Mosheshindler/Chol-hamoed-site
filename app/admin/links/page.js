@@ -60,8 +60,6 @@ export default function AdminLinksPage(){
   const [createdFor,setCreatedFor]=useState('')
   const [builtUrl,setBuiltUrl]=useState('')
   const [shortUrl,setShortUrl]=useState('')
-  const [shortening,setShortening]=useState(false)
-  const [shortenFailed,setShortenFailed]=useState(false)
 
   useEffect(()=>{
     supabase.auth.getSession().then(({data})=>{setSession(data.session);setAuthLoading(false)})
@@ -85,23 +83,16 @@ export default function AdminLinksPage(){
     if(created) setCreated(false)
   }
 
-  async function handleCreate(e){
+  function handleCreate(e){
     e.preventDefault()
     if(!name.trim()) return
     const campaignValue=slugify(name)||'untitled'
     const url=`${BASE}/?utm_source=${UTM_SOURCE}&utm_medium=${UTM_MEDIUM}&utm_campaign=${encodeURIComponent(campaignValue)}`
     setBuiltUrl(url);setCreatedFor(name.trim());setCreated(true)
-    setShortUrl('');setShortenFailed(false);setShortening(true)
-    try{
-      const r=await fetch('/api/shorten',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})})
-      const data=await r.json()
-      if(!r.ok||!data.shortUrl) throw new Error(data.error||'Could not shorten link.')
-      setShortUrl(data.shortUrl)
-    }catch(err){
-      setShortenFailed(true)
-    }finally{
-      setShortening(false)
-    }
+    // A same-domain redirect instead of a third-party shortener — TinyURL's free,
+    // unauthenticated links show a "click to continue" interstitial page before
+    // reaching the destination, which meant every shared link took two clicks.
+    setShortUrl(`${BASE}/l/${campaignValue}`)
   }
 
   const copyValue=shortUrl||builtUrl
@@ -146,9 +137,8 @@ export default function AdminLinksPage(){
 
         {created&&<>
           <div className="linkPreview" style={{marginTop:18}}>
-            <span className="linkPreviewLabel">{shortening?'Shortening…':'Your link'}</span>
+            <span className="linkPreviewLabel">Your link</span>
             <div className="linkPreviewUrl">{shortUrl||builtUrl}</div>
-            {shortenFailed&&<div className="linkPreviewNote">Couldn't shorten it right now — the full link above still works and tracks the same.</div>}
           </div>
 
           <div className="linkActions" style={{marginTop:14}}>
