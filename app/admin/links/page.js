@@ -60,6 +60,7 @@ export default function AdminLinksPage(){
   const [createdFor,setCreatedFor]=useState('')
   const [builtUrl,setBuiltUrl]=useState('')
   const [shortUrl,setShortUrl]=useState('')
+  const [creatingLink,setCreatingLink]=useState(false)
 
   useEffect(()=>{
     supabase.auth.getSession().then(({data})=>{setSession(data.session);setAuthLoading(false)})
@@ -83,16 +84,39 @@ export default function AdminLinksPage(){
     if(created) setCreated(false)
   }
 
-  function handleCreate(e){
+  // Short codes are 6 random lowercase/digit characters — plenty of combinations that a
+  // collision is essentially never going to happen, but retried a couple of times just in
+  // case two people create a link at the exact same moment.
+  function randomCode(){
+    const chars='abcdefghijklmnopqrstuvwxyz0123456789'
+    let code=''
+    for(let i=0;i<6;i++) code+=chars[Math.floor(Math.random()*chars.length)]
+    return code
+  }
+
+  async function handleCreate(e){
     e.preventDefault()
     if(!name.trim()) return
     const campaignValue=slugify(name)||'untitled'
     const url=`${BASE}/?utm_source=${UTM_SOURCE}&utm_medium=${UTM_MEDIUM}&utm_campaign=${encodeURIComponent(campaignValue)}`
     setBuiltUrl(url);setCreatedFor(name.trim());setCreated(true)
+    setShortUrl('');setCreatingLink(true)
     // A same-domain redirect instead of a third-party shortener — TinyURL's free,
     // unauthenticated links show a "click to continue" interstitial page before
-    // reaching the destination, which meant every shared link took two clicks.
-    setShortUrl(`${BASE}/l/${campaignValue}`)
+    // reaching the destination, which meant every shared link took two clicks. The code
+    // is a short random one (not the campaign name) so the link doesn't look like a full
+    // sentence — the campaign name is stored alongside it and looked up on click instead.
+    let code=null
+    for(let attempt=0;attempt<3 && !code;attempt++){
+      const candidate=randomCode()
+      const {error}=await supabase.from('short_links').insert({code:candidate,campaign:campaignValue})
+      if(!error) code=candidate
+      else if(error.code!=='23505') break // not a code collision (e.g. table not set up yet) — stop retrying
+    }
+    // Falls back to the old (full-name) link if short_links isn't set up in Supabase yet,
+    // or the insert failed for some other reason — still works, just less short.
+    setShortUrl(`${BASE}/l/${code||campaignValue}`)
+    setCreatingLink(false)
   }
 
   const copyValue=shortUrl||builtUrl
@@ -132,18 +156,18 @@ export default function AdminLinksPage(){
         <p className="linkHint">This is how you'll find it in your saved links and in Google Analytics.</p>
 
         <div className="linkActions" style={{marginTop:14}}>
-          <button type="submit" className="adminPrimary" disabled={!name.trim()}>Create Link</button>
+          <button type="submit" className="adminPrimary" disabled={!name.trim()||creatingLink}>{creatingLink?'Creating…':'Create Link'}</button>
         </div>
 
         {created&&<>
           <div className="linkPreview" style={{marginTop:18}}>
             <span className="linkPreviewLabel">Your link</span>
-            <div className="linkPreviewUrl">{shortUrl||builtUrl}</div>
+            <div className="linkPreviewUrl">{creatingLink?'Creating your link…':(shortUrl||builtUrl)}</div>
           </div>
 
           <div className="linkActions" style={{marginTop:14}}>
-            <button type="button" className="adminPrimary" onClick={handleCopy}>{copyLabel}</button>
-            <button type="button" className="adminSecondary" onClick={handleSave}>{saveLabel}</button>
+            <button type="button" className="adminPrimary" onClick={handleCopy} disabled={creatingLink}>{copyLabel}</button>
+            <button type="button" className="adminSecondary" onClick={handleSave} disabled={creatingLink}>{saveLabel}</button>
           </div>
         </>}
       </form>
