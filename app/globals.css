@@ -126,6 +126,8 @@ body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple
 
 /* V8.1 Yidly Premium / Mostly Music experience */
 .yidlyPremiumBadge{display:inline-flex;align-items:center;margin:0 0 9px;padding:6px 11px;border:1px solid #efff27;border-radius:999px;color:#efff27;background:rgba(239,255,39,.06);font-size:11px;font-weight:900;letter-spacing:1.05px;box-shadow:0 0 18px rgba(239,255,39,.10)}
+@keyframes scrollHintBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+.scrollForFullVideo{width:min(1080px,100%);margin:14px auto 0;text-align:center;font-size:13px;font-weight:700;color:var(--mint);animation:scrollHintBounce 1.6s ease-in-out infinite}
 .yidlyPurchasePanel{width:min(1080px,100%);margin:20px auto 0;display:grid;grid-template-columns:255px 1fr 330px;align-items:stretch;border:1px solid rgba(147,239,73,.55);border-radius:17px;overflow:hidden;background:radial-gradient(circle at 20% 50%,rgba(147,239,73,.09),transparent 34%),linear-gradient(110deg,#07130e,#06100d 57%,#08130f);box-shadow:0 12px 42px rgba(0,0,0,.18)}
 .yidlyBrandBlock{min-height:150px;padding:25px 28px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid rgba(126,157,142,.28)}
 .yidlyLogo{display:block;width:190px;max-width:100%;height:auto;object-fit:contain}
