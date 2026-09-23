@@ -148,8 +148,8 @@ export default function CategoryBrowser({slug,name,videos,categoryOrder={},initi
         <span className={`chev${filterOpen?' chevOpen':''}`}>▾</span>
       </button>
       {filterOpen&&<div className="collectionFilterMenu" role="menu">
-        {CATEGORIES.map(c=>{const s=categorySlug(c);return <label className="collectionFilterOption" key={s}><input type="checkbox" checked={selectedCats.includes(s)} onChange={()=>toggleCat(s)}/>{c}</label>})}
         {selectedCats.length>0&&<button type="button" className="collectionFilterClear" onClick={()=>{setSelectedCats([]);setVisible(PAGE_SIZE)}}>Clear filters</button>}
+        {CATEGORIES.map(c=>{const s=categorySlug(c);return <label className="collectionFilterOption" key={s}><input type="checkbox" checked={selectedCats.includes(s)} onChange={()=>toggleCat(s)}/>{c}</label>})}
       </div>}
     </div>}
     <div className="search"><span className="searchGlyph">⌕</span><input ref={searchRef} value={q} onChange={e=>{setQ(e.target.value);setVisible(PAGE_SIZE)}} placeholder={slug==='all-videos'?'Search by title or category...':(slug==='qanda'||slug==='q-and-a'?'Search Q&A...':`Search ${name.toLowerCase()}...`)} aria-label="Search videos"/>{q?<button className="searchClear" type="button" onClick={()=>setQ('')} aria-label="Clear search">×</button>:null}</div>
