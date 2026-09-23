@@ -38,6 +38,7 @@ export default function AdminPage(){
   const [message,setMessage]=useState('')
   const [newTag,setNewTag]=useState('')
   const [categoryOrderRows,setCategoryOrderRows]=useState([])
+  const [dragState,setDragState]=useState(null)
 
   const categoryNames=useMemo(()=>{
     const set=new Set()
@@ -96,14 +97,8 @@ export default function AdminPage(){
     if(!error) setCategoryOrderRows(data||[])
   }
 
-  async function moveVideoInCategory(catName,index,direction){
+  async function saveCategoryOrder(catName,reordered){
     const slug=catName===HOME_GROUP?HOME_SLUG:categorySlug(catName)
-    const list=videosForCategory(catName)
-    const target=index+direction
-    if(target<0 || target>=list.length) return
-    const reordered=[...list]
-    const [moved]=reordered.splice(index,1)
-    reordered.splice(target,0,moved)
     setBusy(true);setMessage('Saving new order…')
     try{
       const results=await Promise.all(reordered.map((v,i)=>supabase.from('video_category_order').upsert({video_id:v.id,category:slug,sort_order:i},{onConflict:'video_id,category'})))
@@ -113,6 +108,16 @@ export default function AdminPage(){
       await loadCategoryOrder()
     }catch(err){setMessage(err.message||'Could not save new order.')}
     finally{setBusy(false)}
+  }
+
+  async function moveVideoInCategory(catName,index,direction){
+    const list=videosForCategory(catName)
+    const target=index+direction
+    if(target<0 || target>=list.length) return
+    const reordered=[...list]
+    const [moved]=reordered.splice(index,1)
+    reordered.splice(target,0,moved)
+    await saveCategoryOrder(catName,reordered)
   }
 
   async function login(e){
@@ -190,12 +195,7 @@ export default function AdminPage(){
     setForm({...emptyForm,...v,categories:(Array.isArray(v.categories)&&v.categories.length?v.categories:[v.category].filter(Boolean)),tags:(Array.isArray(v.tags)?v.tags:[]),duration_seconds:v.duration_seconds??'',show_just_minted:v.show_just_minted!==false,show_just_minted_home:v.show_just_minted_home!==false});setThumbFile(null);setHeroFile(null);setMessage('Editing video.');window.scrollTo({top:0,behavior:'smooth'})
   }
 
-  async function moveVideo(index,direction){
-    const target=index+direction
-    if(target<0 || target>=videos.length) return
-    const reordered=[...videos]
-    const [moved]=reordered.splice(index,1)
-    reordered.splice(target,0,moved)
+  async function saveMasterOrder(reordered){
     setVideos(reordered)
     setBusy(true);setMessage('Saving new order…')
     try{
@@ -204,6 +204,36 @@ export default function AdminPage(){
       await loadVideos()
     }catch(err){setMessage(err.message||'Could not save new order.');await loadVideos()}
     finally{setBusy(false)}
+  }
+
+  async function moveVideo(index,direction){
+    const target=index+direction
+    if(target<0 || target>=videos.length) return
+    const reordered=[...videos]
+    const [moved]=reordered.splice(index,1)
+    reordered.splice(target,0,moved)
+    await saveMasterOrder(reordered)
+  }
+
+  // Drag-and-drop reordering, as an alternative to clicking the ↑/↓ buttons repeatedly.
+  // dragState tracks which row started the drag (scoped to its own group, so dragging a
+  // row in one category list can't accidentally drop into a different group's list).
+  function handleDragStart(groupKey,index){
+    setDragState({groupKey,index})
+  }
+  function clearDrag(){
+    setDragState(null)
+  }
+  function handleDropRow(groupKey,list,isMaster,catName,dropIndex){
+    if(!dragState || dragState.groupKey!==groupKey){ setDragState(null); return }
+    const fromIndex=dragState.index
+    setDragState(null)
+    if(fromIndex===dropIndex) return
+    const reordered=[...list]
+    const [moved]=reordered.splice(fromIndex,1)
+    reordered.splice(dropIndex,0,moved)
+    if(isMaster) saveMasterOrder(reordered)
+    else saveCategoryOrder(catName,reordered)
   }
 
   async function removeVideo(v){
@@ -239,12 +269,24 @@ export default function AdminPage(){
       {videos.length===0?<p>No videos yet.</p>:<>
         <div className="adminCategoryGroup">
           <h3 className="adminCategoryGroupTitle">All Videos <span className="adminCategoryGroupHint">(master list, this order is the site-wide default)</span></h3>
-          {videos.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={videos.length} busy={busy} onUp={()=>moveVideo(i,-1)} onDown={()=>moveVideo(i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)}
+          {videos.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={videos.length} busy={busy} onUp={()=>moveVideo(i,-1)} onDown={()=>moveVideo(i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
+            dragging={dragState?.groupKey==='master'&&dragState.index===i}
+            onDragStart={()=>handleDragStart('master',i)}
+            onDragEnd={clearDrag}
+            onDragOverRow={e=>e.preventDefault()}
+            onDropRow={()=>handleDropRow('master',videos,true,null,i)}
+          />)}
         </div>
         <div className="adminCategoryGroup">
           <h3 className="adminCategoryGroupTitle">{HOME_GROUP} <span className="adminCategoryGroupHint">(only the top 5 here actually show on the homepage; reorder to control which)</span></h3>
           {(()=>{const list=videosForCategory(HOME_GROUP); return list.length
-            ? list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(HOME_GROUP,i,-1)} onDown={()=>moveVideoInCategory(HOME_GROUP,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)
+            ? list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(HOME_GROUP,i,-1)} onDown={()=>moveVideoInCategory(HOME_GROUP,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
+                dragging={dragState?.groupKey===HOME_SLUG&&dragState.index===i}
+                onDragStart={()=>handleDragStart(HOME_SLUG,i)}
+                onDragEnd={clearDrag}
+                onDragOverRow={e=>e.preventDefault()}
+                onDropRow={()=>handleDropRow(HOME_SLUG,list,false,HOME_GROUP,i)}
+              />)
             : <p className="adminEmptyHint">No videos are checked "Featured on Homepage" yet. Check that box when adding or editing a video to have it show up here.</p>
           })()}
         </div>
@@ -252,7 +294,13 @@ export default function AdminPage(){
           const list=videosForCategory(cat)
           return <div className="adminCategoryGroup" key={cat}>
             <h3 className="adminCategoryGroupTitle">{cat} <span className="adminCategoryGroupHint">(order used only on this category's page)</span></h3>
-            {list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(cat,i,-1)} onDown={()=>moveVideoInCategory(cat,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)}
+            {list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(cat,i,-1)} onDown={()=>moveVideoInCategory(cat,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
+              dragging={dragState?.groupKey===categorySlug(cat)&&dragState.index===i}
+              onDragStart={()=>handleDragStart(categorySlug(cat),i)}
+              onDragEnd={clearDrag}
+              onDragOverRow={e=>e.preventDefault()}
+              onDropRow={()=>handleDropRow(categorySlug(cat),list,false,cat,i)}
+            />)}
           </div>
         })}
       </>}
@@ -260,6 +308,12 @@ export default function AdminPage(){
   </main><Footer/></>
 }
 
-function VideoRow({v,index,total,busy,onUp,onDown,onEdit,onRemove}){
-  return <div className="adminVideoRow"><div className="adminReorder"><button type="button" className="adminGhost adminReorderBtn" disabled={index===0||busy} onClick={onUp} aria-label="Move up">↑</button><button type="button" className="adminGhost adminReorderBtn" disabled={index===total-1||busy} onClick={onDown} aria-label="Move down">↓</button></div><div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span>{Array.isArray(v.tags)&&v.tags.length>0&&<span className="adminTagsList">{v.tags.map(t=><em key={t} className="adminTagChip">{t}</em>)}</span>}</div><div className="adminBadges">{v.featured&&<span className="adminBadge">Hero</span>}{v.featured_home&&<span className="adminBadge">Home</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={onEdit}>Edit</button><button className="adminDanger" onClick={onRemove}>Delete</button></div>
+function GripIcon(){return <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="5" r="1.8"/><circle cx="8" cy="12" r="1.8"/><circle cx="8" cy="19" r="1.8"/><circle cx="16" cy="5" r="1.8"/><circle cx="16" cy="12" r="1.8"/><circle cx="16" cy="19" r="1.8"/></svg>}
+
+// Drag-and-drop reordering as an alternative to the ↑/↓ buttons — the grip handle is the
+// draggable element (so grabbing the title or a badge doesn't start a drag by accident),
+// while the row itself is the drop target so dropping anywhere on it works, not just on
+// the handle.
+function VideoRow({v,index,total,busy,onUp,onDown,onEdit,onRemove,dragging,onDragStart,onDragEnd,onDragOverRow,onDropRow}){
+  return <div className={`adminVideoRow${dragging?' adminVideoRowDragging':''}`} onDragOver={onDragOverRow} onDrop={onDropRow}><div className="adminReorder"><span className="adminDragHandle" draggable="true" onDragStart={onDragStart} onDragEnd={onDragEnd} role="button" aria-label="Drag to reorder" title="Drag to reorder"><GripIcon/></span><button type="button" className="adminGhost adminReorderBtn" disabled={index===0||busy} onClick={onUp} aria-label="Move up">↑</button><button type="button" className="adminGhost adminReorderBtn" disabled={index===total-1||busy} onClick={onDown} aria-label="Move down">↓</button></div><div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span>{Array.isArray(v.tags)&&v.tags.length>0&&<span className="adminTagsList">{v.tags.map(t=><em key={t} className="adminTagChip">{t}</em>)}</span>}</div><div className="adminBadges">{v.featured&&<span className="adminBadge">Hero</span>}{v.featured_home&&<span className="adminBadge">Home</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={onEdit}>Edit</button><button className="adminDanger" onClick={onRemove}>Delete</button></div>
 }
