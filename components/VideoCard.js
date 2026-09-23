@@ -6,7 +6,7 @@ import Image from 'next/image'
 // thumbnails run 100-200KB+ each) regardless of how small it actually renders on screen.
 // next/image resizes to the real display size and serves modern formats, and only the
 // first row (priority) skips lazy-loading so it doesn't compete with everything below it.
-export default function VideoCard({video,justMinted=false,priority=false}){
+export default function VideoCard({video,priority=false}){
   return <Link href={`/watch/${video.slug}`} className="card">
     <div className="thumb">
       <Image
@@ -17,7 +17,7 @@ export default function VideoCard({video,justMinted=false,priority=false}){
         style={{objectFit:'cover'}}
         priority={priority}
       />
-      {video.premium?<span className="premiumCardBadge">YIDLY PREMIUM</span>:(justMinted?<span className="justMintedCardBadge">JUST MINTED</span>:null)}
+      {video.premium?<span className="premiumCardBadge">YIDLY PREMIUM</span>:null}
       {video.duration ? <span className="duration">{video.duration}</span> : null}
     </div>
     <div className="cardTitle">{video.title}</div>
