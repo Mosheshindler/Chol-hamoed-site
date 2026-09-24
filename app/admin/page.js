@@ -80,10 +80,12 @@ export default function AdminPage(){
   },[videos,videoSearch,videoFilters])
   const isSearching=Boolean(videoSearch.trim())||videoFilters.length>0
 
+  // Restricted to the site's real, current categories (CATEGORY_OPTIONS) rather than every
+  // distinct string on any video — older videos can still carry retired category names (e.g.
+  // "Yeshiva Videos") that no page on the site uses anymore; those shouldn't get their own
+  // reorder group or jump-to entry, just like they're not offered as a checkbox above.
   const categoryNames=useMemo(()=>{
-    const set=new Set()
-    videos.forEach(v=>(v.categories?.length?v.categories:[v.category]).filter(Boolean).forEach(c=>set.add(c)))
-    return Array.from(set).sort((a,b)=>a.localeCompare(b))
+    return CATEGORY_OPTIONS.filter(cat=>videos.some(v=>(v.categories?.length?v.categories:[v.category]).includes(cat)))
   },[videos])
 
   function videosForCategory(catName){
@@ -363,12 +365,20 @@ export default function AdminPage(){
     </section>
     <section className="adminPanel adminLibrary">
       <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={backfillPublishDates} disabled={busy}>{backfillState?`Fetching dates… (${backfillState.done}/${backfillState.total})`:'Backfill Upload Dates'}</button></div></div>
-      {!isSearching&&<nav className="adminJumpNav" aria-label="Jump to section">
-        <a href="#section-all-videos">All Videos</a>
-        <a href="#section-hero">{HERO_GROUP}</a>
-        <a href="#section-home">{HOME_GROUP}</a>
-        {categoryNames.map(cat=><a key={cat} href={`#section-${categorySlug(cat)}`}>{cat}</a>)}
-      </nav>}
+      {!isSearching&&<div className="adminJumpNav">
+        <label htmlFor="adminJumpSelect">Jump to section</label>
+        <select id="adminJumpSelect" value="" onChange={e=>{
+          const id=e.target.value
+          if(id) document.getElementById(id)?.scrollIntoView({behavior:'smooth'})
+          e.target.value=''
+        }}>
+          <option value="" disabled>Choose a section…</option>
+          <option value="section-all-videos">All Videos</option>
+          <option value="section-hero">{HERO_GROUP}</option>
+          <option value="section-home">{HOME_GROUP}</option>
+          {categoryNames.map(cat=><option key={cat} value={`section-${categorySlug(cat)}`}>{cat}</option>)}
+        </select>
+      </div>}
       <div className="adminVideoSearchRow">
         <input type="text" className="adminVideoSearch" value={videoSearch} onChange={e=>setVideoSearch(e.target.value)} placeholder="Search by title or link…"/>
         <div className="adminFilterChips">
