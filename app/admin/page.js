@@ -363,6 +363,12 @@ export default function AdminPage(){
     </section>
     <section className="adminPanel adminLibrary">
       <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={backfillPublishDates} disabled={busy}>{backfillState?`Fetching dates… (${backfillState.done}/${backfillState.total})`:'Backfill Upload Dates'}</button></div></div>
+      {!isSearching&&<nav className="adminJumpNav" aria-label="Jump to section">
+        <a href="#section-all-videos">All Videos</a>
+        <a href="#section-hero">{HERO_GROUP}</a>
+        <a href="#section-home">{HOME_GROUP}</a>
+        {categoryNames.map(cat=><a key={cat} href={`#section-${categorySlug(cat)}`}>{cat}</a>)}
+      </nav>}
       <div className="adminVideoSearchRow">
         <input type="text" className="adminVideoSearch" value={videoSearch} onChange={e=>setVideoSearch(e.target.value)} placeholder="Search by title or link…"/>
         <div className="adminFilterChips">
@@ -380,7 +386,7 @@ export default function AdminPage(){
         }
       </div>
       :videos.length===0?<p>No videos yet.</p>:<>
-        <div className="adminCategoryGroup">
+        <div className="adminCategoryGroup" id="section-all-videos">
           <h3 className="adminCategoryGroupTitle">All Videos <span className="adminCategoryGroupHint">(master list, this order is the site-wide default)</span></h3>
           {videos.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={videos.length} busy={busy} onUp={()=>moveVideo(i,-1)} onDown={()=>moveVideo(i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
             dragging={dragState?.groupKey==='master'&&dragState.index===i}
@@ -390,7 +396,7 @@ export default function AdminPage(){
             onDropRow={()=>handleDropRow('master',videos,true,null,i)}
           />)}
         </div>
-        <div className="adminCategoryGroup">
+        <div className="adminCategoryGroup" id="section-hero">
           <h3 className="adminCategoryGroupTitle">{HERO_GROUP} <span className="adminCategoryGroupHint">(only the top 8 here actually show in the hero; reorder to control which, and what order they rotate in)</span></h3>
           {(()=>{const list=videosForCategory(HERO_GROUP); return list.length
             ? list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(HERO_GROUP,i,-1)} onDown={()=>moveVideoInCategory(HERO_GROUP,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
@@ -403,7 +409,7 @@ export default function AdminPage(){
             : <p className="adminEmptyHint">No videos are checked "Featured in Hero Carousel" yet. Check that box when adding or editing a video to have it show up here.</p>
           })()}
         </div>
-        <div className="adminCategoryGroup">
+        <div className="adminCategoryGroup" id="section-home">
           <h3 className="adminCategoryGroupTitle">{HOME_GROUP} <span className="adminCategoryGroupHint">(only the top 5 here actually show on the homepage; reorder to control which)</span></h3>
           {(()=>{const list=videosForCategory(HOME_GROUP); return list.length
             ? list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(HOME_GROUP,i,-1)} onDown={()=>moveVideoInCategory(HOME_GROUP,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
@@ -418,7 +424,7 @@ export default function AdminPage(){
         </div>
         {categoryNames.map(cat=>{
           const list=videosForCategory(cat)
-          return <div className="adminCategoryGroup" key={cat}>
+          return <div className="adminCategoryGroup" id={`section-${categorySlug(cat)}`} key={cat}>
             <h3 className="adminCategoryGroupTitle">{cat} <span className="adminCategoryGroupHint">(order used only on this category's page)</span></h3>
             {list.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={list.length} busy={busy} onUp={()=>moveVideoInCategory(cat,i,-1)} onDown={()=>moveVideoInCategory(cat,i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
               dragging={dragState?.groupKey===categorySlug(cat)&&dragState.index===i}
