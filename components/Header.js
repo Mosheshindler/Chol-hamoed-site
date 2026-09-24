@@ -38,7 +38,7 @@ export default function Header(){
   }
 
   return <header className="header"><div className="wide headerInner">
-    <Link href="/" className="brand" aria-label="Mint Media home"><img src="/assets/mint-media-logo.png" alt="Mint Media"/></Link>
+    <Link href="/" className="brand" aria-label="Entertain-Mint home"><img src="/assets/entertain-mint-logo.webp" alt="Entertain-Mint, powered by Mint Media"/></Link>
     <nav className="nav" aria-label="Primary navigation">
       <Link className={active('/')?'active':''} href="/">Home</Link>
       <div className="navDrop">
