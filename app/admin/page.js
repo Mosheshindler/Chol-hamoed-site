@@ -42,6 +42,28 @@ export default function AdminPage(){
   const [newTag,setNewTag]=useState('')
   const [categoryOrderRows,setCategoryOrderRows]=useState([])
   const [dragState,setDragState]=useState(null)
+  const [videoSearch,setVideoSearch]=useState('')
+  const [videoFilters,setVideoFilters]=useState([])
+
+  function toggleVideoFilter(key){
+    setVideoFilters(f=>f.includes(key)?f.filter(x=>x!==key):[...f,key])
+  }
+
+  // Search by title or link (so pasting a URL back in tells you if it's already posted),
+  // plus the Home/Hero/Premium filters — all active filters narrow the results together
+  // (AND, not OR). Only kicks in once something is actually searched/filtered; otherwise
+  // the normal per-category grouped view below is unaffected.
+  const filteredVideos=useMemo(()=>{
+    const q=videoSearch.trim().toLowerCase()
+    return videos.filter(v=>{
+      if(q && !(v.title?.toLowerCase().includes(q) || v.video_url?.toLowerCase().includes(q))) return false
+      if(videoFilters.includes('home') && !v.featured_home) return false
+      if(videoFilters.includes('hero') && !v.featured) return false
+      if(videoFilters.includes('premium') && !v.premium) return false
+      return true
+    })
+  },[videos,videoSearch,videoFilters])
+  const isSearching=Boolean(videoSearch.trim())||videoFilters.length>0
 
   const categoryNames=useMemo(()=>{
     const set=new Set()
@@ -181,11 +203,25 @@ export default function AdminPage(){
   }
 
   async function saveVideo(e){
-    e.preventDefault();setBusy(true);setMessage('Saving…')
+    e.preventDefault()
+    if(!form.title.trim()){setMessage('Title is required.');return}
+    if(!form.video_url.trim()){setMessage('Video URL is required.');return}
+    if(!(form.categories||[]).length){setMessage('Choose at least one category.');return}
+    // Only checked when adding a new video (not editing) — comparing the link and title
+    // against everything already posted, case/whitespace-insensitive. Confirm lets the
+    // admin post it again anyway (a legitimate reupload, a second cut of the same event,
+    // etc.) instead of hard-blocking it.
+    if(!form.id){
+      const normUrl=form.video_url.trim().toLowerCase()
+      const normTitle=form.title.trim().toLowerCase()
+      const dup=videos.find(v=>v.video_url?.trim().toLowerCase()===normUrl || v.title?.trim().toLowerCase()===normTitle)
+      if(dup){
+        const matchedOn=dup.video_url?.trim().toLowerCase()===normUrl?'link':'title'
+        if(!confirm(`A video with this ${matchedOn} is already posted: "${dup.title}".\n\nAdd it anyway?`)) return
+      }
+    }
+    setBusy(true);setMessage('Saving…')
     try{
-      if(!form.title.trim()) throw new Error('Title is required.')
-      if(!form.video_url.trim()) throw new Error('Video URL is required.')
-      if(!(form.categories||[]).length) throw new Error('Choose at least one category.')
       let base=slugify(form.slug||form.title)
       const slug=await uniqueSlug(base,form.id)
       let thumbnail=form.thumbnail_url
@@ -280,7 +316,23 @@ export default function AdminPage(){
     </section>
     <section className="adminPanel adminLibrary">
       <div className="adminPanelHead"><h2>Existing Videos</h2><span>{videos.length} videos</span></div>
-      {videos.length===0?<p>No videos yet.</p>:<>
+      <div className="adminVideoSearchRow">
+        <input type="text" className="adminVideoSearch" value={videoSearch} onChange={e=>setVideoSearch(e.target.value)} placeholder="Search by title or link…"/>
+        <div className="adminFilterChips">
+          <button type="button" className={`adminFilterChip${videoFilters.includes('home')?' adminFilterChipActive':''}`} onClick={()=>toggleVideoFilter('home')}>Home</button>
+          <button type="button" className={`adminFilterChip${videoFilters.includes('hero')?' adminFilterChipActive':''}`} onClick={()=>toggleVideoFilter('hero')}>Hero</button>
+          <button type="button" className={`adminFilterChip${videoFilters.includes('premium')?' adminFilterChipActive':''}`} onClick={()=>toggleVideoFilter('premium')}>Premium</button>
+          {isSearching&&<button type="button" className="adminGhost" onClick={()=>{setVideoSearch('');setVideoFilters([])}}>Clear</button>}
+        </div>
+      </div>
+      {isSearching?<div className="adminCategoryGroup">
+        <h3 className="adminCategoryGroupTitle">Search Results <span className="adminCategoryGroupHint">({filteredVideos.length} match{filteredVideos.length===1?'':'es'})</span></h3>
+        {filteredVideos.length
+          ? filteredVideos.map(v=><VideoRow v={v} key={v.id} hideReorder busy={busy} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}/>)
+          : <p className="adminEmptyHint">No videos match that search.</p>
+        }
+      </div>
+      :videos.length===0?<p>No videos yet.</p>:<>
         <div className="adminCategoryGroup">
           <h3 className="adminCategoryGroupTitle">All Videos <span className="adminCategoryGroupHint">(master list, this order is the site-wide default)</span></h3>
           {videos.map((v,i)=><VideoRow v={v} key={v.id} index={i} total={videos.length} busy={busy} onUp={()=>moveVideo(i,-1)} onDown={()=>moveVideo(i,1)} onEdit={()=>editVideo(v)} onRemove={()=>removeVideo(v)}
@@ -341,6 +393,6 @@ function GripIcon(){return <svg width="13" height="13" viewBox="0 0 24 24" fill=
 // draggable element (so grabbing the title or a badge doesn't start a drag by accident),
 // while the row itself is the drop target so dropping anywhere on it works, not just on
 // the handle.
-function VideoRow({v,index,total,busy,onUp,onDown,onEdit,onRemove,dragging,onDragStart,onDragEnd,onDragOverRow,onDropRow}){
-  return <div className={`adminVideoRow${dragging?' adminVideoRowDragging':''}`} onDragOver={onDragOverRow} onDrop={onDropRow}><div className="adminReorder"><span className="adminDragHandle" draggable="true" onDragStart={onDragStart} onDragEnd={onDragEnd} role="button" aria-label="Drag to reorder" title="Drag to reorder"><GripIcon/></span><button type="button" className="adminGhost adminReorderBtn" disabled={index===0||busy} onClick={onUp} aria-label="Move up">↑</button><button type="button" className="adminGhost adminReorderBtn" disabled={index===total-1||busy} onClick={onDown} aria-label="Move down">↓</button></div><div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span>{Array.isArray(v.tags)&&v.tags.length>0&&<span className="adminTagsList">{v.tags.map(t=><em key={t} className="adminTagChip">{t}</em>)}</span>}</div><div className="adminBadges">{v.featured&&<span className="adminBadge">Hero</span>}{v.featured_home&&<span className="adminBadge">Home</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={onEdit}>Edit</button><button className="adminDanger" onClick={onRemove}>Delete</button></div>
+function VideoRow({v,index,total,busy,onUp,onDown,onEdit,onRemove,dragging,onDragStart,onDragEnd,onDragOverRow,onDropRow,hideReorder}){
+  return <div className={`adminVideoRow${dragging?' adminVideoRowDragging':''}${hideReorder?' adminVideoRowNoReorder':''}`} onDragOver={onDragOverRow} onDrop={onDropRow}>{!hideReorder&&<div className="adminReorder"><span className="adminDragHandle" draggable="true" onDragStart={onDragStart} onDragEnd={onDragEnd} role="button" aria-label="Drag to reorder" title="Drag to reorder"><GripIcon/></span><button type="button" className="adminGhost adminReorderBtn" disabled={index===0||busy} onClick={onUp} aria-label="Move up">↑</button><button type="button" className="adminGhost adminReorderBtn" disabled={index===total-1||busy} onClick={onDown} aria-label="Move down">↓</button></div>}<div className="adminMiniThumb" style={{backgroundImage:v.thumbnail_url?`url(${v.thumbnail_url})`:undefined}}/><div className="adminVideoInfo"><strong>{v.title}</strong><span>{(v.categories?.length?v.categories.join(' + '):(v.category||'Video'))}{v.published?'':' · Draft'}</span>{Array.isArray(v.tags)&&v.tags.length>0&&<span className="adminTagsList">{v.tags.map(t=><em key={t} className="adminTagChip">{t}</em>)}</span>}</div><div className="adminBadges">{v.featured&&<span className="adminBadge">Hero</span>}{v.featured_home&&<span className="adminBadge">Home</span>}{v.premium&&<span className="adminBadge premiumBadge">Premium</span>}{!v.published&&<span className="adminBadge draftBadge">Draft</span>}</div><button className="adminGhost" onClick={onEdit}>Edit</button><button className="adminDanger" onClick={onRemove}>Delete</button></div>
 }
