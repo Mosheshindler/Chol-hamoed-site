@@ -20,7 +20,21 @@ const HOME_GROUP='Homepage (Just Minted)'
 const HOME_SLUG='home-just-minted'
 const HERO_GROUP='Hero Carousel'
 const HERO_SLUG='hero-carousel'
-const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'',categories:[],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0}
+const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'',categories:[],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0,source_published_at:''}
+
+// Newest-first, using each video's real YouTube/Vimeo upload date — same ordering as
+// lib/data.js's sortByPublishDate, but working on raw Supabase rows (source_published_at)
+// instead of the mapped site objects (sourcePublishedAt) that admin doesn't use.
+function sortRowsByPublishDate(list){
+  return [...list].sort((a,b)=>{
+    const ad=a.source_published_at?new Date(a.source_published_at).getTime():null
+    const bd=b.source_published_at?new Date(b.source_published_at).getTime():null
+    if(ad==null && bd==null) return 0
+    if(ad==null) return 1
+    if(bd==null) return -1
+    return bd-ad
+  })
+}
 
 function slugify(value){
   return value.toLowerCase().trim().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'video'
@@ -44,6 +58,7 @@ export default function AdminPage(){
   const [dragState,setDragState]=useState(null)
   const [videoSearch,setVideoSearch]=useState('')
   const [videoFilters,setVideoFilters]=useState([])
+  const [backfillState,setBackfillState]=useState(null)
 
   function toggleVideoFilter(key){
     setVideoFilters(f=>f.includes(key)?f.filter(x=>x!==key):[...f,key])
@@ -73,11 +88,15 @@ export default function AdminPage(){
 
   function videosForCategory(catName){
     const slug=catName===HOME_GROUP?HOME_SLUG:catName===HERO_GROUP?HERO_SLUG:categorySlug(catName)
-    const inCat=catName===HOME_GROUP
+    const inCatRaw=catName===HOME_GROUP
       ? videos.filter(v=>v.featured_home)
       : catName===HERO_GROUP
       ? videos.filter(v=>v.featured)
       : videos.filter(v=>(v.categories?.length?v.categories:[v.category]).includes(catName))
+    // Pre-sorted newest-upload-first so videos with no manual position yet fall into that
+    // order below (stable sort keeps them there); anything with an explicit manual position
+    // still wins, same as before.
+    const inCat=sortRowsByPublishDate(inCatRaw)
     const orderMap=new Map(categoryOrderRows.filter(r=>r.category===slug).map(r=>[r.video_id,r.sort_order]))
     return [...inCat].sort((a,b)=>{
       const ao=orderMap.has(a.id)?orderMap.get(a.id):Infinity
@@ -175,7 +194,8 @@ export default function AdminPage(){
         vimeo_hash:data.vimeoHash||'',
         title:f.title||data.title||'',
         thumbnail_url:data.thumbnailUrl||f.thumbnail_url,
-        duration_seconds:data.durationSeconds??f.duration_seconds
+        duration_seconds:data.durationSeconds??f.duration_seconds,
+        source_published_at:data.sourcePublishedAt||f.source_published_at
       }))
       setMessage('Video details loaded. You can change any field before publishing.')
     }catch(err){setMessage(err.message)}finally{setBusy(false)}
@@ -231,7 +251,7 @@ export default function AdminPage(){
       const payload={
         title:form.title.trim(),slug,video_url:form.video_url.trim(),platform:form.platform,vimeo_hash:form.vimeo_hash||null,
         category:(form.categories?.[0]||form.category||null),categories:(form.categories?.length?form.categories:[form.category].filter(Boolean)),tags:(form.tags||[]),thumbnail_url:thumbnail||null,hero_image_url:heroImage,
-        duration_seconds:form.duration_seconds===''?null:Number(form.duration_seconds),featured:Boolean(form.featured),featured_home:Boolean(form.featured_home),show_just_minted:Boolean(form.show_just_minted),show_just_minted_home:Boolean(form.show_just_minted_home),premium:Boolean(form.premium),purchase_url:form.premium?(form.purchase_url?.trim()||null):null,published:Boolean(form.published),sort_order:Number(form.sort_order)||0
+        duration_seconds:form.duration_seconds===''?null:Number(form.duration_seconds),featured:Boolean(form.featured),featured_home:Boolean(form.featured_home),show_just_minted:Boolean(form.show_just_minted),show_just_minted_home:Boolean(form.show_just_minted_home),premium:Boolean(form.premium),purchase_url:form.premium?(form.purchase_url?.trim()||null):null,published:Boolean(form.published),sort_order:Number(form.sort_order)||0,source_published_at:form.source_published_at||null
       }
       const result=form.id
         ? await supabase.from('videos').update(payload).eq('id',form.id).select().single()
@@ -286,6 +306,33 @@ export default function AdminPage(){
     else saveCategoryOrder(catName,reordered)
   }
 
+  // One-time catch-up for videos added before upload-date sorting existed — looks up each
+  // one's real YouTube/Vimeo publish date and saves it, the same lookup Fetch Details does
+  // for new videos. Run one at a time (not Promise.all) so 100+ videos don't hammer the
+  // YouTube API at once.
+  async function backfillPublishDates(){
+    const missing=videos.filter(v=>!v.source_published_at)
+    if(!missing.length){setMessage('Every video already has an upload date on file.');return}
+    if(!confirm(`Look up upload dates for ${missing.length} video${missing.length===1?'':'s'}? This can take a few minutes — don't close this tab while it runs.`)) return
+    setBusy(true);setBackfillState({done:0,total:missing.length})
+    let updated=0,failed=0
+    for(const v of missing){
+      try{
+        const r=await fetch('/api/video-meta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:v.video_url})})
+        const data=await r.json()
+        if(r.ok && data.sourcePublishedAt){
+          const {error}=await supabase.from('videos').update({source_published_at:data.sourcePublishedAt}).eq('id',v.id)
+          error?failed++:updated++
+        }else failed++
+      }catch{failed++}
+      setBackfillState(s=>({done:(s?.done||0)+1,total:missing.length}))
+    }
+    setBackfillState(null)
+    setMessage(`Backfill complete: ${updated} video${updated===1?'':'s'} updated${failed?`, ${failed} couldn't be matched (link may be broken or removed)`:''}.`)
+    await loadVideos()
+    setBusy(false)
+  }
+
   async function removeVideo(v){
     if(!confirm(`Delete “${v.title}”?`)) return
     const {error}=await supabase.from('videos').delete().eq('id',v.id)
@@ -315,7 +362,7 @@ export default function AdminPage(){
       </form>
     </section>
     <section className="adminPanel adminLibrary">
-      <div className="adminPanelHead"><h2>Existing Videos</h2><span>{videos.length} videos</span></div>
+      <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={backfillPublishDates} disabled={busy}>{backfillState?`Fetching dates… (${backfillState.done}/${backfillState.total})`:'Backfill Upload Dates'}</button></div></div>
       <div className="adminVideoSearchRow">
         <input type="text" className="adminVideoSearch" value={videoSearch} onChange={e=>setVideoSearch(e.target.value)} placeholder="Search by title or link…"/>
         <div className="adminFilterChips">

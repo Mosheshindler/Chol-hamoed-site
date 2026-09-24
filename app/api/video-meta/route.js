@@ -10,22 +10,26 @@ function parseIsoDuration(iso){
 }
 
 // Optional — YouTube's oEmbed endpoint (used for title/thumbnail) doesn't include
-// duration at all, unlike Vimeo's. When a YOUTUBE_API_KEY is configured, this fills
-// that gap via the official YouTube Data API v3. Never exposed to the browser.
-async function fetchYouTubeDuration(videoId){
+// duration or the real upload date, unlike Vimeo's. When a YOUTUBE_API_KEY is configured,
+// this fills that gap via the official YouTube Data API v3. Never exposed to the browser.
+async function fetchYouTubeDetails(videoId){
   const key=process.env.YOUTUBE_API_KEY
-  if(!key) return null
+  if(!key) return {durationSeconds:null,publishedAt:null}
   try{
     const target=new URL('https://www.googleapis.com/youtube/v3/videos')
     target.searchParams.set('id',videoId)
-    target.searchParams.set('part','contentDetails')
+    target.searchParams.set('part','contentDetails,snippet')
     target.searchParams.set('key',key)
     const r=await fetch(target,{cache:'no-store'})
-    if(!r.ok) return null
+    if(!r.ok) return {durationSeconds:null,publishedAt:null}
     const data=await r.json()
-    return parseIsoDuration(data.items?.[0]?.contentDetails?.duration)
+    const item=data.items?.[0]
+    return {
+      durationSeconds:parseIsoDuration(item?.contentDetails?.duration),
+      publishedAt:item?.snippet?.publishedAt||null
+    }
   }catch{
-    return null
+    return {durationSeconds:null,publishedAt:null}
   }
 }
 
@@ -94,7 +98,10 @@ export async function POST(request){
         vimeoHash:info.hash,
         title:data.title||'',
         thumbnailUrl:data.thumbnail_url||'',
-        durationSeconds:Number(data.duration)||null
+        durationSeconds:Number(data.duration)||null,
+        // Vimeo's oEmbed response includes the real upload date as "YYYY-MM-DD" — good
+        // enough for date-only sorting (no time-of-day precision, but that's fine here).
+        sourcePublishedAt:data.upload_date||null
       })
     }
 
@@ -104,14 +111,15 @@ export async function POST(request){
     const r=await fetch(target,{cache:'no-store'})
     let title=''
     if(r.ok){ const data=await r.json(); title=data.title||'' }
-    const [durationSeconds,thumbnailUrl]=await Promise.all([fetchYouTubeDuration(info.id),pickYouTubeThumbnail(info.id)])
+    const [details,thumbnailUrl]=await Promise.all([fetchYouTubeDetails(info.id),pickYouTubeThumbnail(info.id)])
     return NextResponse.json({
       platform:'youtube',
       videoId:info.id,
       vimeoHash:'',
       title,
       thumbnailUrl,
-      durationSeconds
+      durationSeconds:details.durationSeconds,
+      sourcePublishedAt:details.publishedAt
     })
   }catch(error){
     return NextResponse.json({error:error.message||'Could not read video details.'},{status:400})

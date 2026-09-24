@@ -3,6 +3,7 @@ import {useEffect,useMemo,useRef,useState} from 'react'
 import VideoCard from './VideoCard'
 import Icon from './Icon'
 import {CATEGORIES,categorySlug} from '../lib/site'
+import {sortByPublishDate} from '../lib/data'
 
 const iconFor={
   'all-videos':'play','documentaries':'documentary','entertainment':'entertainment','music-videos':'music','qanda':'qa','behind-the-scenes':'bts','events-and-highlights':'events','shorts':'shorts','premium-content':'premium'
@@ -118,8 +119,13 @@ export default function CategoryBrowser({slug,name,videos,categoryOrder={},initi
       matches=videos.filter(v=>inCategory(v,slug))
     }
     const hasOrder=categoryOrder && Object.keys(categoryOrder).length>0
-    if(!hasOrder) return matches
-    return [...matches].sort((a,b)=>{
+    // No manual order set for this category yet — default to newest-upload-first instead
+    // of whatever order they happen to come back from the database in.
+    if(!hasOrder) return sortByPublishDate(matches)
+    // A manual order exists, but usually only covers some of the videos (whoever's been
+    // dragged into position); anything left out still defaults to newest-upload-first
+    // among themselves, via the same stable-sort trick used in admin.
+    return sortByPublishDate(matches).sort((a,b)=>{
       const ao=a.id in categoryOrder?categoryOrder[a.id]:Infinity
       const bo=b.id in categoryOrder?categoryOrder[b.id]:Infinity
       return ao-bo
