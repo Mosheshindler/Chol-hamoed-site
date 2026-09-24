@@ -29,16 +29,18 @@ export default async function Home(){
     const bo=b.id in homeOrder?homeOrder[b.id]:Infinity
     return ao-bo
   })
-  const homeFillers=sortByPublishDate(videos.filter(v=>!v.featuredHome)).slice(0,Math.max(0,5-featuredHome.length))
-  const homeVideos=[...featuredHome,...homeFillers].slice(0,5)
+  // Only videos explicitly checked "Featured on Homepage" show here — no automatic
+  // fallback padding with other videos, same as the Hero Carousel already only ever shows
+  // what's checked "Featured in Hero Carousel".
+  const homeVideos=featuredHome.slice(0,5)
   return <><Header/><main>
     <HeroCarousel videos={heroVideos}/>
     <div className="wide homeBody">
       <HomeSearch popular={searches}/>
       <div className="sectionHead"><h2>BROWSE BY CATEGORY</h2></div>
       <CategoryStrip categories={categories}/>
-      <div className="sectionHead justHead"><h2>FEATURED VIDEOS</h2><a href="/category/all-videos">View all&nbsp; →</a></div>
-      <div className="cards homeCards">{homeVideos.map((v,i)=><VideoCard video={v} priority={i<2} key={v.slug}/>)}</div>
+      {homeVideos.length>0&&<><div className="sectionHead justHead"><h2>FEATURED VIDEOS</h2><a href="/category/all-videos">View all&nbsp; →</a></div>
+      <div className="cards homeCards">{homeVideos.map((v,i)=><VideoCard video={v} priority={i<2} key={v.slug}/>)}</div></>}
       <SignupCTA/>
     </div>
    </main><Footer/></>}
