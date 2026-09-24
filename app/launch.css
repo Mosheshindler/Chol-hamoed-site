@@ -1,7 +1,7 @@
 /* Mint Media launch UI overrides — isolated from legacy styles */
 :root{--mint:#88C040;--mint2:#88C040;--deep:#107838;--mm-bg:#020706;--mm-panel:#07110e;--mm-line:#2f473d;--mm-lime:#88C040;--mm-deep:#107838;--mm-text:#f5f7f5;--mm-muted:#c5cec9}
 body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 100%);color:var(--mm-text)}
-.header{background:rgba(2,7,6,.98);z-index:100}.brand,.footerLogo{width:220px!important}.brand img,.footerLogo img{width:100%;height:auto;display:block}
+.header{background:rgba(2,7,6,.98);z-index:100}.footerLogo{width:220px!important}.footerLogo img{width:100%;height:auto;display:block}
 .navDropMenu{top:72px!important;z-index:500!important}
 /* Hero: robust photo layer so thumbnails always render */
 .homeHero.v9Hero{position:relative;height:350px;overflow:hidden;background:#020504!important;border-bottom:1px solid rgba(110,140,128,.22)}
@@ -183,7 +183,7 @@ body{background:radial-gradient(circle at 50% 0,#07140f 0,#030907 42%,#020504 10
 .mobileNavCats{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
 .mobileNavCats a{padding:11px 2px;font-size:14px}
 @media(max-width:900px){.navBurger{display:flex}.mobileNavPanel{display:block}}
-@media(max-width:600px){.brand{width:130px!important;flex-basis:130px!important;height:21px!important}.headerInner{gap:8px!important}.navBurger{width:34px!important;flex:0 0 34px!important}}
+@media(max-width:600px){.brand{height:26px!important}.headerInner{gap:8px!important}.navBurger{width:34px!important;flex:0 0 34px!important}}
 
 @media(max-width:900px){
   .collectionGridAll{grid-template-columns:1fr!important}
