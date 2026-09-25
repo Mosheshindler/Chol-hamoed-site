@@ -8,6 +8,23 @@ import Image from 'next/image'
 import {getVideos,getVideoBySlug} from '../../../lib/data'
 import {getVideoAspect} from '../../../lib/videoAspect'
 import {notFound} from 'next/navigation'
+import {SITE_URL} from '../../../lib/site'
+import {buildVideoJsonLd,videoDescription} from '../../../lib/seo'
+
+export async function generateMetadata({params}){
+  const {slug}=await params
+  const video=await getVideoBySlug(slug)
+  if(!video) return {title:'Video not found'}
+  const description=videoDescription(video)
+  const url=`${SITE_URL}/watch/${video.slug}`
+  return {
+    title:video.title,
+    description,
+    alternates:{canonical:url},
+    openGraph:{title:video.title,description,url,type:'video.other',images:[{url:video.thumbnail}]},
+    twitter:{card:'summary_large_image',title:video.title,description,images:[video.thumbnail]}
+  }
+}
 
 // Fisher-Yates — an unbiased shuffle (unlike sorting by Math.random(), which is not a fair
 // shuffle and skews toward certain orderings).
@@ -33,7 +50,10 @@ export default async function WatchPage({params}){
   const related=others.filter(v=>(v.categories?.length?v.categories:[v.category]).some(c=>myCategories.includes(c)))
   const unrelated=others.filter(v=>!related.includes(v))
   const next=[...shuffle(related),...shuffle(unrelated)].slice(0,6)
-  return <><Header/><main className="wide watchLayout">
+  const jsonLd=buildVideoJsonLd(video,SITE_URL)
+  return <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(jsonLd).replace(/</g,'\\u003c')}}/>
+    <Header/><main className="wide watchLayout">
     <section className="watchMain"><BackButton/><div className={video.premium?'premiumPlayerWrap':undefined}><Player video={video} aspect={aspect}/></div>
       {video.premium&&<section className="yidlyPurchasePanel"><div className="yidlyBrandBlock"><img src="/assets/yidly-logo.png" alt="Yidly" className="yidlyLogo"/><div className="yidlyPremiumWord">PREMIUM</div></div><div className="yidlyPreviewCopy"><div className="yidlyPreviewEyebrow">YIDLY PREMIUM</div><div className="yidlyPreviewTitle">You’re watching a preview.</div><p>Watch the complete Yidly production on Mostly Music.</p></div><div className="yidlyPurchaseAction">{video.purchaseUrl?<MostlyMusicButton video={video}/>:<span className="premiumMissing">Full video link coming soon</span>}<div className="mostlyMusicLockup"><img src="/assets/mostly-music-logo.webp" alt="Mostly Music"/><span>Available on Mostly Music ↗</span></div></div></section>}
       <div className="watchMeta lockedWatchMeta"><div>{video.premium&&<div className="yidlyPremiumBadge">YIDLY PREMIUM</div>}<h1>{video.title}</h1><div className="meta">{(video.categories?.[0]||video.category)}{video.duration?<> &nbsp;•&nbsp; {video.duration}</>:null} &nbsp;•&nbsp; HD</div></div><ShareButton video={video}/></div>

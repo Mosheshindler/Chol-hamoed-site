@@ -8,6 +8,13 @@ import CategoryStrip from '../components/CategoryStrip'
 import Link from 'next/link'
 import {getVideos,getPopularTags,getCategoryOrder,sortByPublishDate} from '../lib/data'
 import {categories} from '../lib/demoVideos'
+import {SITE_URL} from '../lib/site'
+
+export const metadata={
+  title:'Entertain-Mint - Watch Stories, Documentaries & More',
+  description:"Entertain-Mint is Mint Media's home for stories, documentaries, entertainment, music videos and more — new videos added regularly.",
+  alternates:{canonical:SITE_URL}
+}
 
 export default async function Home(){
   const [videos,homeOrder,heroOrder]=await Promise.all([getVideos(),getCategoryOrder('home-just-minted'),getCategoryOrder('hero-carousel')])

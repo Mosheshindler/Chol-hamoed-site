@@ -1,6 +1,12 @@
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
-import {SITE_LINKS} from '../../lib/site'
+import {SITE_LINKS,SITE_URL} from '../../lib/site'
+
+export const metadata={
+  title:'Contact',
+  description:'Get in touch with Mint Media — email, call, or send us a message about your next video project.',
+  alternates:{canonical:`${SITE_URL}/contact`}
+}
 
 function ContactIcon({type}){
   const common={viewBox:'0 0 32 32','aria-hidden':true}

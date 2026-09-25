@@ -2,6 +2,14 @@ import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import SignupCTA from '../../components/SignupCTA'
 import Link from 'next/link'
+import {SITE_URL} from '../../lib/site'
+
+export const metadata={
+  title:'Collections',
+  description:'Explore the Mint Media video library by collection — Stories, Documentaries, Entertainment, Music Videos, and more.',
+  alternates:{canonical:`${SITE_URL}/collections`}
+}
+
 const collections=[
   ['All Videos','Browse the complete library','/category/all-videos','all-videos'],
   ['Stories','Human stories and meaningful moments','/category/stories','stories'],

@@ -1,5 +1,12 @@
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
+import {SITE_URL} from '../../lib/site'
+
+export const metadata={
+  title:'Privacy Policy',
+  description:'How Mint Media collects, uses, and protects your information on Entertain-Mint.',
+  alternates:{canonical:`${SITE_URL}/privacy`}
+}
 
 export default function Privacy(){return <><Header/><main className="wide legalPage">
   <div className="eyebrow">PRIVACY POLICY</div>

@@ -6,7 +6,7 @@ import SafetyPageBody from './SafetyPageBody'
 // visiting this URL directly (e.g. a filtering provider reviewing the site). noindex
 // keeps it out of search results too, without blocking direct access.
 export const metadata = {
-  title: "Content Standards | Entertain-Mint",
+  title: "Content Standards",
   description: "Content safety and platform standards for Entertain-Mint.",
   robots: {
     index: false,

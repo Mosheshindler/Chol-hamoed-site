@@ -1,5 +1,12 @@
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
+import {SITE_URL} from '../../lib/site'
+
+export const metadata={
+  title:'About Us',
+  description:'Mint Media has been telling meaningful stories through video since 2014 — from Lakewood, NJ to events and organizations nationwide.',
+  alternates:{canonical:`${SITE_URL}/about`}
+}
 
 function StatIcon({type}){
   const common={viewBox:'0 0 32 32','aria-hidden':true}
