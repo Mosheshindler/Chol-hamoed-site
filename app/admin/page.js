@@ -20,7 +20,7 @@ const HOME_GROUP='Homepage (Just Minted)'
 const HOME_SLUG='home-just-minted'
 const HERO_GROUP='Hero Carousel'
 const HERO_SLUG='hero-carousel'
-const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'',categories:[],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0,source_published_at:''}
+const emptyForm={id:null,title:'',slug:'',video_url:'',platform:'vimeo',vimeo_hash:'',category:'',categories:[],tags:[],thumbnail_url:'',hero_image_url:'',duration_seconds:'',featured:false,featured_home:false,show_just_minted:true,show_just_minted_home:true,premium:false,purchase_url:'',published:true,sort_order:0,source_published_at:'',learn_more_enabled:false,learn_more_label:'',learn_more_url:''}
 
 // Newest-first, using each video's real YouTube/Vimeo upload date — same ordering as
 // lib/data.js's sortByPublishDate, but working on raw Supabase rows (source_published_at)
@@ -229,6 +229,7 @@ export default function AdminPage(){
     if(!form.title.trim()){setMessage('Title is required.');return}
     if(!form.video_url.trim()){setMessage('Video URL is required.');return}
     if(!(form.categories||[]).length){setMessage('Choose at least one category.');return}
+    if(form.learn_more_enabled && (!form.learn_more_label?.trim() || !form.learn_more_url?.trim())){setMessage('Fill in both the "learn more about" text and the link, or turn the option off.');return}
     // Only checked when adding a new video (not editing) — comparing the link and title
     // against everything already posted, case/whitespace-insensitive. Confirm lets the
     // admin post it again anyway (a legitimate reupload, a second cut of the same event,
@@ -253,7 +254,8 @@ export default function AdminPage(){
       const payload={
         title:form.title.trim(),slug,video_url:form.video_url.trim(),platform:form.platform,vimeo_hash:form.vimeo_hash||null,
         category:(form.categories?.[0]||form.category||null),categories:(form.categories?.length?form.categories:[form.category].filter(Boolean)),tags:(form.tags||[]),thumbnail_url:thumbnail||null,hero_image_url:heroImage,
-        duration_seconds:form.duration_seconds===''?null:Number(form.duration_seconds),featured:Boolean(form.featured),featured_home:Boolean(form.featured_home),show_just_minted:Boolean(form.show_just_minted),show_just_minted_home:Boolean(form.show_just_minted_home),premium:Boolean(form.premium),purchase_url:form.premium?(form.purchase_url?.trim()||null):null,published:Boolean(form.published),sort_order:Number(form.sort_order)||0,source_published_at:form.source_published_at||null
+        duration_seconds:form.duration_seconds===''?null:Number(form.duration_seconds),featured:Boolean(form.featured),featured_home:Boolean(form.featured_home),show_just_minted:Boolean(form.show_just_minted),show_just_minted_home:Boolean(form.show_just_minted_home),premium:Boolean(form.premium),purchase_url:form.premium?(form.purchase_url?.trim()||null):null,published:Boolean(form.published),sort_order:Number(form.sort_order)||0,source_published_at:form.source_published_at||null,
+        learn_more_enabled:Boolean(form.learn_more_enabled),learn_more_label:form.learn_more_enabled?(form.learn_more_label?.trim()||null):null,learn_more_url:form.learn_more_enabled?(form.learn_more_url?.trim()||null):null
       }
       const result=form.id
         ? await supabase.from('videos').update(payload).eq('id',form.id).select().single()
@@ -358,7 +360,9 @@ export default function AdminPage(){
           <div className="adminCheckGroup"><label><input type="checkbox" checked={form.featured} onChange={e=>setForm({...form,featured:e.target.checked})}/> Featured in Hero Carousel</label>{form.featured&&<label className="adminSubCheck"><input type="checkbox" checked={form.show_just_minted} onChange={e=>setForm({...form,show_just_minted:e.target.checked})}/> Show “Just Minted” over this hero slide</label>}</div>
           <div className="adminCheckGroup"><label><input type="checkbox" checked={form.featured_home} onChange={e=>setForm({...form,featured_home:e.target.checked})}/> Featured on Homepage (Just Minted row)</label>{form.featured_home&&<label className="adminSubCheck"><input type="checkbox" checked={form.show_just_minted_home} onChange={e=>setForm({...form,show_just_minted_home:e.target.checked})}/> Show “Just Minted” on this thumbnail</label>}</div>
           <label><input type="checkbox" checked={form.premium} onChange={e=>setForm({...form,premium:e.target.checked})}/> Premium</label><label><input type="checkbox" checked={form.published} onChange={e=>setForm({...form,published:e.target.checked})}/> Published</label>
+          <label><input type="checkbox" checked={form.learn_more_enabled} onChange={e=>setForm({...form,learn_more_enabled:e.target.checked})}/> Show "Click here to learn more" link</label>
         </div>
+        {form.learn_more_enabled&&<div className="learnMoreAdminBox"><label>Learn more about<input value={form.learn_more_label} onChange={e=>setForm({...form,learn_more_label:e.target.value})} placeholder="e.g. the Mir" required={form.learn_more_enabled}/></label><label>Link to their website<input type="url" value={form.learn_more_url} onChange={e=>setForm({...form,learn_more_url:e.target.value})} placeholder="https://…" required={form.learn_more_enabled}/></label><p>Shows under the video as: “Click here to learn more about {form.learn_more_label||'…'}”</p></div>}
         {message&&<div className="adminMessage">{message}</div>}
         <button className="adminPrimary" disabled={busy}>{busy?'Saving…':form.id?'Save Changes':'Publish Video'}</button>
       </form>
