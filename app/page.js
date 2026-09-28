@@ -30,15 +30,17 @@ function getHeroVideos(videos,heroOrder){
   }).slice(0,8)
 }
 
-// The link-preview image itself comes from app/opengraph-image.js (a generated card with
-// the current top Hero video's photo, title, and the site logo composited on) — Next.js
-// wires that up to this route automatically, so no `images` field is needed here.
+// A real screenshot of the homepage (nav, hero, search, categories) rather than a designed
+// graphic — matches what a visitor actually sees. It's a snapshot as of when it was taken,
+// not auto-generated, so re-capture it (ask Claude, or retake and drop the file in) if the
+// homepage's look changes enough that this goes noticeably stale.
+const HOME_IMAGE='/assets/homepage-og.png'
 export const metadata={
   title:TITLE,
   description:DESCRIPTION,
   alternates:{canonical:SITE_URL},
-  openGraph:{title:TITLE,description:DESCRIPTION,url:SITE_URL},
-  twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION}
+  openGraph:{title:TITLE,description:DESCRIPTION,url:SITE_URL,images:[{url:HOME_IMAGE,width:2400,height:1260}]},
+  twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION,images:[HOME_IMAGE]}
 }
 
 export default async function Home(){
