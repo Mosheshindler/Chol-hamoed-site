@@ -10,27 +10,47 @@ import {getVideos,getPopularTags,getCategoryOrder,sortByPublishDate} from '../li
 import {categories} from '../lib/demoVideos'
 import {SITE_URL} from '../lib/site'
 
-export const metadata={
-  title:'Entertain-Mint - Watch Stories, Documentaries & More',
-  description:"Entertain-Mint is Mint Media's home for stories, documentaries, entertainment, music videos and more — new videos added regularly.",
-  alternates:{canonical:SITE_URL}
+const TITLE='Entertain-Mint - Watch Stories, Documentaries & More'
+const DESCRIPTION="Entertain-Mint is Mint Media's home for stories, documentaries, entertainment, music videos and more — new videos added regularly."
+
+// Shared by generateMetadata and the page body, so the homepage's link-preview image always
+// matches whatever's actually the #1 Hero Carousel slide, not a separate/stale selection.
+// Admin can reorder this row (independent of the site-wide All Videos order) from the
+// "Hero Carousel" group in /admin — see getCategoryOrder.
+// Newest-upload-first is the default order; anything given an explicit manual position
+// (dragged in the admin's Hero Carousel/Homepage groups) wins over that — the manual sort
+// below runs on the already publish-date-sorted list, so videos with no manual position
+// just keep falling in newest-first among themselves (stable sort).
+function getHeroVideos(videos,heroOrder){
+  const heroFeatured=sortByPublishDate(videos.filter(v=>v.featured))
+  return [...heroFeatured].sort((a,b)=>{
+    const ao=a.id in heroOrder?heroOrder[a.id]:Infinity
+    const bo=b.id in heroOrder?heroOrder[b.id]:Infinity
+    return ao-bo
+  }).slice(0,8)
+}
+
+export async function generateMetadata(){
+  const [videos,heroOrder]=await Promise.all([getVideos(),getCategoryOrder('hero-carousel')])
+  const top=getHeroVideos(videos,heroOrder)[0]
+  const image=top?.heroImage?.trim()||top?.thumbnail?.trim()||''
+  return {
+    title:TITLE,
+    description:DESCRIPTION,
+    alternates:{canonical:SITE_URL},
+    // No image found (e.g. nothing's featured yet) — omit openGraph/twitter entirely so the
+    // page falls back to the root layout's default preview image instead of a broken one.
+    ...(image?{
+      openGraph:{title:TITLE,description:DESCRIPTION,url:SITE_URL,images:[{url:image}]},
+      twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION,images:[image]}
+    }:{})
+  }
 }
 
 export default async function Home(){
   const [videos,homeOrder,heroOrder]=await Promise.all([getVideos(),getCategoryOrder('home-just-minted'),getCategoryOrder('hero-carousel')])
   const searches=getPopularTags(videos,20)
-  // Admin can reorder this row (independent of the site-wide All Videos order) from the
-  // "Hero Carousel" group in /admin — see getCategoryOrder.
-  // Newest-upload-first is the default order; anything given an explicit manual position
-  // (dragged in the admin's Hero Carousel/Homepage groups) wins over that — the manual sort
-  // below runs on the already publish-date-sorted list, so videos with no manual position
-  // just keep falling in newest-first among themselves (stable sort).
-  const heroFeatured=sortByPublishDate(videos.filter(v=>v.featured))
-  const heroVideos=[...heroFeatured].sort((a,b)=>{
-    const ao=a.id in heroOrder?heroOrder[a.id]:Infinity
-    const bo=b.id in heroOrder?heroOrder[b.id]:Infinity
-    return ao-bo
-  }).slice(0,8)
+  const heroVideos=getHeroVideos(videos,heroOrder)
   const featuredHome=[...sortByPublishDate(videos.filter(v=>v.featuredHome))].sort((a,b)=>{
     const ao=a.id in homeOrder?homeOrder[a.id]:Infinity
     const bo=b.id in homeOrder?homeOrder[b.id]:Infinity
