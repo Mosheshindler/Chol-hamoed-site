@@ -59,6 +59,6 @@ export default async function WatchPage({params}){
       <div className="watchMeta lockedWatchMeta"><div>{video.premium&&<div className="yidlyPremiumBadge">YIDLY PREMIUM</div>}<h1>{video.title}</h1><div className="meta">{(video.categories?.[0]||video.category)}{video.duration?<> &nbsp;•&nbsp; {video.duration}</>:null} &nbsp;•&nbsp; HD</div></div><ShareButton video={video}/></div>
       {video.learnMoreEnabled&&video.learnMoreLabel&&video.learnMoreUrl&&<div className="watchLearnMore"><a href={video.learnMoreUrl} target="_blank" rel="noreferrer">Click here</a> to learn more about {video.learnMoreLabel}</div>}
     </section>
-    <aside className="upNext"><div className="upNextTitle">Up Next</div>{next.map(v=><a className="upNextItem" href={`/watch/${v.slug}`} key={v.slug}><div className="upNextThumb"><Image src={v.thumbnail} alt={v.title} fill sizes="145px" style={{objectFit:'cover'}}/>{v.duration&&<span>{v.duration}</span>}</div><div><strong>{v.title}</strong><small>{v.categories?.[0]||v.category}</small></div></a>)}</aside>
+    <aside className="upNext"><div className="upNextTitle">Up Next</div>{next.map(v=><a className="upNextItem" href={`/watch/${v.slug}`} key={v.slug}><div className="upNextThumb"><Image src={v.thumbnail} alt={v.title} fill sizes="145px" style={{objectFit:'cover'}} unoptimized/>{v.duration&&<span>{v.duration}</span>}</div><div><strong>{v.title}</strong><small>{v.categories?.[0]||v.category}</small></div></a>)}</aside>
   </main><Footer/></>
 }
