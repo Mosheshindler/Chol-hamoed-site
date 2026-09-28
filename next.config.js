@@ -10,6 +10,14 @@ const nextConfig = {
       {protocol: 'https', hostname: 'i.ytimg.com'},
       {protocol: 'https', hostname: 'qqytekjvhdrdxmogeeln.supabase.co'},
     ],
+    // Left at Next's defaults, this generates candidate widths up to 3840px — no thumbnail
+    // on this site is ever displayed wider than a few hundred pixels (video cards, "Up
+    // Next" thumbnails). Every new (image, size) combination a visitor's browser requests
+    // counts against Vercel's Image Optimization quota, so a much smaller, tailored list
+    // means far fewer distinct combinations ever get created as the library grows — same
+    // visual result, since Next always serves the nearest size at or above what's needed.
+    deviceSizes: [420, 768, 1080],
+    imageSizes: [96, 145, 256, 384],
   },
 }
 
