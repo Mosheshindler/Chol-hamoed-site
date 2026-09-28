@@ -2,12 +2,16 @@ import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import SignupCTA from '../../components/SignupCTA'
 import Link from 'next/link'
-import {SITE_URL} from '../../lib/site'
+import {SITE_URL,SITE_IMAGE,SITE_IMAGE_DIMENSIONS} from '../../lib/site'
 
+const TITLE='Collections'
+const DESCRIPTION='Explore the Mint Media video library by collection — Stories, Documentaries, Entertainment, Music Videos, and more.'
 export const metadata={
-  title:'Collections',
-  description:'Explore the Mint Media video library by collection — Stories, Documentaries, Entertainment, Music Videos, and more.',
-  alternates:{canonical:`${SITE_URL}/collections`}
+  title:TITLE,
+  description:DESCRIPTION,
+  alternates:{canonical:`${SITE_URL}/collections`},
+  openGraph:{title:TITLE,description:DESCRIPTION,url:`${SITE_URL}/collections`,images:[{url:SITE_IMAGE,...SITE_IMAGE_DIMENSIONS}]},
+  twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION,images:[SITE_IMAGE]}
 }
 
 const collections=[

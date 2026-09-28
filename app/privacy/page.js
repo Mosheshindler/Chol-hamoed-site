@@ -1,11 +1,15 @@
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
-import {SITE_URL} from '../../lib/site'
+import {SITE_URL,SITE_IMAGE,SITE_IMAGE_DIMENSIONS} from '../../lib/site'
 
+const TITLE='Privacy Policy'
+const DESCRIPTION='How Mint Media collects, uses, and protects your information on Entertain-Mint.'
 export const metadata={
-  title:'Privacy Policy',
-  description:'How Mint Media collects, uses, and protects your information on Entertain-Mint.',
-  alternates:{canonical:`${SITE_URL}/privacy`}
+  title:TITLE,
+  description:DESCRIPTION,
+  alternates:{canonical:`${SITE_URL}/privacy`},
+  openGraph:{title:TITLE,description:DESCRIPTION,url:`${SITE_URL}/privacy`,images:[{url:SITE_IMAGE,...SITE_IMAGE_DIMENSIONS}]},
+  twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION,images:[SITE_IMAGE]}
 }
 
 export default function Privacy(){return <><Header/><main className="wide legalPage">

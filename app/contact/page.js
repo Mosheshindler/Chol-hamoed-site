@@ -1,11 +1,15 @@
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
-import {SITE_LINKS,SITE_URL} from '../../lib/site'
+import {SITE_LINKS,SITE_URL,SITE_IMAGE,SITE_IMAGE_DIMENSIONS} from '../../lib/site'
 
+const TITLE='Contact'
+const DESCRIPTION='Get in touch with Mint Media — email, call, or send us a message about your next video project.'
 export const metadata={
-  title:'Contact',
-  description:'Get in touch with Mint Media — email, call, or send us a message about your next video project.',
-  alternates:{canonical:`${SITE_URL}/contact`}
+  title:TITLE,
+  description:DESCRIPTION,
+  alternates:{canonical:`${SITE_URL}/contact`},
+  openGraph:{title:TITLE,description:DESCRIPTION,url:`${SITE_URL}/contact`,images:[{url:SITE_IMAGE,...SITE_IMAGE_DIMENSIONS}]},
+  twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION,images:[SITE_IMAGE]}
 }
 
 function ContactIcon({type}){

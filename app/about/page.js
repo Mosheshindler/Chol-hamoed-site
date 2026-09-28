@@ -1,11 +1,15 @@
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
-import {SITE_URL} from '../../lib/site'
+import {SITE_URL,SITE_IMAGE,SITE_IMAGE_DIMENSIONS} from '../../lib/site'
 
+const TITLE='About Us'
+const DESCRIPTION='Mint Media has been telling meaningful stories through video since 2014 — from Lakewood, NJ to events and organizations nationwide.'
 export const metadata={
-  title:'About Us',
-  description:'Mint Media has been telling meaningful stories through video since 2014 — from Lakewood, NJ to events and organizations nationwide.',
-  alternates:{canonical:`${SITE_URL}/about`}
+  title:TITLE,
+  description:DESCRIPTION,
+  alternates:{canonical:`${SITE_URL}/about`},
+  openGraph:{title:TITLE,description:DESCRIPTION,url:`${SITE_URL}/about`,images:[{url:SITE_IMAGE,...SITE_IMAGE_DIMENSIONS}]},
+  twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION,images:[SITE_IMAGE]}
 }
 
 function StatIcon({type}){

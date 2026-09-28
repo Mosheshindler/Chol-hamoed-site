@@ -1,11 +1,10 @@
 import './globals.css'
 import './launch.css'
 import {GoogleAnalytics} from '@next/third-parties/google'
-import {SITE_URL} from '../lib/site'
+import {SITE_URL,SITE_IMAGE,SITE_IMAGE_DIMENSIONS} from '../lib/site'
 
 const SITE_TITLE='Entertain-Mint - a collection of Mint Media content'
 const SITE_DESCRIPTION='Watch stories, documentaries, events, entertainment and more from Mint Media.'
-const SITE_IMAGE='/assets/about-hero.jpg'
 
 // title.template applies "%s | Entertain-Mint" to any page-level `title` string automatically
 // — pages below just set a short title (e.g. 'Stories') instead of repeating the suffix.
@@ -19,7 +18,7 @@ export const metadata={
     title:SITE_TITLE,
     description:SITE_DESCRIPTION,
     url:SITE_URL,
-    images:[{url:SITE_IMAGE,width:1024,height:476}]
+    images:[{url:SITE_IMAGE,...SITE_IMAGE_DIMENSIONS}]
   },
   twitter:{
     card:'summary_large_image',
