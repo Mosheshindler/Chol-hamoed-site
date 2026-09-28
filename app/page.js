@@ -30,21 +30,15 @@ function getHeroVideos(videos,heroOrder){
   }).slice(0,8)
 }
 
-export async function generateMetadata(){
-  const [videos,heroOrder]=await Promise.all([getVideos(),getCategoryOrder('hero-carousel')])
-  const top=getHeroVideos(videos,heroOrder)[0]
-  const image=top?.heroImage?.trim()||top?.thumbnail?.trim()||''
-  return {
-    title:TITLE,
-    description:DESCRIPTION,
-    alternates:{canonical:SITE_URL},
-    // No image found (e.g. nothing's featured yet) — omit openGraph/twitter entirely so the
-    // page falls back to the root layout's default preview image instead of a broken one.
-    ...(image?{
-      openGraph:{title:TITLE,description:DESCRIPTION,url:SITE_URL,images:[{url:image}]},
-      twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION,images:[image]}
-    }:{})
-  }
+// The link-preview image itself comes from app/opengraph-image.js (a generated card with
+// the current top Hero video's photo, title, and the site logo composited on) — Next.js
+// wires that up to this route automatically, so no `images` field is needed here.
+export const metadata={
+  title:TITLE,
+  description:DESCRIPTION,
+  alternates:{canonical:SITE_URL},
+  openGraph:{title:TITLE,description:DESCRIPTION,url:SITE_URL},
+  twitter:{card:'summary_large_image',title:TITLE,description:DESCRIPTION}
 }
 
 export default async function Home(){
