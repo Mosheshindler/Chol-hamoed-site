@@ -54,12 +54,12 @@ export default function SignupPopup(){
       <div className="signupPopupHead">
         <div className="eyebrow">DON&rsquo;T MISS OUT</div>
         <h3>Stay in the loop</h3>
-        <p>Get new videos and updates from Mint Media the moment they drop.</p>
+        <p>Get new videos and updates from Mint Media.</p>
       </div>
       <div className="signupPopupOptions">
         <a className="signupPopupOption" href={SITE_LINKS.newsletter} target="_blank" rel="noreferrer" onClick={dismiss}>
           <span className="ctaIcon"><MailIcon/></span>
-          <span><strong>Newsletter</strong><small>Email updates</small></span>
+          <span><strong>Newsletter</strong><small>Email updates (once monthly)</small></span>
         </a>
         <a className="signupPopupOption" href={SITE_LINKS.whatsapp} target="_blank" rel="noreferrer" onClick={dismiss}>
           <span className="ctaIcon waIcon"><WhatsAppIcon/></span>
