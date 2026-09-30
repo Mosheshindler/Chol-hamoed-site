@@ -2,6 +2,7 @@ import './globals.css'
 import './launch.css'
 import {GoogleAnalytics} from '@next/third-parties/google'
 import {SITE_URL,SITE_IMAGE,SITE_IMAGE_DIMENSIONS} from '../lib/site'
+import SignupPopup from '../components/SignupPopup'
 
 const SITE_TITLE='Entertain-Mint - a collection of Mint Media content'
 const SITE_DESCRIPTION='Watch stories, documentaries, events, entertainment and more from Mint Media.'
@@ -27,4 +28,4 @@ export const metadata={
     images:[SITE_IMAGE]
   }
 }
-export default function RootLayout({children}){return <html lang="en"><body>{children}</body><GoogleAnalytics gaId="G-Q53CBD5P39"/></html>}
+export default function RootLayout({children}){return <html lang="en"><body>{children}<SignupPopup/></body><GoogleAnalytics gaId="G-Q53CBD5P39"/></html>}
