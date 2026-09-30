@@ -11,6 +11,18 @@ import {notFound} from 'next/navigation'
 import {SITE_URL} from '../../../lib/site'
 import {buildVideoJsonLd,videoDescription} from '../../../lib/seo'
 
+// Without this, Next has no way to know video slugs ahead of time, so every single watch
+// page view was rendered fresh on the server with zero caching (verified live: every request
+// came back `x-vercel-cache: MISS`, even back-to-back requests for the same video). Listing
+// every published slug here lets Next serve these statically, same as the homepage, and
+// regenerate in the background every 30s (matching the videos list's own cache window) —
+// a brand-new video not yet in this list still renders fine on first request and gets cached
+// from then on (Next's default `dynamicParams` behavior).
+export async function generateStaticParams(){
+  const videos=await getVideos()
+  return videos.map(v=>({slug:v.slug}))
+}
+
 export async function generateMetadata({params}){
   const {slug}=await params
   const video=await getVideoBySlug(slug)

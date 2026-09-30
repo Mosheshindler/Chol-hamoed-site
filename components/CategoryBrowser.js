@@ -1,5 +1,6 @@
 'use client'
 import {useEffect,useMemo,useRef,useState} from 'react'
+import {useSearchParams} from 'next/navigation'
 import VideoCard from './VideoCard'
 import Icon from './Icon'
 import {CATEGORIES,categorySlug} from '../lib/site'
@@ -84,7 +85,14 @@ function matchesSearch(video,query){
   return q.split(' ').every(word=>fuzzyWordMatch(hayWords,word))
 }
 
-export default function CategoryBrowser({slug,name,videos,categoryOrder={},initialQuery='',autoFocus=false}){
+// Reading ?q=/?focus=1 here (client-side, via the hook) instead of as server-passed props
+// keeps the category page itself free of request-specific data, so it can be served as a
+// cached/static page (see app/category/[slug]/page.js) instead of re-rendering on the
+// server for every single visit.
+export default function CategoryBrowser({slug,name,videos,categoryOrder={}}){
+  const searchParams=useSearchParams()
+  const initialQuery=searchParams.get('q')||''
+  const autoFocus=searchParams.get('focus')==='1'
   const [q,setQ]=useState(initialQuery)
   const searchRef=useRef(null)
   const [visible,setVisible]=useState(PAGE_SIZE)

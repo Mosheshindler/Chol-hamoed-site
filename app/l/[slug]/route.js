@@ -22,7 +22,11 @@ async function lookupCampaign(code){
     const target=new URL(`${url}/rest/v1/short_links`)
     target.searchParams.set('code',`eq.${code}`)
     target.searchParams.set('select','campaign')
-    const r=await fetch(target,{headers:{apikey:key,Authorization:`Bearer ${key}`},cache:'no-store'})
+    // Campaign names never change once a link is created, but `cache:'no-store'` meant a
+    // link going out in a mass WhatsApp/status blast would hit Supabase once per click, all
+    // at once. A short revalidation window still shows a brand-new link correctly within a
+    // few minutes, while collapsing a traffic spike into one shared lookup per code.
+    const r=await fetch(target,{headers:{apikey:key,Authorization:`Bearer ${key}`},next:{revalidate:300}})
     if(!r.ok) return null
     const rows=await r.json()
     return rows[0]?.campaign||null

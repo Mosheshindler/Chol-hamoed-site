@@ -14,6 +14,21 @@ export default function HeroCarousel({videos=[]}){
   const [playing,setPlaying]=useState(true)
   const touchStartX=useRef(null)
   const touchStartY=useRef(null)
+  // Every slide used to load its full photo immediately, regardless of whether anyone ever
+  // scrolled to it — a brand-new visitor paid for all 8 hero photos on the very first hit.
+  // Now only the current slide plus the one after it (so the crossfade never shows a blank
+  // frame) load at a time; each step through the carousel loads one more, never all at once.
+  const [loaded,setLoaded]=useState(()=>new Set([0]))
+
+  useEffect(()=>{
+    setLoaded(prev=>{
+      const next=(index+1)%Math.max(slides.length,1)
+      if(prev.has(index) && prev.has(next)) return prev
+      const updated=new Set(prev)
+      updated.add(index);updated.add(next)
+      return updated
+    })
+  },[index,slides.length])
 
   useEffect(()=>{
     if(!playing || slides.length<2) return
@@ -50,7 +65,7 @@ export default function HeroCarousel({videos=[]}){
     <div className="heroSlideStack">
       {slides.map((s,i)=>{
         const image=(s.heroImage&&s.heroImage.trim())||(s.thumbnail&&s.thumbnail.trim())||'/assets/hero-camera.jpg'
-        return <div key={s.slug||i} className={`heroSlide${i===index?' active':''}`} style={{backgroundImage:`url(${JSON.stringify(image)})`}}/>
+        return <div key={s.slug||i} className={`heroSlide${i===index?' active':''}`} style={loaded.has(i)?{backgroundImage:`url(${JSON.stringify(image)})`}:undefined}/>
       })}
     </div>
     <div className="heroShade"/>

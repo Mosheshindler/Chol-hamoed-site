@@ -1,9 +1,17 @@
+import {Suspense} from 'react'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import SignupCTA from '../../../components/SignupCTA'
 import CategoryBrowser from '../../../components/CategoryBrowser'
 import {getVideos,getCategoryOrder} from '../../../lib/data'
 import {CATEGORIES,categorySlug,CATEGORY_DESCRIPTIONS,SITE_URL,SITE_IMAGE,SITE_IMAGE_DIMENSIONS} from '../../../lib/site'
+
+// Same fix as the watch pages: without this, every category page (Stories, Documentaries,
+// All Videos, …) rendered fresh on the server per visit with zero caching. Listing every
+// category slug up front lets these serve statically and regenerate every 30s instead.
+export async function generateStaticParams(){
+  return [...CATEGORIES.map(c=>({slug:categorySlug(c)})),{slug:'all-videos'}]
+}
 
 export async function generateMetadata({params}){
   const {slug:resolvedSlug}=await params
@@ -32,13 +40,10 @@ export async function generateMetadata({params}){
   }
 }
 
-export default async function CategoryPage({params,searchParams}){
+export default async function CategoryPage({params}){
   const {slug:resolvedSlug}=await params
-  const resolvedSearch=await searchParams
   const slug=resolvedSlug||'stories'
   const name=slug.split('-').map(x=>x[0]?.toUpperCase()+x.slice(1)).join(' ').replace('And','&')
   const [videos,categoryOrder]=await Promise.all([getVideos(),slug==='all-videos'?Promise.resolve({}):getCategoryOrder(slug)])
-  const initialQuery=typeof resolvedSearch?.q==='string'?resolvedSearch.q:''
-  const autoFocus=resolvedSearch?.focus==='1'
-  return <><Header/><main className="container"><CategoryBrowser slug={slug} name={name} videos={videos} categoryOrder={categoryOrder} initialQuery={initialQuery} autoFocus={autoFocus}/><SignupCTA/></main><Footer/></>
+  return <><Header/><main className="container"><Suspense fallback={null}><CategoryBrowser slug={slug} name={name} videos={videos} categoryOrder={categoryOrder}/></Suspense><SignupCTA/></main><Footer/></>
 }
