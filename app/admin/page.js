@@ -56,6 +56,7 @@ export default function AdminPage(){
   const [newTag,setNewTag]=useState('')
   const [categoryOrderRows,setCategoryOrderRows]=useState([])
   const [dragState,setDragState]=useState(null)
+  const [cacheFixState,setCacheFixState]=useState(null)
   const [videoSearch,setVideoSearch]=useState('')
   const [videoFilters,setVideoFilters]=useState([])
 
@@ -241,8 +242,12 @@ export default function AdminPage(){
     const compressed=await compressImage(file,prefix==='hero'?1600:800)
     const ext=(compressed.name.split('.').pop()||'jpg').toLowerCase()
     const safeExt=['jpg','jpeg','png','webp'].includes(ext)?ext:'jpg'
+    // Each upload gets a fresh timestamped filename (never reused), so this exact file at
+    // this exact path never changes — safe to cache for a year instead of Supabase's default
+    // 1 hour, which meant every visitor who stuck around more than an hour, or came back
+    // later, re-downloaded every image from scratch. Cuts repeat-download bandwidth a lot.
     const path=`${prefix}-${slug}-${Date.now()}.${safeExt}`
-    const {error}=await supabase.storage.from('video-thumbnails').upload(path,compressed,{upsert:false,contentType:compressed.type||undefined})
+    const {error}=await supabase.storage.from('video-thumbnails').upload(path,compressed,{upsert:false,contentType:compressed.type||undefined,cacheControl:'31536000'})
     if(error) throw error
     const {data}=supabase.storage.from('video-thumbnails').getPublicUrl(path)
     return data.publicUrl
@@ -366,6 +371,39 @@ export default function AdminPage(){
     setBusy(false)
   }
 
+  // Urgent fix for the Supabase bandwidth overage: every image currently in storage was
+  // uploaded with only a 1-hour cache lifetime (Supabase's default when it's not specified),
+  // so anyone browsing more than an hour, or returning later, re-downloads everything from
+  // scratch. Re-uploads each Supabase-hosted image to its own exact same path (upsert) purely
+  // to change that to a 1-year cache — no video's thumbnail_url/hero_image_url changes, and
+  // since the bytes are identical, this doesn't need to re-compress anything.
+  async function extendImageCaching(){
+    const targets=[]
+    for(const v of videos){
+      if(v.thumbnail_url?.includes('supabase.co/storage')) targets.push(v.thumbnail_url)
+      if(v.hero_image_url?.includes('supabase.co/storage')) targets.push(v.hero_image_url)
+    }
+    if(!targets.length){setMessage('No Supabase-hosted images to update.');return}
+    if(!confirm(`Update caching on ${targets.length} stored image${targets.length===1?'':'s'}? This can take a minute — don't close this tab while it runs.`)) return
+    setBusy(true);setCacheFixState({done:0,total:targets.length})
+    let done=0,failed=0
+    for(const imgUrl of targets){
+      try{
+        const res=await fetch(imgUrl)
+        if(!res.ok) throw new Error('fetch failed')
+        const blob=await res.blob()
+        const path=decodeURIComponent(imgUrl.split('/video-thumbnails/')[1])
+        const {error}=await supabase.storage.from('video-thumbnails').upload(path,blob,{upsert:true,contentType:blob.type||undefined,cacheControl:'31536000'})
+        if(error) throw error
+        done++
+      }catch{failed++}
+      setCacheFixState(s=>({done:(s?.done||0)+1,total:targets.length}))
+    }
+    setCacheFixState(null)
+    setMessage(`Caching updated on ${done} image${done===1?'':'s'}${failed?`, ${failed} couldn't be updated`:''}.`)
+    setBusy(false)
+  }
+
   async function removeVideo(v){
     if(!confirm(`Delete “${v.title}”?`)) return
     const {error}=await supabase.from('videos').delete().eq('id',v.id)
@@ -397,7 +435,7 @@ export default function AdminPage(){
       </form>
     </section>
     <section className="adminPanel adminLibrary">
-      <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={cleanupOrphanedImages} disabled={busy}>Clean Up Unused Images</button></div></div>
+      <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={extendImageCaching} disabled={busy}>{cacheFixState?`Updating caching… ${cacheFixState.done}/${cacheFixState.total}`:'Update Image Caching'}</button><button type="button" className="adminGhost" onClick={cleanupOrphanedImages} disabled={busy}>Clean Up Unused Images</button></div></div>
       {!isSearching&&<div className="adminJumpNav">
         <label htmlFor="adminJumpSelect">Jump to section</label>
         <select id="adminJumpSelect" value="" onChange={e=>{
