@@ -59,6 +59,7 @@ export default function AdminPage(){
   const [videoSearch,setVideoSearch]=useState('')
   const [videoFilters,setVideoFilters]=useState([])
   const [backfillState,setBackfillState]=useState(null)
+  const [compressState,setCompressState]=useState(null)
 
   function toggleVideoFilter(key){
     setVideoFilters(f=>f.includes(key)?f.filter(x=>x!==key):[...f,key])
@@ -214,11 +215,36 @@ export default function AdminPage(){
     }
   }
 
+  // Uploaded images were going straight into storage at whatever size/format the admin's
+  // phone or camera produced them in — several hero images ended up 5-7MB each, served to
+  // every single visitor with zero compression. Every video card and hero slide is a plain
+  // <img>, not next/image (that's now `unoptimized` too — see VideoCard.js), so nothing else
+  // resizes these on the way out; this is the only place that can. Re-encoding through a
+  // canvas to a capped width + JPEG keeps it looking the same on screen at a fraction of
+  // the size, and cuts both Supabase bandwidth and any future Vercel image-optimization use.
+  async function compressImage(file,maxWidth){
+    try{
+      const bitmap=await createImageBitmap(file)
+      const scale=Math.min(1,maxWidth/bitmap.width)
+      const w=Math.max(1,Math.round(bitmap.width*scale))
+      const h=Math.max(1,Math.round(bitmap.height*scale))
+      const canvas=document.createElement('canvas')
+      canvas.width=w;canvas.height=h
+      canvas.getContext('2d').drawImage(bitmap,0,0,w,h)
+      const blob=await new Promise(res=>canvas.toBlob(res,'image/jpeg',0.82))
+      if(!blob) return file
+      return new File([blob],file.name.replace(/\.\w+$/,'.jpg'),{type:'image/jpeg'})
+    }catch{
+      return file // if compression fails for any reason, fall back to the original upload
+    }
+  }
+
   async function uploadImage(file,slug,prefix='thumb'){
-    const ext=(file.name.split('.').pop()||'jpg').toLowerCase()
+    const compressed=await compressImage(file,prefix==='hero'?1600:800)
+    const ext=(compressed.name.split('.').pop()||'jpg').toLowerCase()
     const safeExt=['jpg','jpeg','png','webp'].includes(ext)?ext:'jpg'
     const path=`${prefix}-${slug}-${Date.now()}.${safeExt}`
-    const {error}=await supabase.storage.from('video-thumbnails').upload(path,file,{upsert:false,contentType:file.type||undefined})
+    const {error}=await supabase.storage.from('video-thumbnails').upload(path,compressed,{upsert:false,contentType:compressed.type||undefined})
     if(error) throw error
     const {data}=supabase.storage.from('video-thumbnails').getPublicUrl(path)
     return data.publicUrl
@@ -337,6 +363,44 @@ export default function AdminPage(){
     setBusy(false)
   }
 
+  // One-time cleanup for images uploaded before compression existed above — several hero
+  // images were sitting at 5-7MB each, served uncompressed to every visitor. Re-fetches each
+  // Supabase-hosted image, re-encodes it through the same compressImage() new uploads use,
+  // and uploads it back to the exact same storage path (upsert), so no video's thumbnail_url
+  // or hero_image_url needs to change — the URL just points at a much smaller file afterward.
+  async function compressStoredImages(){
+    const targets=[]
+    for(const v of videos){
+      if(v.thumbnail_url?.includes('supabase.co/storage')) targets.push({field:'thumbnail_url',url:v.thumbnail_url})
+      if(v.hero_image_url?.includes('supabase.co/storage')) targets.push({field:'hero_image_url',url:v.hero_image_url})
+    }
+    if(!targets.length){setMessage('No Supabase-hosted images to compress.');return}
+    if(!confirm(`Compress ${targets.length} stored image${targets.length===1?'':'s'}? This can take a few minutes — don't close this tab while it runs.`)) return
+    setBusy(true);setCompressState({done:0,total:targets.length})
+    let done=0,failed=0,savedBytes=0
+    for(const t of targets){
+      try{
+        const res=await fetch(t.url)
+        if(!res.ok) throw new Error('fetch failed')
+        const blob=await res.blob()
+        const originalSize=blob.size
+        const file=new File([blob],'image',{type:blob.type||'image/png'})
+        const compressed=await compressImage(file,t.field==='hero_image_url'?1600:800)
+        if(compressed.size<originalSize){
+          const path=decodeURIComponent(t.url.split('/video-thumbnails/')[1])
+          const {error}=await supabase.storage.from('video-thumbnails').upload(path,compressed,{upsert:true,contentType:'image/jpeg'})
+          if(error) throw error
+          savedBytes+=originalSize-compressed.size
+        }
+        done++
+      }catch{failed++}
+      setCompressState(s=>({done:(s?.done||0)+1,total:targets.length}))
+    }
+    setCompressState(null)
+    setMessage(`Compression complete: ${done} image${done===1?'':'s'} processed, ~${(savedBytes/1024/1024).toFixed(1)}MB saved${failed?`, ${failed} couldn't be processed`:''}.`)
+    setBusy(false)
+  }
+
   async function removeVideo(v){
     if(!confirm(`Delete “${v.title}”?`)) return
     const {error}=await supabase.from('videos').delete().eq('id',v.id)
@@ -368,7 +432,7 @@ export default function AdminPage(){
       </form>
     </section>
     <section className="adminPanel adminLibrary">
-      <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={backfillPublishDates} disabled={busy}>{backfillState?`Fetching dates… (${backfillState.done}/${backfillState.total})`:'Backfill Upload Dates'}</button></div></div>
+      <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={backfillPublishDates} disabled={busy}>{backfillState?`Fetching dates… (${backfillState.done}/${backfillState.total})`:'Backfill Upload Dates'}</button><button type="button" className="adminGhost" onClick={compressStoredImages} disabled={busy}>{compressState?`Compressing… (${compressState.done}/${compressState.total})`:'Compress Stored Images'}</button></div></div>
       {!isSearching&&<div className="adminJumpNav">
         <label htmlFor="adminJumpSelect">Jump to section</label>
         <select id="adminJumpSelect" value="" onChange={e=>{
