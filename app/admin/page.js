@@ -401,6 +401,38 @@ export default function AdminPage(){
     setBusy(false)
   }
 
+  // Every re-upload (Edit Video → replace thumbnail/hero image) leaves the old file sitting
+  // in storage forever — nothing ever deletes it, since a fresh timestamped filename is used
+  // each time rather than overwriting. This finds any file in the bucket that no video's
+  // thumbnail_url/hero_image_url points to anymore and removes it. Storage delete needs the
+  // same permission upload already has — if this errors, the "video-thumbnails" bucket may
+  // need a delete policy added for authenticated users in Supabase.
+  async function cleanupOrphanedImages(){
+    setBusy(true);setMessage('Checking for unused images…')
+    try{
+      const {data:files,error:listError}=await supabase.storage.from('video-thumbnails').list('',{limit:1000})
+      if(listError) throw listError
+      const referenced=new Set()
+      videos.forEach(v=>{
+        ;[v.thumbnail_url,v.hero_image_url].forEach(u=>{
+          if(u && u.includes('/video-thumbnails/')) referenced.add(decodeURIComponent(u.split('/video-thumbnails/')[1]))
+        })
+      })
+      const orphaned=(files||[]).filter(f=>!referenced.has(f.name))
+      if(!orphaned.length){setMessage('No unused images found — storage is already clean.');setBusy(false);return}
+      const totalKB=orphaned.reduce((a,f)=>a+(f.metadata?.size||0),0)/1024
+      if(!confirm(`Delete ${orphaned.length} unused image${orphaned.length===1?'':'s'} (~${(totalKB/1024).toFixed(1)}MB)? These aren't linked to any video. This can't be undone.`)) {setBusy(false);return}
+      const {error:removeError}=await supabase.storage.from('video-thumbnails').remove(orphaned.map(f=>f.name))
+      if(removeError) throw removeError
+      setMessage(`Removed ${orphaned.length} unused image${orphaned.length===1?'':'s'}, freeing ~${(totalKB/1024).toFixed(1)}MB.`)
+    }catch(err){
+      setMessage(err.message?.includes('permission')||err.status===403
+        ? `Couldn't delete: your admin login doesn't have storage delete permission yet. Ask Claude for the Supabase policy to add.`
+        : (err.message||'Could not clean up unused images.'))
+    }
+    setBusy(false)
+  }
+
   async function removeVideo(v){
     if(!confirm(`Delete “${v.title}”?`)) return
     const {error}=await supabase.from('videos').delete().eq('id',v.id)
@@ -432,7 +464,7 @@ export default function AdminPage(){
       </form>
     </section>
     <section className="adminPanel adminLibrary">
-      <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={backfillPublishDates} disabled={busy}>{backfillState?`Fetching dates… (${backfillState.done}/${backfillState.total})`:'Backfill Upload Dates'}</button><button type="button" className="adminGhost" onClick={compressStoredImages} disabled={busy}>{compressState?`Compressing… (${compressState.done}/${compressState.total})`:'Compress Stored Images'}</button></div></div>
+      <div className="adminPanelHead"><h2>Existing Videos</h2><div className="adminPanelHeadRight"><span>{videos.length} videos</span><button type="button" className="adminGhost" onClick={backfillPublishDates} disabled={busy}>{backfillState?`Fetching dates… (${backfillState.done}/${backfillState.total})`:'Backfill Upload Dates'}</button><button type="button" className="adminGhost" onClick={compressStoredImages} disabled={busy}>{compressState?`Compressing… (${compressState.done}/${compressState.total})`:'Compress Stored Images'}</button><button type="button" className="adminGhost" onClick={cleanupOrphanedImages} disabled={busy}>Clean Up Unused Images</button></div></div>
       {!isSearching&&<div className="adminJumpNav">
         <label htmlFor="adminJumpSelect">Jump to section</label>
         <select id="adminJumpSelect" value="" onChange={e=>{
