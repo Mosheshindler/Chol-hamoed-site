@@ -154,6 +154,16 @@ export default function AdminPage(){
     if(!error) setCategoryOrderRows(data||[])
   }
 
+  // Public pages are statically cached now (see app/watch/[slug] and app/category/[slug]),
+  // so a save here wouldn't show up on the live site until the next timed refresh. Calling
+  // this right after a successful save makes it show up immediately instead — silently; a
+  // visitor never needs to know or wait, and this doesn't block on the result either way.
+  async function notifyPublished(){
+    try{
+      await fetch('/api/revalidate',{method:'POST',headers:{Authorization:`Bearer ${session?.access_token||''}`}})
+    }catch{}
+  }
+
   async function saveCategoryOrder(catName,reordered){
     const slug=catName===HOME_GROUP?HOME_SLUG:catName===HERO_GROUP?HERO_SLUG:categorySlug(catName)
     setBusy(true);setMessage('Saving new order…')
@@ -163,6 +173,7 @@ export default function AdminPage(){
       if(failed) throw failed.error
       setMessage('Order updated.')
       await loadCategoryOrder()
+      notifyPublished()
     }catch(err){setMessage(err.message||'Could not save new order.')}
     finally{setBusy(false)}
   }
@@ -291,6 +302,7 @@ export default function AdminPage(){
         : await supabase.from('videos').insert(payload).select().single()
       if(result.error) throw result.error
       setForm(emptyForm);setThumbFile(null);setHeroFile(null);setMessage(form.id?'Video updated.':'Video published.');await loadVideos()
+      notifyPublished()
     }catch(err){setMessage(err.message||'Could not save video.')}finally{setBusy(false)}
   }
 
@@ -305,6 +317,7 @@ export default function AdminPage(){
       await Promise.all(reordered.map((v,i)=>supabase.from('videos').update({sort_order:i}).eq('id',v.id)))
       setMessage('Order updated.')
       await loadVideos()
+      notifyPublished()
     }catch(err){setMessage(err.message||'Could not save new order.');await loadVideos()}
     finally{setBusy(false)}
   }
@@ -407,7 +420,7 @@ export default function AdminPage(){
   async function removeVideo(v){
     if(!confirm(`Delete “${v.title}”?`)) return
     const {error}=await supabase.from('videos').delete().eq('id',v.id)
-    if(error)setMessage(error.message);else{setMessage('Video deleted.');loadVideos()}
+    if(error)setMessage(error.message);else{setMessage('Video deleted.');loadVideos();notifyPublished()}
   }
 
   if(authLoading) return <><Header/><main className="adminPage wide"><div className="adminPanel">Loading admin…</div></main><Footer/></>
