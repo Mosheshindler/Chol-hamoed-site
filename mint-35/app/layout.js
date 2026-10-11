@@ -1,13 +1,12 @@
 import './globals.css'
 
+const title = 'Mint 35 — AI-Powered Commercials by Mint Media'
+const description = 'A streamlined, fixed-scope way to create short commercials. Submit your project details and brand assets, and Mint 35 turns them into a finished 30–60 second spot.'
+
 export const metadata = {
-  title: 'Mint 35 — AI Commercials by Mint Media',
-  description: 'Short, scroll-stopping 30–60 second AI commercials, scripted and directed by the Mint Media team.',
-  openGraph: {
-    title: 'Mint 35 — AI Commercials by Mint Media',
-    description: 'Short, scroll-stopping 30–60 second AI commercials, scripted and directed by the Mint Media team.',
-    type: 'website',
-  },
+  title,
+  description,
+  openGraph: {title, description, type: 'website'},
 }
 
 export const viewport = {themeColor: '#0b0d0b'}

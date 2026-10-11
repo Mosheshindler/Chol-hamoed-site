@@ -11,9 +11,11 @@ npm run dev
 ```
 Open http://localhost:3000
 
-## Contact form
-Uses FormSubmit, posting to info@mintmediallc.com. The first submission triggers a one-time
-confirmation email from FormSubmit; confirm it once and later inquiries arrive in that inbox.
+## Project form
+The project questionnaire (components/ProjectForm.js) posts to FormSubmit, which emails each
+submission to info@mintmediallc.com with uploaded files attached. The first submission triggers a
+one-time confirmation email from FormSubmit; confirm it once and later projects arrive in that inbox.
+Email attachments are size-limited, so very large logo or image files may not come through.
 
 ## Deploy
 Create a new Vercel project from this repo and set **Root Directory** to `mint-35`.
