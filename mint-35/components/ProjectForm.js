@@ -23,7 +23,7 @@ export default function ProjectForm() {
 
       <label>What are you promoting?<textarea name="What are you promoting" rows={3} required /></label>
       <label>Who is your target audience?
-        <span className="hint">Who do you want watching this commercial? Please describe your ideal audience, including relevant details such as age range, gender, geographic location, interests, community or other important demographics.</span>
+        <span className="hint">Age range, gender, location, interests, community.</span>
         <textarea name="Target audience" rows={3} required />
       </label>
       <label>What&rsquo;s the single most important thing they should know?<textarea name="Most important thing to know" rows={2} required /></label>
@@ -40,7 +40,7 @@ export default function ProjectForm() {
       </fieldset>
 
       <label>When would you ideally like it delivered?
-        <span className="hint">Production dates are subject to availability. Once your project officially begins production, your first completed version will be delivered within three business days.</span>
+        <span className="hint">Subject to availability. First cut arrives 3 business days after production begins.</span>
         <input type="date" name="Ideal delivery date" />
       </label>
 
@@ -54,11 +54,13 @@ export default function ProjectForm() {
       <label><span>Creative references or links <span className="optional">— optional</span></span><textarea name="Creative references or links" rows={2} /></label>
 
       <div className="before">
-        <h3>Before submitting</h3>
-        <p>Please make sure all names, prices, dates, URLs, offers, phone numbers and required information are accurate.</p>
-        <p>By submitting your project, you understand that Mint 35 is a fixed-scope production service that includes one script approval opportunity and one consolidated round of creative revisions.</p>
-        <p>Your project will enter our production queue after submission and acceptance. The three-business-day turnaround begins only when your project officially enters production, following script approval.</p>
-        <p>Additional creative revisions or major changes to the original project scope are not included and may be quoted separately.</p>
+        <h3>Before you submit</h3>
+        <ul className="ticks">
+          <li>Double-check names, prices, dates, URLs and phone numbers.</li>
+          <li>You get one script approval and one revision round.</li>
+          <li>The 3-day clock starts after script approval.</li>
+          <li>Extra revisions or scope changes are quoted separately.</li>
+        </ul>
       </div>
 
       <button type="submit" className="btn btn-primary">Submit My Project</button>
