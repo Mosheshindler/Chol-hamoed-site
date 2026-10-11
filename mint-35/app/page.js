@@ -3,6 +3,8 @@ import Hero from '@/components/Hero'
 import ProjectForm from '@/components/ProjectForm'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
+import FormatsModal from '@/components/FormatsModal'
+import DialogController from '@/components/DialogController'
 
 const formats = [
   {ratio: '9:16', label: 'Reels · TikTok · Shorts · WhatsApp Status'},
@@ -42,8 +44,8 @@ const notIncluded = [
 ]
 
 const packages = [
-  {name: 'Single 35', blurb: 'One commercial, one message.', items: ['1 commercial, 30–60 sec', '1 platform export', '1 revision round'], cta: 'Start My Commercial'},
-  {name: 'Campaign 3', featured: true, blurb: 'Three spots around one campaign.', items: ['3 commercials', 'Shared look, different hooks', '1 revision round each'], cta: 'Build My Campaign'},
+  {name: 'Single 35', blurb: 'One commercial, one message.', items: ['1 commercial, 30–60 sec', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round'], cta: 'Start My Commercial'},
+  {name: 'Campaign 3', featured: true, blurb: 'Three spots around one campaign.', items: ['3 commercials', 'Shared look, different hooks', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round each'], cta: 'Build My Campaign'},
   {name: 'Always On', blurb: 'Fresh spots every month.', items: ['Set number of spots per month', 'Priority production queue', 'Your brand assets on file'], cta: 'Go Always On'},
 ]
 
@@ -55,7 +57,15 @@ const faqs = [
   {q: 'Is it fully automated?', a: 'No. AI does the production work. Real Mint Media creatives write, assemble and finish every spot.'},
 ]
 
-const Yes = ({items}) => <ul className="yes">{items.map(i => <li key={i}>{i}</li>)}</ul>
+const Yes = ({items}) => (
+  <ul className="yes">
+    {items.map(i => typeof i === 'string' ? <li key={i}>{i}</li> : (
+      <li key={i.text}>
+        <button type="button" className="info-link" data-open={i.info}>{i.text}<span className="info-i" aria-hidden="true">i</span></button>
+      </li>
+    ))}
+  </ul>
+)
 const No = ({items}) => <ul className="no">{items.map(i => <li key={i}>{i}</li>)}</ul>
 
 export default function Home() {
@@ -74,6 +84,7 @@ export default function Home() {
                 <span><strong>{f.ratio}</strong> {f.label}</span>
               </div>
             ))}
+            <button type="button" className="info-link" data-open="formats-dialog">What&rsquo;s the difference?<span className="info-i" aria-hidden="true">i</span></button>
           </div>
         </section>
 
@@ -174,6 +185,8 @@ export default function Home() {
         </section>
       </main>
       <Footer />
+      <FormatsModal />
+      <DialogController />
     </>
   )
 }

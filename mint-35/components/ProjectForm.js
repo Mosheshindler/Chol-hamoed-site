@@ -1,6 +1,8 @@
 // Posts to FormSubmit (no backend needed). The first submission sends a one-time
 // confirmation email to info@mintmediallc.com; after confirming, projects arrive there
 // with uploaded files attached.
+import {formats} from './formats'
+
 const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 
 export default function ProjectForm() {
@@ -36,6 +38,29 @@ export default function ProjectForm() {
           {placements.map(p => (
             <label key={p} className="check"><input type="checkbox" name={`Runs on: ${p}`} value="Yes" />{p}</label>
           ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="legend-row">
+          <span>Which orientation do you need?</span>
+          <button type="button" className="info-link" data-open="formats-dialog">What&rsquo;s the difference?<span className="info-i" aria-hidden="true">i</span></button>
+        </legend>
+        <div className="orient">
+          {formats.map(f => (
+            <label key={f.ratio} className="orient-opt">
+              <input type="radio" name="Orientation" value={`${f.ratio} ${f.name}`} required />
+              <span className={`frame frame-${f.ratio.replace(':', '-')}`} aria-hidden="true" />
+              <b>{f.ratio}</b>
+              <span className="orient-name">{f.name}</span>
+            </label>
+          ))}
+          <label className="orient-opt">
+            <input type="radio" name="Orientation" value="Not sure - recommend one" />
+            <span className="frame frame-unsure" aria-hidden="true">?</span>
+            <b>Not sure</b>
+            <span className="orient-name">Recommend one for me</span>
+          </label>
         </div>
       </fieldset>
 
