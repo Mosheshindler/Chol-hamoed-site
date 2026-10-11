@@ -45,6 +45,14 @@ const compare = [
 
 const uses = ['Product launches', 'Events', 'Sales & offers', 'Announcements', 'Services', 'Social content', 'Testing new ideas']
 
+const anatomy = [
+  {name: 'Hook', secs: 3},
+  {name: 'Message', secs: 9},
+  {name: 'Product', secs: 13},
+  {name: 'Offer', secs: 5},
+  {name: 'Call to action', secs: 5},
+]
+
 const packages = [
   {name: 'Single 35', blurb: 'One commercial, one message.', items: ['1 commercial, 30–60 sec', '1 platform export', '1 revision round'], cta: 'Start My Commercial'},
   {name: 'Campaign 3', featured: true, blurb: 'Three spots around one campaign.', items: ['3 commercials', 'Shared look, different hooks', '1 revision round each'], cta: 'Build My Campaign'},
@@ -81,6 +89,17 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="marquee" aria-label="Perfect for">
+          <span className="marquee-label">Perfect for</span>
+          <div className="marquee-track">
+            {[0, 1].map(k => (
+              <div key={k} className="marquee-group" aria-hidden={k === 1 ? 'true' : undefined}>
+                {uses.map(u => <span key={u}>{u}</span>)}
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section id="how" className="section">
           <div className="container">
             <p className="eyebrow">How it works</p>
@@ -94,6 +113,17 @@ export default function Home() {
                 </li>
               ))}
             </ol>
+            <div className="anatomy" aria-label="Example structure of a 35-second spot">
+              <p className="label">Anatomy of a 35-second spot</p>
+              <div className="anatomy-bar">
+                {anatomy.map(a => (
+                  <div key={a.name} style={{flexGrow: a.secs}} className="seg">
+                    <b>{a.name}</b><span>{a.secs}s</span>
+                  </div>
+                ))}
+              </div>
+              <div className="anatomy-scale"><span>0:00</span><span>0:35</span></div>
+            </div>
           </div>
         </section>
 
@@ -102,12 +132,8 @@ export default function Home() {
             <p className="eyebrow">What&rsquo;s included</p>
             <h2>Fixed scope. That&rsquo;s why it costs less.</h2>
             <div className="yesno">
-              <div className="card"><h3>Included</h3><Yes items={included} /></div>
-              <div className="card"><h3>Not included</h3><No items={notIncluded} /></div>
-            </div>
-            <div className="uses">
-              <span className="label">Perfect for</span>
-              {uses.map(u => <span key={u} className="chip">{u}</span>)}
+              <div className="card card-yes"><h3>Included</h3><Yes items={included} /></div>
+              <div className="card card-no"><h3>Not included</h3><No items={notIncluded} /></div>
             </div>
           </div>
         </section>
@@ -141,7 +167,7 @@ export default function Home() {
                   <h3>{p.name}</h3>
                   <p className="package-blurb">{p.blurb}</p>
                   <Yes items={p.items} />
-                  <a href="#start" className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>{p.cta}</a>
+                  <a href="#start" className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>{p.cta} <span className="arrow">→</span></a>
                 </div>
               ))}
             </div>
@@ -189,7 +215,7 @@ export default function Home() {
                 <li>No script to write</li>
                 <li>No AI to learn</li>
               </ul>
-              <a href="#project-form" className="btn btn-primary">Start My Mint 35</a>
+              <a href="#project-form" className="btn btn-primary">Start My Mint 35 <span className="arrow">→</span></a>
             </div>
             <ProjectForm />
           </div>
