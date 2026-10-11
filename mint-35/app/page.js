@@ -130,7 +130,7 @@ export default function Home() {
                   <h3>{p.name}</h3>
                   <p className="package-blurb">{p.blurb}</p>
                   <Yes items={p.items} />
-                  <a href="#start" className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>{p.cta} <span className="arrow">→</span></a>
+                  <a href="#start" data-package={p.name} className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>{p.cta} <span className="arrow">→</span></a>
                 </div>
               ))}
             </div>

@@ -306,6 +306,13 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .ticks li::before { content: ""; position: absolute; left: 3px; top: 11px; width: 10px; height: 6px; border-left: 2px solid var(--lime); border-bottom: 2px solid var(--lime); transform: rotate(-45deg); }
 .form .btn { justify-self: start; }
 .hp { display: none; }
+.other-input { margin-top: 10px; }
+.form-error { color: var(--red); background: rgba(224,122,107,.1); border: 1px solid rgba(224,122,107,.35); border-radius: 12px; padding: 12px 14px; margin: 0; font-size: .92rem; }
+.form .btn:disabled { opacity: .7; cursor: progress; transform: none; }
+.form-done { text-align: center; justify-items: center; padding: 56px 32px; }
+.form-done p { color: var(--muted); max-width: 440px; margin: 0; }
+.form-done .done-ref { color: var(--text); }
+.done-check { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--lime); color: #0a0c0a; font-size: 1.8rem; font-weight: 800; box-shadow: 0 0 0 10px rgba(136,192,64,.15); }
 
 /* Footer */
 .footer { border-top: 1px solid var(--line); padding: 56px 0 28px; background: var(--bg-alt); }

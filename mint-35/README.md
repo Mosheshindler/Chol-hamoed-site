@@ -1,21 +1,29 @@
 # Mint 35
 
-Marketing site for **Mint 35**, Mint Media's product for short (30–60 second) AI commercials.
-It is a standalone Next.js app, separate from the Mint Media video site in the repo root.
+Website and back office for **Mint 35**, Mint Media's product for short (30–60 second) AI commercials.
+A standalone Next.js app, separate from the Mint Media video site in the repo root.
+
+- `/`: public site and project questionnaire
+- `/admin`: team back office (jobs, files, notes, team), sign-in required
 
 ## Run locally
 ```bash
 cd mint-35
 npm install
+npx supabase start      # local database, auth and storage (needs Docker)
+cp .env.example .env.local   # then paste the local URL/keys `supabase start` prints
 npm run dev
 ```
-Open http://localhost:3000
+Open http://localhost:3000, then http://localhost:3000/admin/setup to create the first (owner) account.
 
-## Project form
-The project questionnaire (components/ProjectForm.js) posts to FormSubmit, which emails each
-submission to info@mintmediallc.com with uploaded files attached. The first submission triggers a
-one-time confirmation email from FormSubmit; confirm it once and later projects arrive in that inbox.
-Email attachments are size-limited, so very large logo or image files may not come through.
+## Production setup (one time)
+1. **Supabase:** create a new project. In the SQL Editor, run `supabase/migrations/20261011000000_init.sql`.
+2. **Vercel:** new project from this repo, Root Directory `mint-35`. Add the variables from `.env.example`
+   (Supabase values are under Project Settings → API).
+3. **Owner account:** visit `https://mint35.com/admin/setup` once and create your login. Add teammates on the Team page.
+4. **Email:** add `mint35.com` in Resend, add the DNS records it shows, then set `RESEND_API_KEY`.
+   Until then the site works but skips emails.
 
-## Deploy
-Create a new Vercel project from this repo and set **Root Directory** to `mint-35`.
+## How a job moves
+New request → Accept & set price → (card on file) → Start job → Script sent → Script approved
+(due date set to 3 business days) → First cut sent → Revision → Delivered. Every step is logged on the job.
