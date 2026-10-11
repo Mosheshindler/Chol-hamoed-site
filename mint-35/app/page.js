@@ -2,6 +2,7 @@ import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import ProjectForm from '@/components/ProjectForm'
 import Footer from '@/components/Footer'
+import CompareModal from '@/components/CompareModal'
 
 const formats = [
   {ratio: '9:16', label: 'Reels · TikTok · Shorts · WhatsApp Status'},
@@ -9,11 +10,18 @@ const formats = [
   {ratio: '16:9', label: 'YouTube · Web · Digital'},
 ]
 
+const icon = {
+  form: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3h6v1" /><path d="M9 10h6M9 14h6M9 18h3" /></>,
+  approve: <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /><path d="m9 14 2 2 4-4" /></>,
+  produce: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m10 9 5 3-5 3z" /></>,
+  deliver: <><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4z" /></>,
+}
+
 const steps = [
-  {title: 'Fill out the questionnaire', text: 'What you’re promoting, who it’s for, what they should do. Upload your logo and images.'},
-  {title: 'Approve the script', text: 'We write it. You review it once and approve.'},
-  {title: 'We produce it', text: 'AI production plus Mint Media editing. First cut in 3 business days.'},
-  {title: 'One revision, then delivery', text: 'Send one round of notes. We finish it, ready to post.'},
+  {icon: 'form', title: 'Fill out the questionnaire', text: 'What you’re promoting, who it’s for, what they should do. Upload your logo and images.'},
+  {icon: 'approve', title: 'Approve the script', text: 'We write it. You review it once and approve.'},
+  {icon: 'produce', title: 'We produce it', text: 'AI production plus Mint Media editing. First cut in 3 business days.'},
+  {icon: 'deliver', title: 'One revision, then delivery', text: 'Send one round of notes. We finish it, ready to post.'},
 ]
 
 const included = [
@@ -32,18 +40,6 @@ const notIncluded = [
   'Extra revision rounds',
   'Ongoing back-and-forth',
 ]
-
-const compare = [
-  ['How we start', 'Online questionnaire', 'Strategy meetings'],
-  ['Who decides the creative', 'Our team', 'Together with you'],
-  ['Filming', 'No', 'Yes'],
-  ['Script approvals', 'One', 'Collaborative'],
-  ['Revision rounds', 'One', 'Multiple'],
-  ['Price', 'Fixed package', 'Custom quote'],
-  ['Best for', 'Short, focused commercials', 'Custom films and campaigns'],
-]
-
-const uses = ['Product launches', 'Events', 'Sales & offers', 'Announcements', 'Services', 'Social content', 'Testing new ideas']
 
 const packages = [
   {name: 'Single 35', blurb: 'One commercial, one message.', items: ['1 commercial, 30–60 sec', '1 platform export', '1 revision round'], cta: 'Start My Commercial'},
@@ -81,17 +77,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="marquee" aria-label="Perfect for">
-          <span className="marquee-label">Perfect for</span>
-          <div className="marquee-track">
-            {[0, 1].map(k => (
-              <div key={k} className="marquee-group" aria-hidden={k === 1 ? 'true' : undefined}>
-                {uses.map(u => <span key={u}>{u}</span>)}
-              </div>
-            ))}
-          </div>
-        </section>
-
         <section id="how" className="section">
           <div className="container">
             <p className="eyebrow">How it works</p>
@@ -99,7 +84,10 @@ export default function Home() {
             <ol className="timeline">
               {steps.map((s, i) => (
                 <li key={s.title}>
-                  <span className="dot">{i + 1}</span>
+                  <span className="step-num">0{i + 1}</span>
+                  <span className="dot" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icon[s.icon]}</svg>
+                  </span>
                   <h3>{s.title}</h3>
                   <p>{s.text}</p>
                 </li>
@@ -116,24 +104,7 @@ export default function Home() {
               <div className="card card-yes"><h3>Included</h3><Yes items={included} /></div>
               <div className="card card-no"><h3>Not included</h3><No items={notIncluded} /></div>
             </div>
-          </div>
-        </section>
-
-        <section id="compare" className="section">
-          <div className="container narrow">
-            <p className="eyebrow">Mint 35 or Mint Media?</p>
-            <h2>Need more control? That&rsquo;s a Mint Media project.</h2>
-            <div className="table-wrap">
-              <table className="compare-table">
-                <thead><tr><th /><th className="hl">Mint 35</th><th>Mint Media</th></tr></thead>
-                <tbody>
-                  {compare.map(([k, a, b]) => (
-                    <tr key={k}><th scope="row">{k}</th><td className="hl">{a}</td><td>{b}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="compare-cta">Need full-service production? <a href="https://mintmediallc.com" target="_blank" rel="noopener noreferrer">Talk to Mint Media →</a></p>
+            <CompareModal />
           </div>
         </section>
 
