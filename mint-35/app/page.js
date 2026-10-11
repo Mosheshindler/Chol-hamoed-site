@@ -45,14 +45,6 @@ const compare = [
 
 const uses = ['Product launches', 'Events', 'Sales & offers', 'Announcements', 'Services', 'Social content', 'Testing new ideas']
 
-const anatomy = [
-  {name: 'Hook', secs: 3},
-  {name: 'Message', secs: 9},
-  {name: 'Product', secs: 13},
-  {name: 'Offer', secs: 5},
-  {name: 'Call to action', secs: 5},
-]
-
 const packages = [
   {name: 'Single 35', blurb: 'One commercial, one message.', items: ['1 commercial, 30–60 sec', '1 platform export', '1 revision round'], cta: 'Start My Commercial'},
   {name: 'Campaign 3', featured: true, blurb: 'Three spots around one campaign.', items: ['3 commercials', 'Shared look, different hooks', '1 revision round each'], cta: 'Build My Campaign'},
@@ -113,17 +105,6 @@ export default function Home() {
                 </li>
               ))}
             </ol>
-            <div className="anatomy" aria-label="Example structure of a 35-second spot">
-              <p className="label">Anatomy of a 35-second spot</p>
-              <div className="anatomy-bar">
-                {anatomy.map(a => (
-                  <div key={a.name} style={{flexGrow: a.secs}} className="seg">
-                    <b>{a.name}</b><span>{a.secs}s</span>
-                  </div>
-                ))}
-              </div>
-              <div className="anatomy-scale"><span>0:00</span><span>0:35</span></div>
-            </div>
           </div>
         </section>
 
