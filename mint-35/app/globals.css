@@ -246,7 +246,11 @@ p { margin: 0 0 12px; }
 .package { position: relative; display: flex; flex-direction: column; padding: 30px 28px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); transition: transform .25s, border-color .25s; }
 .package:hover { transform: translateY(-6px); border-color: rgba(136,192,64,.5); }
 .package.featured { background: linear-gradient(170deg, #1f3a1d, var(--card) 60%); border-color: var(--lime); box-shadow: 0 30px 80px -30px rgba(136,192,64,.45); }
-.package h3 { font-size: 1.8rem; margin-bottom: 6px; }
+.package h3 { font-size: 1.8rem; margin-bottom: 4px; }
+.price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 0 10px; }
+.price b { font-family: var(--display); font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); font-variant-numeric: tabular-nums; }
+.price span { font-size: .8rem; font-weight: 700; color: var(--lime); background: rgba(136,192,64,.12); padding: 3px 9px; border-radius: 999px; }
+.chosen-price { font-family: var(--display); font-weight: 800; font-size: 1.15rem; color: var(--lime); }
 .package-blurb { color: var(--muted); margin-bottom: 14px; }
 .package .yes { flex: 1; align-content: start; margin-bottom: 20px; }
 .badge { position: absolute; top: -14px; left: 32px; background: var(--lime); color: #0a0c0a; font-size: .72rem; font-weight: 800; padding: 5px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: .08em; }
