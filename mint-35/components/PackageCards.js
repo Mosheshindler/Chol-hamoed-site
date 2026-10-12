@@ -1,13 +1,13 @@
-import Link from 'next/link'
 import {PACKAGES, formatPrice} from '@/lib/packages'
 import Yes from './Yes'
+import AddToCart from './AddToCart'
 
-// Package cards. Each button opens the Start page with that package chosen.
-export default function PackageCards({selected, ctaLabel}) {
+// Package cards. The button adds the package to the visitor's order.
+export default function PackageCards() {
   return (
     <div className="packages">
       {PACKAGES.map(p => (
-        <div key={p.slug} className={`package${p.featured ? ' featured' : ''}${selected === p.slug ? ' selected' : ''}`}>
+        <div key={p.slug} className={`package${p.featured ? ' featured' : ''}`}>
           {p.featured && <span className="badge">Most popular</span>}
           {p.tag && <span className="badge badge-org">{p.tag}</span>}
           <h3>{p.name}</h3>
@@ -20,9 +20,7 @@ export default function PackageCards({selected, ctaLabel}) {
           )}
           <Yes items={p.items} />
           {p.footnote && <p className="package-foot">{p.footnote}</p>}
-          <Link href={`/start?package=${p.slug}`} scroll className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>
-            {ctaLabel || p.cta} <span className="arrow">→</span>
-          </Link>
+          <AddToCart slug={p.slug} label="Add to order" primary={p.featured} />
         </div>
       ))}
     </div>

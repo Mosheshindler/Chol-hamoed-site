@@ -46,10 +46,13 @@ export default async function ProjectPage({params}) {
   const {data: p} = await supabase.from('projects').select('*').eq('id', id).maybeSingle()
   if (!p) notFound()
 
-  const [{data: files}, {data: events}, {data: team}] = await Promise.all([
+  const [{data: files}, {data: events}, {data: team}, {data: siblings}] = await Promise.all([
     supabase.from('project_files').select('*').eq('project_id', id).order('created_at'),
     supabase.from('project_events').select('*').eq('project_id', id).order('created_at', {ascending: false}),
     supabase.from('team_members').select('id, name').order('name'),
+    p.order_id && p.order_size > 1
+      ? supabase.from('projects').select('id, number, package, status, price_cents, order_item').eq('order_id', p.order_id).order('order_item')
+      : Promise.resolve({data: null}),
   ])
   const names = Object.fromEntries((team || []).map(t => [t.id, t.name]))
   const {data: signed} = files?.length
@@ -75,6 +78,25 @@ export default async function ProjectPage({params}) {
         </div>
         <StatusPill status={p.status} />
       </div>
+
+      {siblings?.length > 1 && (
+        <section className="order-panel" aria-label="Order">
+          <span className="order-panel-label">Order · project {p.order_item} of {p.order_size}</span>
+          <ul>
+            {siblings.map(o => (
+              <li key={o.id} className={o.id === p.id ? 'current' : undefined}>
+                {o.id === p.id
+                  ? <b>{projectRef(o.number)}</b>
+                  : <Link href={`/admin/projects/${o.id}`}>{projectRef(o.number)}</Link>}
+                <span>{o.package || 'No package'}</span>
+                <span className="num">{formatMoney(o.price_cents)}</span>
+                <StatusPill status={o.status} />
+              </li>
+            ))}
+          </ul>
+          <span className="order-panel-total">Order total {formatMoney(siblings.reduce((s, o) => s + (o.price_cents || 0), 0))}</span>
+        </section>
+      )}
 
       <StatusActions id={p.id} status={p.status} steps={TRANSITIONS[p.status] || []} price={p.price_cents} />
 
