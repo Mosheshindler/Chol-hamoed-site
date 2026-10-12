@@ -64,9 +64,9 @@ p { margin: 0 0 12px; }
 .btn-sm { padding: 10px 20px; font-size: .9rem; }
 
 /* Logo */
-.logo { display: inline-flex; align-items: center; gap: 6px; font-family: var(--display); font-weight: 800; font-size: 1.65rem; letter-spacing: -0.04em; }
-.logo-num { display: inline-flex; align-items: center; gap: 6px; color: #0a0c0a; background: var(--lime); border-radius: 9px; padding: 1px 9px 2px 8px; font-size: 1.3rem; }
-.logo-dot { width: 7px; height: 7px; border-radius: 50%; background: #d8352a; animation: blink 1.6s steps(2, start) infinite; }
+.logo-img { display: block; height: auto; max-width: 100%; }
+.logo-mark { width: 150px; }
+.logo-full { width: 300px; }
 
 /* Header */
 .header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: rgba(10,12,10,.72); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid rgba(255,255,255,.06); }

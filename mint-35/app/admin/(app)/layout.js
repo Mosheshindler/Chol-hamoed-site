@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 import {redirect} from 'next/navigation'
 import {createClient} from '@/lib/supabase/server'
 import {signOut} from '../actions'
@@ -21,7 +22,7 @@ export default async function AdminLayout({children}) {
   return (
     <div className="admin">
       <header className="admin-bar">
-        <Link href="/admin" className="logo" aria-label="Mint 35 admin home"><span className="logo-mark">mint</span><span className="logo-num"><span className="logo-dot" />35</span></Link>
+        <Link href="/admin" aria-label="Mint 35 admin home"><Logo /></Link>
         <AdminNav />
         <div className="admin-me">
           <span>{me.name}</span>

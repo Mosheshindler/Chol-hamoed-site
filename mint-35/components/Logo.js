@@ -1,8 +1,11 @@
-export default function Logo() {
-  return (
-    <span className="logo">
-      <span className="logo-mark">mint</span>
-      <span className="logo-num"><span className="logo-dot" />35</span>
-    </span>
-  )
+// Official Mint 35 logo (transparent PNGs made from the supplied artwork).
+// "full" includes the "Powered by mintmedia" line.
+const LOGOS = {
+  mark: {src: '/brand/mint35-logo.png', w: 640, h: 144},
+  full: {src: '/brand/mint35-logo-full.png', w: 900, h: 260},
+}
+
+export default function Logo({variant = 'mark', className = ''}) {
+  const l = LOGOS[variant]
+  return <img src={l.src} width={l.w} height={l.h} alt="Mint 35" className={`logo-img logo-${variant} ${className}`} />
 }
