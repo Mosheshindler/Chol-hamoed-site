@@ -1,28 +1,16 @@
 'use client'
 
-import {useEffect, useRef, useState} from 'react'
+import {useRef, useState} from 'react'
 import {formats} from './formats'
 import {createClient} from '@/lib/supabase/browser'
 
 const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
-const packages = ['Single 35', 'Campaign 3', 'Always On', 'Not sure yet']
 
 // Saves the questionnaire through /api/projects, then uploads files straight to storage
 // with the signed URLs it returns, then confirms so the team gets notified.
-export default function ProjectForm() {
-  const [pkg, setPkg] = useState('')
+export default function ProjectForm({packageName}) {
   const [state, setState] = useState({phase: 'idle'})
   const formRef = useRef(null)
-
-  // Package buttons elsewhere on the page carry data-package to preselect it here.
-  useEffect(() => {
-    const onClick = e => {
-      const btn = e.target.closest('[data-package]')
-      if (btn) setPkg(btn.dataset.package)
-    }
-    document.addEventListener('click', onClick)
-    return () => document.removeEventListener('click', onClick)
-  }, [])
 
   async function onSubmit(e) {
     e.preventDefault()
@@ -34,7 +22,7 @@ export default function ProjectForm() {
     const payload = {
       _honey: fd.get('_honey'),
       name: fd.get('name'), email: fd.get('email'), company: fd.get('company'), website: fd.get('website'),
-      package: fd.get('package'),
+      package: packageName,
       promoting: fd.get('promoting'), audience: fd.get('audience'), key_message: fd.get('key_message'),
       desired_action: fd.get('desired_action'), must_appear: fd.get('must_appear'),
       placements: fd.getAll('placements'), placement_other: fd.get('placement_other'),
@@ -89,7 +77,7 @@ export default function ProjectForm() {
     <form id="project-form" ref={formRef} className="form" onSubmit={onSubmit}>
       <input type="text" name="_honey" className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
-      <h2>Tell us what we&rsquo;re making.</h2>
+      <h1 id="form-title">Tell us what we&rsquo;re making.</h1>
 
       <div className="form-row">
         <label>Name<input name="name" required autoComplete="name" /></label>
@@ -99,13 +87,6 @@ export default function ProjectForm() {
         <label>Company / Organization<input name="company" autoComplete="organization" /></label>
         <label>Website<input name="website" placeholder="https://" autoComplete="url" /></label>
       </div>
-
-      <label>Package
-        <select name="package" value={pkg} onChange={e => setPkg(e.target.value)}>
-          <option value="">Choose a package</option>
-          {packages.map(p => <option key={p}>{p}</option>)}
-        </select>
-      </label>
 
       <label>What are you promoting?<textarea name="promoting" rows={2} required /></label>
       <label>Who is your target audience?
