@@ -23,7 +23,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Hidden from search until `NEXT_PUBLIC_ALLOW_INDEXING=true`.
 
 ## Decisions so far
-- Packages and prices live in `lib/packages.js` (Single 35 $2,800, Campaign 3 $6,400, Momentum Pack $3,800 [slug online-campaign];
+- Packages and prices live in `lib/packages.js` (Single 35 $2,800, Campaign 3 $7,200, Momentum Pack $3,800 [slug online-campaign];
   Momentum Pack is for online fundraisers (organizations), org name required).
 - Orders: visitors add packages (repeats allowed) to a browser-side cart, then fill one form: contact + brand
   once, a brief per package. Each package becomes its own job sharing `order_id`.
