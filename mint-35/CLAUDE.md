@@ -32,6 +32,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - No WhatsApp. Plan: shared admin Inbox fed by a website chat bubble, email (hello@mint35.com) and a customer
   job page thread; AI drafts every reply and learns from approved answers.
 
+- Customer project page `/p/[customer_token]` (no login; token per job, page shows the whole order):
+  progress, files (script/first_cut/final), approve/request changes, messages, add-on requests after approval.
+  Add-on list in `lib/addons.js` (prices not set yet). Team replies and confirms add-ons from the job page.
+
 ## Planned (owner asked)
-- Upsells after approval: extra orientations and other add-ons, offered to the customer once videos are approved.
 - Automated customer emails at each job step, once the site is confirmed.

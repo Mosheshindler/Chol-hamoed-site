@@ -41,16 +41,6 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .empty { text-align: center; padding: 56px 20px; border: 1px dashed var(--line); border-radius: 16px; }
 .empty p { margin: 0 0 6px; }
 
-.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; white-space: nowrap; }
-.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.pill-new { color: #0a0c0a; background: var(--lime); }
-.pill-new::before { background: #0a0c0a; }
-.pill-go { color: var(--lime); background: rgba(136,192,64,.15); }
-.pill-work { color: #8fc7ff; background: rgba(143,199,255,.12); }
-.pill-wait { color: #f0c46a; background: rgba(240,196,106,.12); }
-.pill-done { color: var(--muted); background: rgba(255,255,255,.06); }
-.pill-off { color: var(--muted); background: rgba(255,255,255,.04); }
-
 .project-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
 .project-head p { margin: 0; }
 .project-head h1 { margin: 4px 0; }
@@ -144,3 +134,19 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .order-panel a { color: var(--lime); font-weight: 700; }
 .order-panel-total { color: var(--muted); font-size: .88rem; justify-self: end; }
 @media (max-width: 560px) { .order-panel li { grid-template-columns: 1fr auto; } }
+
+.flag { display: block; margin-top: 4px; color: #f0c46a; font-size: .74rem; font-weight: 700; }
+.cust-link { display: flex; gap: 8px; flex-wrap: wrap; }
+.cust-link input { flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--muted); padding: 8px 12px; font: inherit; font-size: .85rem; }
+.thread { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 10px; }
+.thread li { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); max-width: 92%; }
+.thread li.from-team { justify-self: end; background: rgba(136,192,64,.08); border-color: rgba(136,192,64,.3); }
+.thread p { margin: 4px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.thread time { color: var(--muted); font-size: .76rem; }
+.addon-reqs { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.addon-reqs li { display: grid; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.addon-reqs li:last-child { border-bottom: 0; padding-bottom: 0; }
+.addon-decide { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.addon-decide .money-input { width: 130px; }
+.addon-decide .money-input input { width: 100%; background: transparent; border: 0; color: var(--text); padding: 7px 8px; font: inherit; }
+.addon-decide .form-error { flex-basis: 100%; }
