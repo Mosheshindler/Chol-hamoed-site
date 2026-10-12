@@ -9,6 +9,7 @@ export default function PackageCards({selected, ctaLabel}) {
       {PACKAGES.map(p => (
         <div key={p.slug} className={`package${p.featured ? ' featured' : ''}${selected === p.slug ? ' selected' : ''}`}>
           {p.featured && <span className="badge">Most popular</span>}
+          {p.tag && <span className="badge badge-org">{p.tag}</span>}
           <h3>{p.name}</h3>
           <p className="package-blurb">{p.blurb}</p>
           {p.milestones && (
@@ -17,6 +18,7 @@ export default function PackageCards({selected, ctaLabel}) {
             </ol>
           )}
           <Yes items={p.items} />
+          {p.footnote && <p className="package-foot">{p.footnote}</p>}
           <Link href={`/start?package=${p.slug}`} scroll className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>
             {ctaLabel || p.cta} <span className="arrow">→</span>
           </Link>

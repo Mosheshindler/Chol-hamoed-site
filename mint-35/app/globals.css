@@ -256,6 +256,9 @@ p { margin: 0 0 12px; }
 .milestones li span { width: 14px; height: 14px; border-radius: 50%; background: var(--card); border: 2px solid var(--lime); }
 .milestones li:last-child { color: var(--lime); }
 .milestones li:last-child span { background: var(--lime); }
+.badge-org { background: #f0c46a; }
+.package-foot { color: var(--muted); font-size: .85rem; margin: -8px 0 18px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.org-note { margin: 0; padding: 12px 16px; border-radius: 12px; background: rgba(240,196,106,.1); border: 1px solid rgba(240,196,106,.35); color: #f0dcae; font-size: .92rem; }
 .package-note { text-align: center; color: var(--muted); margin: 20px 0 0; }
 
 /* Work */

@@ -1,6 +1,6 @@
 import {NextResponse} from 'next/server'
 import {createAdminClient} from '@/lib/supabase/admin'
-import {PACKAGE_NAMES} from '@/lib/packages'
+import {PACKAGE_NAMES, ORG_ONLY_NAMES} from '@/lib/packages'
 
 const PLACEMENTS = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -40,6 +40,7 @@ export async function POST(request) {
 
   const missing = ['name', 'email', 'promoting', 'audience', 'key_message', 'desired_action'].filter(k => !project[k])
   if (!project.orientation) missing.push('orientation')
+  if (ORG_ONLY_NAMES.includes(project.package) && !project.company) missing.push('company')
   if (missing.length) return NextResponse.json({error: 'Please fill in every required field.', missing}, {status: 400})
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(project.email)) return NextResponse.json({error: 'Please enter a valid email address.'}, {status: 400})
 

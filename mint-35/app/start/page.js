@@ -40,7 +40,8 @@ export default async function StartPage({searchParams}) {
                 <b>{pkg.name}</b>
                 <Link href="/start" className="chosen-change">Change</Link>
               </div>
-              <ProjectForm packageName={pkg.name} />
+              {pkg.orgOnly && <p className="org-note">{pkg.name} is for organizations running a fundraising campaign. Please include your organization&rsquo;s name.</p>}
+              <ProjectForm packageName={pkg.name} orgOnly={!!pkg.orgOnly} />
             </section>
           )}
         </div>

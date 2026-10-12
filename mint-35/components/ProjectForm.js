@@ -8,7 +8,7 @@ const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital
 
 // Saves the questionnaire through /api/projects, then uploads files straight to storage
 // with the signed URLs it returns, then confirms so the team gets notified.
-export default function ProjectForm({packageName}) {
+export default function ProjectForm({packageName, orgOnly}) {
   const [state, setState] = useState({phase: 'idle'})
   const formRef = useRef(null)
 
@@ -84,7 +84,9 @@ export default function ProjectForm({packageName}) {
         <label>Email<input type="email" name="email" required autoComplete="email" /></label>
       </div>
       <div className="form-row">
-        <label>Company / Organization<input name="company" autoComplete="organization" /></label>
+        {orgOnly
+          ? <label>Organization name<input name="company" autoComplete="organization" required /></label>
+          : <label>Company / Organization<input name="company" autoComplete="organization" /></label>}
         <label>Website<input name="website" placeholder="https://" autoComplete="url" /></label>
       </div>
 
