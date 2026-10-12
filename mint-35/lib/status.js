@@ -2,7 +2,7 @@
 export const STATUSES = {
   submitted:      {label: 'New request',          waitingOn: 'team',     tone: 'new'},
   quoted:         {label: 'Waiting for card',     waitingOn: 'customer', tone: 'wait'},
-  card_saved:     {label: 'Ready to start',       waitingOn: 'team',     tone: 'go'},
+  card_saved:     {label: 'Ready to start (card on file)', waitingOn: 'team', tone: 'go'},
   in_progress:    {label: 'Writing script',       waitingOn: 'team',     tone: 'work'},
   script_sent:    {label: 'Script with customer', waitingOn: 'customer', tone: 'wait'},
   in_production:  {label: 'In production',        waitingOn: 'team',     tone: 'work'},
@@ -27,7 +27,7 @@ export function formatMoney(cents) {
 export const TRANSITIONS = {
   submitted:      [{to: 'quoted', label: 'Accept & set price', primary: true, needs: 'price'}, {to: 'declined', label: 'Decline', danger: true}],
   quoted:         [{to: 'in_progress', label: 'Start job (paid another way)', needs: 'confirm'}, {to: 'cancelled', label: 'Cancel', danger: true}],
-  card_saved:     [{to: 'in_progress', label: 'Start job', primary: true, needs: 'confirm'}, {to: 'cancelled', label: 'Cancel', danger: true}],
+  card_saved:     [{to: 'in_progress', label: 'Start job & charge card', primary: true, needs: 'confirm'}, {to: 'in_progress', label: 'Start without charging', needs: 'confirm', skipCharge: true}, {to: 'cancelled', label: 'Cancel', danger: true}],
   in_progress:    [{to: 'script_sent', label: 'Script sent to customer', primary: true}, {to: 'cancelled', label: 'Cancel', danger: true}],
   script_sent:    [{to: 'in_production', label: 'Script approved', primary: true}, {to: 'in_progress', label: 'Customer asked for script changes'}],
   in_production:  [{to: 'first_cut_sent', label: 'First cut sent', primary: true}],

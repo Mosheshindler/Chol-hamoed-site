@@ -4,13 +4,14 @@ import {useState} from 'react'
 import {formats} from './formats'
 import {createClient} from '@/lib/supabase/browser'
 import {formatPrice} from '@/lib/packages'
+import CardFields, {tokenizeCard} from './CardFields'
 
 const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 
 // One form for the whole order: contact and brand details once, then a project brief per package.
 // Saves through /api/projects, uploads files straight to storage with the signed URLs it returns,
 // then confirms so the team gets notified.
-export default function ProjectForm({lines, onDone}) {
+export default function ProjectForm({lines, tokenUrl, onDone}) {
   const [state, setState] = useState({phase: 'idle'})
   const orgRequired = lines.some(l => l.pkg.orgOnly)
   const many = lines.length > 1
@@ -37,8 +38,12 @@ export default function ProjectForm({lines, onDone}) {
       files: files.map(f => ({name: f.file.name, size: f.file.size, kind: f.kind})),
     }
 
-    setState({phase: 'saving'})
     try {
+      if (tokenUrl) {
+        setState({phase: 'card'})
+        payload.cardToken = await tokenizeCard(tokenUrl)
+      }
+      setState({phase: 'saving'})
       const res = await fetch('/api/projects', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)})
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.')
@@ -64,7 +69,7 @@ export default function ProjectForm({lines, onDone}) {
     }
   }
 
-  const busy = state.phase === 'saving' || state.phase === 'uploading'
+  const busy = state.phase === 'card' || state.phase === 'saving' || state.phase === 'uploading'
 
   return (
     <form id="project-form" className="form" onSubmit={onSubmit}>
@@ -154,6 +159,8 @@ export default function ProjectForm({lines, onDone}) {
         </fieldset>
       ))}
 
+      {tokenUrl && <CardFields />}
+
       <div className="before">
         <h3>Before you submit</h3>
         <ul className="ticks">
@@ -167,7 +174,7 @@ export default function ProjectForm({lines, onDone}) {
       {state.phase === 'error' && <p className="form-error" role="alert">{state.message}</p>}
 
       <button type="submit" className="btn btn-primary" disabled={busy}>
-        {state.phase === 'saving' ? 'Sending…' : state.phase === 'uploading' ? `Uploading files ${state.done + 1}/${state.total}…` : 'Submit order'}
+        {state.phase === 'card' ? 'Securing card…' : state.phase === 'saving' ? 'Sending…' : state.phase === 'uploading' ? `Uploading files ${state.done + 1}/${state.total}…` : 'Submit order'}
       </button>
     </form>
   )

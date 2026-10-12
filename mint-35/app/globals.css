@@ -317,6 +317,9 @@ p { margin: 0 0 12px; }
 .tip-bubble { position: absolute; left: 0; bottom: calc(100% + 10px); z-index: 30; width: min(280px, 80vw); padding: 12px 14px; border-radius: 12px; background: #f2f6f2; color: #0a0c0a; font-size: .85rem; font-weight: 500; line-height: 1.45; box-shadow: 0 16px 40px rgba(0,0,0,.5); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .15s, transform .15s, visibility .15s; pointer-events: none; }
 .tip-bubble::after { content: ""; position: absolute; left: 24px; top: 100%; border: 7px solid transparent; border-top-color: #f2f6f2; }
 .tip:hover .tip-bubble, .tip:focus-within .tip-bubble { opacity: 1; visibility: visible; transform: none; }
+.card-section { background: rgba(255,255,255,.02); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.form-row.card-row { grid-template-columns: 1fr 1fr 1fr; }
+.secure-note { margin: 0; color: var(--muted); font-size: .82rem; }
 .package-note { text-align: center; color: var(--muted); margin: 20px 0 0; }
 
 /* Work */
@@ -517,6 +520,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .tell-more > span:nth-child(2) { flex-basis: calc(100% - 52px); }
   .tell-more-cta { margin-left: 52px; }
   .modal-body { padding: 28px 18px; }
+  .form-row.card-row { grid-template-columns: 1fr 1fr; }
   .cp-job { padding: 18px; }
   .cp-stages li { font-size: .62rem; }
   .cp-bar { padding: 12px 16px; }
