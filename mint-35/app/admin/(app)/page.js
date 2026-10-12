@@ -16,7 +16,7 @@ export default async function JobsPage({searchParams}) {
   const view = VIEWS[v] ? v : 'us'
   const supabase = await createClient()
   const [{data: projects}, {data: team}] = await Promise.all([
-    supabase.from('projects').select('id, number, status, name, company, package, price_cents, assigned_to, due_date, created_at').order('created_at', {ascending: false}).limit(500),
+    supabase.from('projects').select('id, number, status, name, company, package, price_cents, assigned_to, due_date, created_at, order_item, order_size').order('created_at', {ascending: false}).limit(500),
     supabase.from('team_members').select('id, name'),
   ])
   const names = Object.fromEntries((team || []).map(t => [t.id, t.name]))
@@ -67,7 +67,7 @@ export default async function JobsPage({searchParams}) {
             const overdue = ACTIVE.includes(p.status) && p.due_date && p.due_date < today
             return (
               <Link key={p.id} href={`/admin/projects/${p.id}`} className="job-row" role="row">
-                <span className="mono" role="cell">{projectRef(p.number)}</span>
+                <span className="mono" role="cell">{projectRef(p.number)}{p.order_size > 1 && <small className="order-tag">{p.order_item}/{p.order_size} in order</small>}</span>
                 <span role="cell"><b>{p.company || p.name}</b>{p.company && <small>{p.name}</small>}</span>
                 <span role="cell"><StatusPill status={p.status} /></span>
                 <span role="cell" data-label="Package">{p.package || '—'}</span>

@@ -1,4 +1,5 @@
 import Logo from './Logo'
+import CartLink from './CartLink'
 
 export default function Header() {
   return (
@@ -12,7 +13,10 @@ export default function Header() {
           <a href="/#packages">Packages</a>
           <a href="/#faq">FAQ</a>
         </nav>
-        <a href="/start" className="btn btn-primary btn-sm">Start a Project</a>
+        <div className="header-actions">
+          <CartLink />
+          <a href="/start" className="btn btn-primary btn-sm">Start<span className="hide-sm"> a Project</span></a>
+        </div>
       </div>
     </header>
   )

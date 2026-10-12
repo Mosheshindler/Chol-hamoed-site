@@ -23,6 +23,10 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Hidden from search until `NEXT_PUBLIC_ALLOW_INDEXING=true`.
 
 ## Decisions so far
+- Packages and prices live in `lib/packages.js` (Single 35 $2,800, Campaign 3 $6,400, Online Campaign $3,200;
+  Online Campaign is for fundraising organizations, org name required).
+- Orders: visitors add packages (repeats allowed) to a browser-side cart, then fill one form: contact + brand
+  once, a brief per package. Each package becomes its own job sharing `order_id`; nothing is charged at checkout.
 - Payments: QuickBooks only. Card saved at acceptance, charged on "Start job" (not built yet).
 - No WhatsApp. Plan: shared admin Inbox fed by a website chat bubble, email (hello@mint35.com) and a customer
   job page thread; AI drafts every reply and learns from approved answers.

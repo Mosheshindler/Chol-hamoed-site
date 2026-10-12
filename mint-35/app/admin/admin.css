@@ -134,3 +134,13 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
   .admin-main { padding: 24px 16px 64px; }
   .project-head { flex-direction: column; }
 }
+
+.order-tag { display: block; color: var(--lime); font-size: .72rem; font-weight: 700; letter-spacing: 0; }
+.order-panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; display: grid; gap: 10px; }
+.order-panel-label { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+.order-panel ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.order-panel li { display: grid; grid-template-columns: 100px 1fr auto auto; gap: 12px; align-items: center; padding: 6px 10px; border-radius: 10px; }
+.order-panel li.current { background: rgba(136,192,64,.08); }
+.order-panel a { color: var(--lime); font-weight: 700; }
+.order-panel-total { color: var(--muted); font-size: .88rem; justify-self: end; }
+@media (max-width: 560px) { .order-panel li { grid-template-columns: 1fr auto; } }
