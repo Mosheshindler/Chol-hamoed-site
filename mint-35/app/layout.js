@@ -7,6 +7,8 @@ export const metadata = {
   title,
   description,
   openGraph: {title, description, type: 'website'},
+  // Hidden from search engines until launch. Set NEXT_PUBLIC_ALLOW_INDEXING=true in Vercel to go public.
+  robots: process.env.NEXT_PUBLIC_ALLOW_INDEXING === 'true' ? undefined : {index: false, follow: false},
 }
 
 export const viewport = {themeColor: '#0a0c0a'}

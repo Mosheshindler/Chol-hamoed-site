@@ -1,8 +1,7 @@
 /* Admin: same tokens as the public site, denser layout for daily work. */
 .admin { min-height: 100vh; background: var(--bg); font-size: 15px; }
 .admin-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; align-items: center; gap: 28px; padding: 14px 24px; background: rgba(10,12,10,.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-.admin-bar .logo { font-size: 1.35rem; }
-.admin-bar .logo-num { font-size: 1.05rem; }
+.admin-bar .logo-mark { width: 116px; }
 .admin-nav { display: flex; gap: 4px; flex: 1; }
 .admin-nav a { padding: 7px 14px; border-radius: 999px; color: var(--muted); font-weight: 600; }
 .admin-nav a:hover { color: var(--text); background: rgba(255,255,255,.05); }
@@ -114,7 +113,8 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .auth-card { width: 100%; max-width: 420px; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 32px; }
 .auth-card h1 { font-size: 1.8rem; margin: 18px 0 18px; }
 .auth-card .admin-form .btn { justify-self: stretch; }
-.logo-row { display: flex; align-items: center; gap: 10px; margin: 0; }
+.logo-row { display: flex; align-items: center; gap: 12px; margin: 0; }
+.logo-row .logo-mark { width: 140px; }
 .auth-tag { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; }
 
 @media (max-width: 900px) {

@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="container footer-grid">
         <div>
-          <Logo />
+          <Logo variant="full" />
           <p className="footer-tag">Short-form commercial production. Simplified.</p>
           <p className="muted">A product of Mint Media LLC</p>
         </div>
