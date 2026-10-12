@@ -57,7 +57,7 @@ p { margin: 0 0 12px; }
 .btn:hover { transform: translateY(-2px); }
 .btn-primary { background: var(--lime); color: #0a0c0a; box-shadow: 0 10px 30px -10px rgba(136,192,64,.6); }
 .btn-primary:hover { background: var(--lime-hi); box-shadow: 0 16px 40px -12px rgba(136,192,64,.75); }
-.btn-outline { border-color: var(--lime); color: var(--lime); }
+.btn-outline { border-color: var(--lime); color: var(--lime); background: transparent; }
 .btn-outline:hover { background: rgba(136,192,64,.1); }
 .btn-ghost { color: var(--text); border-color: var(--line); background: rgba(255,255,255,.03); }
 .btn-ghost:hover { border-color: var(--lime); }
@@ -312,6 +312,11 @@ p { margin: 0 0 12px; }
 .section-price { font-family: var(--body); font-size: .85rem; font-weight: 700; color: var(--lime); background: rgba(136,192,64,.12); padding: 2px 9px; border-radius: 999px; }
 .project-section { background: rgba(136,192,64,.03); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 16px; margin-top: 6px; }
 .form-done .btn { margin-top: 10px; }
+.tip { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+.tip-btn { display: inline-grid; place-items: center; width: 18px; height: 18px; padding: 0; border-radius: 50%; border: 0; background: rgba(136,192,64,.2); color: var(--lime); font: inherit; font-size: .72rem; font-weight: 800; cursor: help; }
+.tip-bubble { position: absolute; left: 0; bottom: calc(100% + 10px); z-index: 30; width: min(280px, 80vw); padding: 12px 14px; border-radius: 12px; background: #f2f6f2; color: #0a0c0a; font-size: .85rem; font-weight: 500; line-height: 1.45; box-shadow: 0 16px 40px rgba(0,0,0,.5); opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .15s, transform .15s, visibility .15s; pointer-events: none; }
+.tip-bubble::after { content: ""; position: absolute; left: 24px; top: 100%; border: 7px solid transparent; border-top-color: #f2f6f2; }
+.tip:hover .tip-bubble, .tip:focus-within .tip-bubble { opacity: 1; visibility: visible; transform: none; }
 .package-note { text-align: center; color: var(--muted); margin: 20px 0 0; }
 
 /* Work */
