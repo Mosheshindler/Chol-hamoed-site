@@ -160,7 +160,7 @@ export default function ProjectForm({lines, onDone}) {
           <li>Double-check names, prices, dates, URLs and phone numbers.</li>
           <li>Each project gets one approval step and one revision round.</li>
           <li>Delivery dates depend on availability. The first cut arrives 3 business days after production starts.</li>
-          <li>Nothing is charged now. We save your card after accepting, and charge it when we start your job.</li>
+          <li>Your card is saved when you place your order. We only charge it once your order enters our production queue.</li>
         </ul>
       </div>
 

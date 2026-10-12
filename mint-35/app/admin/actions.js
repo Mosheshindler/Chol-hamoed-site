@@ -75,7 +75,7 @@ export async function moveStatus(formData) {
       subject: `Your Mint 35 project is accepted (${projectRef(p.number)})`,
       html: `<p>Hi ${esc(p.name.split(' ')[0])},</p>
 <p>Good news: we've accepted your project. The price is <b>${formatMoney(patch.price_cents)}</b>.</p>
-<p>Next, we'll send you a secure link to put a card on file. You won't be charged until we start your job.</p>
+<p>Your card on file will be charged when your order enters our production queue. We'll let you know when that happens.</p>
 <p>— The Mint 35 team</p>`,
     })
   }

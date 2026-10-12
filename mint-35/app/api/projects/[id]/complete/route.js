@@ -52,7 +52,7 @@ export async function POST(request, ctx) {
       html: `<p>Hi ${esc(c.name.split(' ')[0])},</p>
 <p>Thanks for your order. Here's what we received:</p><ul>${lines}</ul>
 <p><b>Total:</b> ${formatMoney(total)}</p>
-<p>Our team will review it and email you next steps. Nothing is charged until we start your job.</p>
+<p>Our team will review it and email you next steps. Your card is only charged once your order enters our production queue.</p>
 <p>— The Mint 35 team</p>`,
     }),
   ])

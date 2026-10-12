@@ -34,7 +34,7 @@ export default function StartFlow({step, legacyPackage}) {
         {done.refs?.length > 0 && (
           <p className="done-ref">Your reference number{done.refs.length > 1 ? 's are' : ' is'} <b>{done.refs.join(', ')}</b>.</p>
         )}
-        <p>We&rsquo;ll review your order and email you. Nothing is charged until we start your job.</p>
+        <p>We&rsquo;ll review your order and email you. Your card is only charged once your order enters our production queue.</p>
         {done.missed > 0 && <p className="form-error">{done.missed} file(s) didn&rsquo;t upload. Reply to our email and attach them there.</p>}
         <Link href="/" className="btn btn-ghost">Back to home</Link>
       </div>
@@ -92,7 +92,7 @@ export default function StartFlow({step, legacyPackage}) {
               </ul>
             )}
             <div className="order-total"><span>Total</span><b>{formatPrice(total)}{hasUnpriced ? ' + quote' : ''}</b></div>
-            <p className="order-fine">Nothing is charged now. We review your order, then save your card and charge it only when we start your job.</p>
+            <p className="order-fine">Your card is saved when you place your order. We only charge it once your order enters our production queue.</p>
             {lines.length > 0
               ? <Link href="/start?step=details" className="btn btn-primary order-continue">Continue to project details →</Link>
               : <button type="button" className="btn btn-primary order-continue" disabled>Continue to project details →</button>}
