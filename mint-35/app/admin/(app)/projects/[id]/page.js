@@ -8,6 +8,8 @@ import StatusActions from './StatusActions'
 import JobForm from './JobForm'
 import NoteForm from './NoteForm'
 import FileUpload from './FileUpload'
+import {CustomerLink, ReplyForm, AddonDecision} from './CustomerPanel'
+import {siteOrigin, customerLink} from '@/lib/site'
 
 const ANSWERS = [
   ['promoting', 'What they’re promoting'],
@@ -36,6 +38,10 @@ function describe(e, names) {
     case 'due': return e.data.due_date ? `${who} set the due date to ${formatDate(e.data.due_date)}` : `${who} cleared the due date`
     case 'file': return `${who} uploaded ${KIND_LABEL[e.data.kind]?.toLowerCase() || 'a file'}: ${e.data.name}`
     case 'note': return null
+    case 'customer': return `Customer ${e.data.decision === 'approve' ? 'approved' : 'requested changes'}, moved to “${STATUSES[e.data.to]?.label}”`
+    case 'addon': return `Customer requested add-on: ${e.data.label}${e.data.details ? ` (${e.data.details})` : ''}`
+    case 'addon_accepted': return `${who} confirmed add-on ${e.data.label} at ${formatMoney(e.data.price_cents)}`
+    case 'addon_declined': return `${who} declined add-on ${e.data.label}`
     default: return e.type
   }
 }
@@ -46,14 +52,17 @@ export default async function ProjectPage({params}) {
   const {data: p} = await supabase.from('projects').select('*').eq('id', id).maybeSingle()
   if (!p) notFound()
 
-  const [{data: files}, {data: events}, {data: team}, {data: siblings}] = await Promise.all([
+  const [{data: files}, {data: events}, {data: team}, {data: siblings}, {data: messages}, {data: addons}] = await Promise.all([
     supabase.from('project_files').select('*').eq('project_id', id).order('created_at'),
     supabase.from('project_events').select('*').eq('project_id', id).order('created_at', {ascending: false}),
     supabase.from('team_members').select('id, name').order('name'),
     p.order_id && p.order_size > 1
       ? supabase.from('projects').select('id, number, package, status, price_cents, order_item').eq('order_id', p.order_id).order('order_item')
       : Promise.resolve({data: null}),
+    supabase.from('project_messages').select('id, author, member_id, body, created_at').eq('project_id', id).order('created_at'),
+    supabase.from('project_addons').select('*').eq('project_id', id).order('created_at'),
   ])
+  const custUrl = customerLink(await siteOrigin(), p.customer_token)
   const names = Object.fromEntries((team || []).map(t => [t.id, t.name]))
   const {data: signed} = files?.length
     ? await supabase.storage.from('project-files').createSignedUrls(files.map(f => f.path), 3600)
@@ -121,6 +130,44 @@ export default async function ProjectPage({params}) {
               })}
             </dl>
           </section>
+
+          <section className="panel">
+            <h2>Customer page</h2>
+            <p className="hint">The customer&rsquo;s private link for this order. It&rsquo;s in their emails; copy it if they ask.</p>
+            <CustomerLink url={custUrl} />
+          </section>
+
+          <section className="panel">
+            <h2>Messages with the customer</h2>
+            {messages?.length ? (
+              <ol className="thread">
+                {messages.map(m => (
+                  <li key={m.id} className={m.author === 'team' ? 'from-team' : 'from-cust'}>
+                    <b>{m.author === 'team' ? (names[m.member_id] || 'Team') : p.name}</b>
+                    <p>{m.body}</p>
+                    <time>{formatDateTime(m.created_at)}</time>
+                  </li>
+                ))}
+              </ol>
+            ) : <p className="muted">No messages yet.</p>}
+            <ReplyForm id={p.id} />
+          </section>
+
+          {addons?.length > 0 && (
+            <section className="panel">
+              <h2>Add-on requests</h2>
+              <ul className="addon-reqs">
+                {addons.map(a => (
+                  <li key={a.id}>
+                    <div><b>{a.label}</b>{a.details && <span className="muted"> · {a.details}</span>}<small className="muted"> · {formatDateTime(a.created_at)}</small></div>
+                    {a.status === 'requested'
+                      ? <AddonDecision addonId={a.id} suggested={a.price_cents != null ? a.price_cents / 100 : null} />
+                      : <span className={`pill ${a.status === 'accepted' ? 'pill-go' : 'pill-off'}`}>{a.status === 'accepted' ? `Confirmed · ${formatMoney(a.price_cents)}` : 'Declined'}</span>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="panel">
             <h2>Files</h2>

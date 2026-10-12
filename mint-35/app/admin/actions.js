@@ -7,6 +7,8 @@ import {createAdminClient} from '@/lib/supabase/admin'
 import {TRANSITIONS, STATUSES, projectRef, formatMoney} from '@/lib/status'
 import {addBusinessDays} from '@/lib/dates'
 import {sendEmail, esc} from '@/lib/email'
+import {siteOrigin, customerLink} from '@/lib/site'
+import {scriptWord} from '@/lib/status'
 
 async function requireMember() {
   const supabase = await createClient()
@@ -47,7 +49,7 @@ export async function moveStatus(formData) {
   const id = String(formData.get('id'))
   const to = String(formData.get('to'))
 
-  const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents').eq('id', id).single()
+  const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents, package, customer_token').eq('id', id).single()
   const step = (TRANSITIONS[p.status] || []).find(t => t.to === to)
   if (!step) return {error: 'That step isn’t available any more. Refresh the page.'}
 
@@ -69,16 +71,17 @@ export async function moveStatus(formData) {
   if (error) return {error: 'Couldn’t update the job. Try again.'}
   await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'status', data: event})
 
-  if (to === 'quoted') {
-    await sendEmail({
-      to: p.email,
-      subject: `Your Mint 35 project is accepted (${projectRef(p.number)})`,
-      html: `<p>Hi ${esc(p.name.split(' ')[0])},</p>
-<p>Good news: we've accepted your project. The price is <b>${formatMoney(patch.price_cents)}</b>.</p>
-<p>Your card on file will be charged when your order enters our production queue. We'll let you know when that happens.</p>
-<p>— The Mint 35 team</p>`,
-    })
+  const link = customerLink(await siteOrigin(), p.customer_token)
+  const hi = `<p>Hi ${esc(p.name.split(' ')[0])},</p>`
+  const sign = `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`
+  const w = scriptWord(p.package)
+  const notices = {
+    quoted: [`Your Mint 35 project is accepted (${projectRef(p.number)})`, `<p>Good news: we've accepted your project. The price is <b>${formatMoney(patch.price_cents)}</b>.</p><p>Your card on file will be charged when your order enters our production queue. We'll let you know when that happens.</p>`],
+    script_sent: [`Your ${w} is ready to review (${projectRef(p.number)})`, `<p>Your ${w} is ready. Please review it on your project page and approve it or request changes.</p>`],
+    first_cut_sent: [`Your first cut is ready (${projectRef(p.number)})`, `<p>Your first cut is ready. Please watch it on your project page and approve it or send your revision notes.</p>`],
+    delivered: [`Your commercial is delivered (${projectRef(p.number)})`, `<p>Your final files are ready to download on your project page.</p>`],
   }
+  if (notices[to]) await sendEmail({to: p.email, subject: notices[to][0], html: hi + notices[to][1] + sign})
 
   revalidatePath(`/admin/projects/${id}`)
   revalidatePath('/admin')
@@ -169,4 +172,50 @@ export async function changePassword(formData) {
   const {error} = await supabase.auth.updateUser({password})
   if (error) return {error: error.message}
   return {ok: true, message: 'Password updated.'}
+}
+
+export async function replyToCustomer(formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const body = String(formData.get('body') || '').trim().slice(0, 5000)
+  if (!body) return {error: 'Write a reply first.'}
+  const {data: p} = await supabase.from('projects').select('number, name, email, customer_token').eq('id', id).single()
+  const {error} = await supabase.from('project_messages').insert({project_id: id, author: 'team', member_id: me.id, body})
+  if (error) return {error: 'Couldn’t send. Try again.'}
+  const link = customerLink(await siteOrigin(), p.customer_token)
+  await sendEmail({
+    to: p.email,
+    subject: `New message about your Mint 35 project (${projectRef(p.number)})`,
+    html: `<p>Hi ${esc(p.name.split(' ')[0])},</p><blockquote>${esc(body).replace(/\n/g, '<br>')}</blockquote><p><a href="${link}">Reply on your project page</a></p><p>— ${esc(me.name)}, Mint 35</p>`,
+  })
+  revalidatePath(`/admin/projects/${id}`)
+  return {ok: true}
+}
+
+export async function decideAddon(formData) {
+  const {supabase, me} = await requireMember()
+  const addonId = String(formData.get('addon'))
+  const decision = formData.get('decision') === 'accept' ? 'accepted' : 'declined'
+  const patch = {status: decision}
+  if (decision === 'accepted') {
+    const dollars = Number(String(formData.get('price') || '').replace(/[$,\s]/g, ''))
+    if (!(dollars >= 0) || String(formData.get('price') || '').trim() === '') return {error: 'Enter the price for this add-on.'}
+    patch.price_cents = Math.round(dollars * 100)
+  }
+  const {data: a, error} = await supabase.from('project_addons').update(patch).eq('id', addonId).eq('status', 'requested').select('project_id, label, details, price_cents').single()
+  if (error || !a) return {error: 'That request was already handled. Refresh the page.'}
+  await supabase.from('project_events').insert({project_id: a.project_id, actor: me.id, type: 'addon_' + decision, data: {label: a.label, price_cents: a.price_cents}})
+
+  const {data: p} = await supabase.from('projects').select('number, name, email, customer_token').eq('id', a.project_id).single()
+  const link = customerLink(await siteOrigin(), p.customer_token)
+  await sendEmail({
+    to: p.email,
+    subject: `${a.label}: ${decision === 'accepted' ? 'confirmed' : 'update'} (${projectRef(p.number)})`,
+    html: `<p>Hi ${esc(p.name.split(' ')[0])},</p>` + (decision === 'accepted'
+      ? `<p>We've confirmed your request for <b>${esc(a.label)}</b>${a.details ? ` (${esc(a.details)})` : ''} at <b>${formatMoney(a.price_cents)}</b>. It will be charged to your card on file.</p>`
+      : `<p>We're not able to add <b>${esc(a.label)}</b> to this project. We'll be in touch if there's another option.</p>`)
+      + `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`,
+  })
+  revalidatePath(`/admin/projects/${a.project_id}`)
+  return {ok: true}
 }

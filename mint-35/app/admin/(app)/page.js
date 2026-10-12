@@ -5,7 +5,7 @@ import {formatDate} from '@/lib/dates'
 import StatusPill from './StatusPill'
 
 const VIEWS = {
-  us: {label: 'Needs us', match: s => STATUSES[s].waitingOn === 'team'},
+  us: {label: 'Needs us', match: (s, p, flag) => STATUSES[s].waitingOn === 'team' || flag(p.id)},
   customer: {label: 'Waiting on customer', match: s => STATUSES[s].waitingOn === 'customer'},
   active: {label: 'All active', match: s => ACTIVE.includes(s)},
   done: {label: 'Done', match: s => !ACTIVE.includes(s)},
@@ -15,14 +15,21 @@ export default async function JobsPage({searchParams}) {
   const {view: v} = await searchParams
   const view = VIEWS[v] ? v : 'us'
   const supabase = await createClient()
-  const [{data: projects}, {data: team}] = await Promise.all([
+  const [{data: projects}, {data: team}, {data: recentMsgs}, {data: openAddons}] = await Promise.all([
     supabase.from('projects').select('id, number, status, name, company, package, price_cents, assigned_to, due_date, created_at, order_item, order_size').order('created_at', {ascending: false}).limit(500),
     supabase.from('team_members').select('id, name'),
+    supabase.from('project_messages').select('project_id, author, created_at').order('created_at', {ascending: false}).limit(1000),
+    supabase.from('project_addons').select('project_id').eq('status', 'requested'),
   ])
+  const lastAuthor = {}
+  for (const m of recentMsgs || []) if (!(m.project_id in lastAuthor)) lastAuthor[m.project_id] = m.author
+  const addonCount = {}
+  for (const a of openAddons || []) addonCount[a.project_id] = (addonCount[a.project_id] || 0) + 1
+  const needsReply = id => lastAuthor[id] === 'customer' || addonCount[id] > 0
   const names = Object.fromEntries((team || []).map(t => [t.id, t.name]))
   const all = projects || []
-  const rows = all.filter(p => VIEWS[view].match(p.status))
-  const counts = Object.fromEntries(Object.entries(VIEWS).map(([k, x]) => [k, all.filter(p => x.match(p.status)).length]))
+  const rows = all.filter(p => VIEWS[view].match(p.status, p, needsReply))
+  const counts = Object.fromEntries(Object.entries(VIEWS).map(([k, x]) => [k, all.filter(p => x.match(p.status, p, needsReply)).length]))
   const today = new Date().toISOString().slice(0, 10)
 
   const stats = [
@@ -69,7 +76,7 @@ export default async function JobsPage({searchParams}) {
               <Link key={p.id} href={`/admin/projects/${p.id}`} className="job-row" role="row">
                 <span className="mono" role="cell">{projectRef(p.number)}{p.order_size > 1 && <small className="order-tag">{p.order_item}/{p.order_size} in order</small>}</span>
                 <span role="cell"><b>{p.company || p.name}</b>{p.company && <small>{p.name}</small>}</span>
-                <span role="cell"><StatusPill status={p.status} /></span>
+                <span role="cell"><StatusPill status={p.status} />{lastAuthor[p.id] === 'customer' && <small className="flag">New message</small>}{addonCount[p.id] > 0 && <small className="flag">Add-on request</small>}</span>
                 <span role="cell" data-label="Package">{p.package || '—'}</span>
                 <span role="cell" className="num" data-label="Price">{formatMoney(p.price_cents)}</span>
                 <span role="cell" data-label="Assigned">{names[p.assigned_to] || <i className="muted">Unassigned</i>}</span>
