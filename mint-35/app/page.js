@@ -2,6 +2,8 @@ import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import PackageCards from '@/components/PackageCards'
 import Yes from '@/components/Yes'
+import VideoSample from '@/components/VideoSample'
+import {SAMPLES} from '@/lib/samples'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
 import FormatsModal from '@/components/FormatsModal'
@@ -118,13 +120,8 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">Work</p>
             <h2>See what your idea can become.</h2>
-            <div className="samples">
-              {['01', '02', '03', '04'].map((n, i) => (
-                <div key={n} className={`sample s${i + 1}`}>
-                  <span className="play" aria-hidden="true" />
-                  <span className="sample-label">Commercial {n}</span>
-                </div>
-              ))}
+            <div className="work-grid">
+              {SAMPLES.map(v => <VideoSample key={v.id} {...v} />)}
             </div>
           </div>
         </section>

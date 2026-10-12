@@ -320,20 +320,19 @@ p { margin: 0 0 12px; }
 .package-note { text-align: center; color: var(--muted); margin: 20px 0 0; }
 
 /* Work */
-.samples { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 28px 0 0; }
-.sample { position: relative; aspect-ratio: 9/16; max-width: 100%; border-radius: var(--radius); border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; transition: transform .3s; }
-.sample::before { content: ""; position: absolute; inset: 0; background: inherit; transition: transform .6s; }
-.sample:hover { transform: translateY(-6px); }
-.sample:hover::before { transform: scale(1.08); }
-.sample > * { position: relative; }
-.s1 { background: radial-gradient(circle at 70% 25%, rgba(199,240,138,.6), transparent 35%), linear-gradient(160deg, #107838, #0b2414); }
-.s2 { background: repeating-linear-gradient(135deg, rgba(136,192,64,.12) 0 14px, transparent 14px 28px), linear-gradient(160deg, #3b5a1c, #0e1a0e); }
-.s3 { background: radial-gradient(circle at 30% 70%, rgba(242,246,242,.25), transparent 40%), linear-gradient(160deg, #1d4a3a, #081510); }
-.s4 { background: radial-gradient(circle at 50% 110%, rgba(136,192,64,.7), transparent 55%), linear-gradient(160deg, #2c6a2a, #0a160c); }
-.sample-label { position: absolute !important; left: 16px; bottom: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; font-size: .78rem; }
 .play { width: 60px; height: 60px; border-radius: 50%; background: rgba(136,192,64,.95); position: relative; display: inline-block; box-shadow: 0 0 0 10px rgba(136,192,64,.18); transition: transform .25s; }
-.sample:hover .play { transform: scale(1.1); }
 .play::after { content: ""; position: absolute; left: 24px; top: 18px; border-left: 17px solid #0a0c0a; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+.work-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 28px; }
+.work-item { margin: 0; display: grid; gap: 10px; min-width: 0; }
+.work-frame { position: relative; aspect-ratio: 16 / 9; max-width: 100%; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: #000; box-shadow: 0 30px 60px -30px rgba(0,0,0,.8); }
+.work-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.work-poster { position: absolute; inset: 0; display: grid; place-items: center; padding: 0; border: 0; background: #000; cursor: pointer; }
+.work-poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s, opacity .3s; opacity: .9; }
+.work-poster:hover img { transform: scale(1.04); opacity: 1; }
+.work-poster .play { position: relative; z-index: 1; width: 72px; height: 72px; }
+.work-poster .play::after { left: 29px; top: 22px; border-left-width: 21px; border-top-width: 14px; border-bottom-width: 14px; }
+.work-poster:hover .play { transform: scale(1.08); }
+.work-item figcaption { font-family: var(--display); font-weight: 700; font-size: 1.15rem; }
 
 /* FAQ */
 .faqs { margin-top: 24px; display: grid; gap: 8px; }
@@ -488,7 +487,6 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 @media (max-width: 1080px) {
   .timeline { grid-template-columns: 1fr 1fr; }
   .timeline::before { display: none; }
-  .samples { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 960px) {
   .nav { display: none; }
@@ -496,6 +494,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .hero-grid, .yesno { grid-template-columns: 1fr; }
   .hero-visual { height: 520px; max-width: 420px; width: 100%; margin: 0 auto; }
   .packages { grid-template-columns: 1fr; }
+  .work-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
@@ -503,7 +502,6 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .container { padding: 0 16px; }
   .section { padding: 52px 0; }
   .form-row, .timeline { grid-template-columns: 1fr; }
-  .samples { gap: 12px; }
   .card, .form, .package { padding: 24px; }
   .facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; }
   .facts div { padding-right: 14px; margin-right: 14px; }
