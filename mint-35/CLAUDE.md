@@ -23,8 +23,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Hidden from search until `NEXT_PUBLIC_ALLOW_INDEXING=true`.
 
 ## Decisions so far
-- Packages and prices live in `lib/packages.js` (Single 35 $2,800, Campaign 3 $6,400, Online Campaign $3,200;
-  Online Campaign is for fundraising organizations, org name required).
+- Packages and prices live in `lib/packages.js` (Single 35 $2,800, Campaign 3 $6,400, Road to Goal $3,800 [slug online-campaign];
+  Road to Goal is for fundraising organizations, org name required).
 - Orders: visitors add packages (repeats allowed) to a browser-side cart, then fill one form: contact + brand
   once, a brief per package. Each package becomes its own job sharing `order_id`.
 - Payments: QuickBooks only. Card is saved when the customer places the order (checkout) and charged only once

@@ -55,7 +55,7 @@ export async function POST(request) {
     return NextResponse.json({error: items.length > 1 ? `Please fill in every required field for project ${incomplete + 1}.` : 'Please fill in every required field.'}, {status: 400})
   }
   if (items.some(it => ORG_ONLY_NAMES.includes(it.package)) && !shared.company) {
-    return NextResponse.json({error: 'Online Campaign is for organizations. Please enter your organization’s name.', missing: ['company']}, {status: 400})
+    return NextResponse.json({error: `${ORG_ONLY_NAMES.join(' / ')} is for organizations. Please enter your organization’s name.`, missing: ['company']}, {status: 400})
   }
 
   const files = (Array.isArray(body.files) ? body.files : []).slice(0, MAX_FILES)

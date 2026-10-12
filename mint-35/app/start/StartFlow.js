@@ -120,7 +120,7 @@ export default function StartFlow({step, legacyPackage}) {
             <Link href="/start" className="chosen-change">Edit order</Link>
           </div>
           {lines.some(l => l.pkg.orgOnly) && (
-            <p className="org-note">Online Campaign is for organizations running a fundraising campaign. Please include your organization&rsquo;s name.</p>
+            <p className="org-note">{lines.find(l => l.pkg.orgOnly).pkg.name} is for organizations running a fundraising campaign. Please include your organization&rsquo;s name.</p>
           )}
           <ProjectForm lines={lines} onDone={result => { setDone(result); clear() }} />
         </section>
