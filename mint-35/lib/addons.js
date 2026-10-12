@@ -3,7 +3,7 @@
 export const ADDONS = [
   {key: 'orientation', label: 'Extra orientation', desc: 'The same video in another shape, like 1:1 or 16:9.', price: 450, perVideo: true, askOrientation: true},
   {key: 'cutdown', label: '15-second cutdown', desc: 'A short version for ads and stories.', price: 175, perVideo: true},
-  {key: 'captions', label: 'Captions', desc: 'Burned-in captions for sound-off viewing.', price: null, perVideo: true},
+  {key: 'captions', label: 'Captions', desc: 'Burned-in captions for sound-off viewing.', price: 150, perVideo: true},
   {key: 'revision', label: 'Extra revision round', desc: 'Another round of changes. We quote based on the changes you need.', price: null},
   {key: 'rush', label: 'Rush delivery', desc: 'Move your project up in our queue. We quote based on the current queue.', price: null},
 ]
