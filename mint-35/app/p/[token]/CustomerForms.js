@@ -81,7 +81,7 @@ export function AddonForm({token, job, addons, orientation}) {
           <button key={a.key} type="button" className={`cp-addon${pick === a.key ? ' picked' : ''}`} onClick={() => setPick(a.key)} aria-pressed={pick === a.key}>
             <b>{a.label}</b>
             <span>{a.desc}</span>
-            <em>{a.price || 'Price confirmed by our team'}</em>
+            <em>{a.price || 'Custom quote'}</em>
           </button>
         ))}
       </div>

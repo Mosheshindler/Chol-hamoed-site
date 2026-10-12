@@ -34,7 +34,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Customer project page `/p/[customer_token]` (no login; token per job, page shows the whole order):
   progress, files (script/first_cut/final), approve/request changes, messages, add-on requests after approval.
-  Add-on list in `lib/addons.js` (prices not set yet). Team replies and confirms add-ons from the job page.
+  Add-on list in `lib/addons.js`: extra orientation $450/video, 15-sec cutdown $175/video; captions, extra
+  revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
 
 ## Planned (owner asked)
 - Automated customer emails at each job step, once the site is confirmed.
