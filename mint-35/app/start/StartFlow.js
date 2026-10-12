@@ -8,7 +8,7 @@ import {PACKAGES, NOT_SURE, packageBySlug, formatPrice} from '@/lib/packages'
 import Yes from '@/components/Yes'
 import ProjectForm from '@/components/ProjectForm'
 
-export default function StartFlow({step, legacyPackage}) {
+export default function StartFlow({step, legacyPackage, tokenUrl}) {
   const router = useRouter()
   const {items, ready, add, remove, clear} = useCart()
   const handledLegacy = useRef(false)
@@ -122,7 +122,7 @@ export default function StartFlow({step, legacyPackage}) {
           {lines.some(l => l.pkg.orgOnly) && (
             <p className="org-note">{lines.find(l => l.pkg.orgOnly).pkg.name} is for organizations running a fundraising campaign. Please include your organization&rsquo;s name.</p>
           )}
-          <ProjectForm lines={lines} onDone={result => { setDone(result); clear() }} />
+          <ProjectForm lines={lines} tokenUrl={tokenUrl} onDone={result => { setDone(result); clear() }} />
         </section>
       )}
     </>

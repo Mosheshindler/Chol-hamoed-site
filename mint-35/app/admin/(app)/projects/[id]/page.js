@@ -32,12 +32,13 @@ function describe(e, names) {
   const who = names[e.actor] || 'Website'
   switch (e.type) {
     case 'submitted': return 'Submitted from the website'
-    case 'status': return `${who} moved it to “${STATUSES[e.data.to]?.label}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}`
+    case 'status': return `${who} moved it to “${STATUSES[e.data.to]?.label}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}`
     case 'price': return `${who} set the price to ${formatMoney(e.data.price_cents)}`
     case 'assigned': return e.data.to ? `${who} assigned it to ${names[e.data.to] || 'someone'}` : `${who} unassigned it`
     case 'due': return e.data.due_date ? `${who} set the due date to ${formatDate(e.data.due_date)}` : `${who} cleared the due date`
     case 'file': return `${who} uploaded ${KIND_LABEL[e.data.kind]?.toLowerCase() || 'a file'}: ${e.data.name}`
     case 'note': return null
+    case 'charge_failed': return `Charge failed: ${e.data.message}`
     case 'customer': return `Customer ${e.data.decision === 'approve' ? 'approved' : 'requested changes'}, moved to “${STATUSES[e.data.to]?.label}”`
     case 'addon': return `Customer requested add-on: ${e.data.label}${e.data.details ? ` (${e.data.details})` : ''}`
     case 'addon_accepted': return `${who} confirmed add-on ${e.data.label} at ${formatMoney(e.data.price_cents)}`
@@ -107,7 +108,7 @@ export default async function ProjectPage({params}) {
         </section>
       )}
 
-      <StatusActions id={p.id} status={p.status} steps={TRANSITIONS[p.status] || []} price={p.price_cents} />
+      <StatusActions id={p.id} status={p.status} steps={TRANSITIONS[p.status] || []} price={p.price_cents} card={p.card_last4 ? `${p.card_brand || 'card'} ending ${p.card_last4}` : null} />
 
       <div className="project-grid">
         <div className="col-main">
@@ -187,6 +188,14 @@ export default async function ProjectPage({params}) {
         </div>
 
         <aside className="col-side">
+          <section className="panel">
+            <h2>Payment</h2>
+            <dl className="kv">
+              <dt>Card</dt><dd>{p.card_last4 ? `${p.card_brand || 'Card'} ending ${p.card_last4}` : <span className="muted">None on file</span>}</dd>
+              {p.charge_id && <><dt>Charged</dt><dd>{formatMoney(p.charged_cents)} · {formatDateTime(p.charged_at)}</dd><dt>Charge ID</dt><dd className="mono">{p.charge_id}</dd></>}
+            </dl>
+          </section>
+
           <section className="panel">
             <h2>Job</h2>
             <JobForm id={p.id} price={p.price_cents} assignedTo={p.assigned_to} dueDate={p.due_date} team={team || []} />

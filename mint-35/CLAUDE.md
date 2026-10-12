@@ -27,8 +27,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Momentum Pack is for online fundraisers (organizations), org name required).
 - Orders: visitors add packages (repeats allowed) to a browser-side cart, then fill one form: contact + brand
   once, a brief per package. Each package becomes its own job sharing `order_id`.
-- Payments: QuickBooks only. Card is saved when the customer places the order (checkout) and charged only once
-  the order enters the production queue. Card capture is not built yet; site copy already states this policy.
+- Payments: QuickBooks Payments only (`lib/qb.js`). Checkout tokenizes the card in the browser (Intuit tokens
+  endpoint; numbers never hit our server), the server saves it as a card on file under customer id = order_id.
+  Accepting a job with a card moves it to `card_saved`; "Start job & charge card" charges the job price;
+  confirming an add-on charges it. Owner connects QuickBooks at /admin/settings (OAuth, tokens in `qb_connection`,
+  service-role only). Without keys/connection, checkout takes orders with no card.
 - No WhatsApp. Plan: shared admin Inbox fed by a website chat bubble, email (hello@mint35.com) and a customer
   job page thread; AI drafts every reply and learns from approved answers.
 

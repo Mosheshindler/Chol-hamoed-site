@@ -3,7 +3,7 @@
 import {useState, useTransition} from 'react'
 import {moveStatus} from '../../../actions'
 
-export default function StatusActions({id, status, steps, price}) {
+export default function StatusActions({id, status, steps, price, card}) {
   const [open, setOpen] = useState(null) // step awaiting extra input
   const [error, setError] = useState('')
   const [pending, start] = useTransition()
@@ -13,6 +13,7 @@ export default function StatusActions({id, status, steps, price}) {
   const run = (step, fd = new FormData()) => {
     fd.set('id', id)
     fd.set('to', step.to)
+    if (step.skipCharge) fd.set('skipCharge', '1')
     setError('')
     start(async () => {
       const res = await moveStatus(fd)
@@ -26,7 +27,7 @@ export default function StatusActions({id, status, steps, price}) {
       <div className="actions-row">
         <span className="actions-label">Next step</span>
         {steps.map(step => (
-          <button key={step.to} type="button" disabled={pending}
+          <button key={step.label} type="button" disabled={pending}
             className={`btn btn-sm ${step.primary ? 'btn-primary' : step.danger ? 'btn-danger' : 'btn-ghost'}`}
             onClick={() => (step.needs ? setOpen(step) : run(step))}>
             {step.label}
@@ -49,9 +50,9 @@ export default function StatusActions({id, status, steps, price}) {
 
       {open?.needs === 'confirm' && (
         <div className="actions-panel">
-          <p>{status === 'quoted'
-            ? 'Start this job without a card on file? Use this only if the customer paid another way, like a QuickBooks invoice.'
-            : 'Start this job? The card on file will be charged.'}</p>
+          <p>{open.skipCharge || status === 'quoted'
+            ? 'Start this job without charging a card? Use this only if the customer paid another way, like a QuickBooks invoice.'
+            : `Start this job and charge ${price ? '$' + (price / 100).toLocaleString('en-US', {minimumFractionDigits: 2}) : 'the job price'} to ${card || 'the card on file'}?`}</p>
           <div className="actions-row">
             <button className="btn btn-primary btn-sm" disabled={pending} onClick={() => run(open)}>{pending ? 'Starting…' : 'Yes, start job'}</button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(null)}>Cancel</button>

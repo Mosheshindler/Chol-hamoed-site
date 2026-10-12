@@ -3,6 +3,7 @@ import {randomUUID} from 'node:crypto'
 import {createAdminClient} from '@/lib/supabase/admin'
 import {PACKAGE_NAMES, ORG_ONLY_NAMES, packageByName} from '@/lib/packages'
 import {projectRef} from '@/lib/status'
+import {paymentsReady, saveCardFromToken} from '@/lib/qb'
 
 const PLACEMENTS = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -64,11 +65,25 @@ export async function POST(request) {
   }
 
   const orderId = randomUUID()
+
+  // With QuickBooks connected, a card is required and is saved before the order is created.
+  let card = null
+  if (await paymentsReady()) {
+    const cardToken = typeof body.cardToken === 'string' ? body.cardToken.slice(0, 500) : ''
+    if (!cardToken) return NextResponse.json({error: 'Please add a card to place your order.'}, {status: 400})
+    try {
+      card = await saveCardFromToken(orderId, cardToken)
+    } catch (e) {
+      console.error('Card save failed', e.message)
+      return NextResponse.json({error: `We couldn’t save that card: ${e.message} Please check it or try another card.`}, {status: 402})
+    }
+  }
   const rows = items.map((it, i) => {
     const listed = packageByName(it.package)
     return {
       ...shared, ...it,
       order_id: orderId, order_item: i + 1, order_size: items.length,
+      ...(card && {qb_customer_id: orderId, qb_card_id: card.id, card_last4: card.last4, card_brand: card.brand}),
       price_cents: listed ? listed.price * 100 : null, // list price; the team can change it when accepting
     }
   })
