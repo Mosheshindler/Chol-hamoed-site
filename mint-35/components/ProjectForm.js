@@ -107,14 +107,14 @@ export default function ProjectForm() {
         </select>
       </label>
 
-      <label>What are you promoting?<textarea name="promoting" rows={3} required /></label>
+      <label>What are you promoting?<textarea name="promoting" rows={2} required /></label>
       <label>Who is your target audience?
         <span className="hint">Age range, gender, location, interests, community.</span>
-        <textarea name="audience" rows={3} required />
+        <textarea name="audience" rows={2} required />
       </label>
       <label>What&rsquo;s the single most important thing they should know?<textarea name="key_message" rows={2} required /></label>
       <label>What do you want them to do after watching?<textarea name="desired_action" rows={2} required /></label>
-      <label>What offer, price or information MUST appear?<textarea name="must_appear" rows={3} /></label>
+      <label>What offer, price or information MUST appear?<textarea name="must_appear" rows={2} /></label>
 
       <fieldset>
         <legend>Where will the commercial run?</legend>
@@ -159,7 +159,7 @@ export default function ProjectForm() {
         <label>Upload product / brand images<input type="file" name="images" accept="image/*" multiple /></label>
       </div>
       <label>Brand colors<input name="brand_colors" placeholder="e.g. #88C040, deep green, white" /></label>
-      <label>Required text / legal language<textarea name="legal_text" rows={3} /></label>
+      <label>Required text / legal language<textarea name="legal_text" rows={2} /></label>
       <label>Anything we absolutely cannot do?<textarea name="restrictions" rows={2} /></label>
       <label><span>Creative references or links <span className="optional">— optional</span></span><textarea name="references_links" rows={2} /></label>
 
