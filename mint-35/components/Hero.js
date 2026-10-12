@@ -20,7 +20,7 @@ export default function Hero() {
             <li>No AI skills needed</li>
           </ul>
           <div className="hero-ctas">
-            <a href="#start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>
+            <a href="/start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>
             <a href="#how" className="btn btn-ghost">See How It Works</a>
           </div>
           <dl className="facts">

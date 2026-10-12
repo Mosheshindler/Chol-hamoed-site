@@ -1,6 +1,7 @@
 import Header from '@/components/Header'
 import Hero from '@/components/Hero'
-import ProjectForm from '@/components/ProjectForm'
+import PackageCards from '@/components/PackageCards'
+import Yes from '@/components/Yes'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
 import FormatsModal from '@/components/FormatsModal'
@@ -43,12 +44,6 @@ const notIncluded = [
   'Ongoing back-and-forth',
 ]
 
-const packages = [
-  {name: 'Single 35', blurb: 'One commercial, one message.', items: ['1 commercial, 30–60 sec', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round'], cta: 'Start My Commercial'},
-  {name: 'Campaign 3', featured: true, blurb: 'Three spots around one campaign.', items: ['3 commercials', 'Shared look, different hooks', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round each'], cta: 'Build My Campaign'},
-  {name: 'Always On', blurb: 'Fresh spots every month.', items: ['Set number of spots per month', 'Priority production queue', 'Your brand assets on file'], cta: 'Go Always On'},
-]
-
 const faqs = [
   {q: 'Do I need a meeting?', a: 'No. Everything starts with the online questionnaire.'},
   {q: 'Can I share my ideas?', a: 'Yes. The questionnaire has space for ideas and reference links. Our team makes the final creative calls.'},
@@ -57,15 +52,6 @@ const faqs = [
   {q: 'Is it fully automated?', a: 'No. AI does the production work. Real Mint Media creatives write, assemble and finish every spot.'},
 ]
 
-const Yes = ({items}) => (
-  <ul className="yes">
-    {items.map(i => typeof i === 'string' ? <li key={i}>{i}</li> : (
-      <li key={i.text}>
-        <button type="button" className="info-link" data-open={i.info}>{i.text}<span className="info-i" aria-hidden="true">i</span></button>
-      </li>
-    ))}
-  </ul>
-)
 const No = ({items}) => <ul className="no">{items.map(i => <li key={i}>{i}</li>)}</ul>
 
 export default function Home() {
@@ -123,17 +109,7 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">Packages</p>
             <h2>Simple packages. Clear scope.</h2>
-            <div className="packages">
-              {packages.map(p => (
-                <div key={p.name} className={`package${p.featured ? ' featured' : ''}`}>
-                  {p.featured && <span className="badge">Most popular</span>}
-                  <h3>{p.name}</h3>
-                  <p className="package-blurb">{p.blurb}</p>
-                  <Yes items={p.items} />
-                  <a href="#start" data-package={p.name} className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>{p.cta} <span className="arrow">→</span></a>
-                </div>
-              ))}
-            </div>
+            <PackageCards />
             <p className="package-note">Every package includes script approval and one revision round per commercial.</p>
           </div>
         </section>
@@ -169,18 +145,15 @@ export default function Home() {
         </section>
 
         <section id="start" className="section start">
-          <div className="container start-grid">
-            <div className="start-copy">
-              <p className="eyebrow">Ready?</p>
-              <h2>Tell us your idea.<br /><span className="accent">We&rsquo;ll make the spot.</span></h2>
-              <ul className="nots">
-                <li>No meeting</li>
-                <li>No script to write</li>
-                <li>No AI to learn</li>
-              </ul>
-              <a href="#project-form" className="btn btn-primary">Start My Mint 35 <span className="arrow">→</span></a>
-            </div>
-            <ProjectForm />
+          <div className="container start-band">
+            <p className="eyebrow">Ready?</p>
+            <h2>Tell us your idea.<br /><span className="accent">We&rsquo;ll make the spot.</span></h2>
+            <ul className="nots">
+              <li>No meeting</li>
+              <li>No script to write</li>
+              <li>No AI to learn</li>
+            </ul>
+            <a href="/start" className="btn btn-primary">Start My Mint 35 <span className="arrow">→</span></a>
           </div>
         </section>
       </main>
