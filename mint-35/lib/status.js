@@ -15,8 +15,6 @@ export const STATUSES = {
 
 export const ACTIVE = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent', 'in_production', 'first_cut_sent', 'revising']
 
-export const PACKAGES = ['Single 35', 'Campaign 3', 'Always On', 'Not sure yet']
-
 export const projectRef = n => `M35-${n}`
 
 export function formatMoney(cents) {

@@ -201,7 +201,7 @@ p { margin: 0 0 12px; }
 .modal .table-wrap { background: var(--bg); }
 .modal-close { position: absolute; right: 18px; top: 18px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--card-2); color: var(--text); font-size: 1rem; cursor: pointer; }
 .modal-close:hover { border-color: var(--lime); color: var(--lime); }
-.info-link { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline dotted rgba(136,192,64,.7); text-underline-offset: 4px; }
+.info-link { text-align: left; display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline dotted rgba(136,192,64,.7); text-underline-offset: 4px; }
 .info-link:hover { color: var(--lime); }
 .info-i { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(136,192,64,.2); color: var(--lime); font-size: .72rem; font-weight: 800; font-style: italic; font-family: Georgia, serif; text-decoration: none; }
 .formats-row .info-link { color: var(--lime); font-weight: 600; }
@@ -250,6 +250,12 @@ p { margin: 0 0 12px; }
 .package-blurb { color: var(--muted); margin-bottom: 14px; }
 .package .yes { flex: 1; align-content: start; margin-bottom: 20px; }
 .badge { position: absolute; top: -14px; left: 32px; background: var(--lime); color: #0a0c0a; font-size: .72rem; font-weight: 800; padding: 5px 12px; border-radius: 999px; text-transform: uppercase; letter-spacing: .08em; }
+.milestones { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: repeat(5, 1fr); position: relative; }
+.milestones::before { content: ""; position: absolute; left: 10%; right: 10%; top: 6px; height: 2px; background: linear-gradient(90deg, rgba(136,192,64,.3), var(--lime)); }
+.milestones li { position: relative; display: grid; justify-items: center; gap: 6px; text-align: center; font-size: .72rem; font-weight: 700; color: var(--muted); line-height: 1.2; }
+.milestones li span { width: 14px; height: 14px; border-radius: 50%; background: var(--card); border: 2px solid var(--lime); }
+.milestones li:last-child { color: var(--lime); }
+.milestones li:last-child span { background: var(--lime); }
 .package-note { text-align: center; color: var(--muted); margin: 20px 0 0; }
 
 /* Work */

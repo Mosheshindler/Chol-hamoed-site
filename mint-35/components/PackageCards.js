@@ -11,6 +11,11 @@ export default function PackageCards({selected, ctaLabel}) {
           {p.featured && <span className="badge">Most popular</span>}
           <h3>{p.name}</h3>
           <p className="package-blurb">{p.blurb}</p>
+          {p.milestones && (
+            <ol className="milestones" aria-label="The five videos">
+              {p.milestones.map(m => <li key={m}><span aria-hidden="true" />{m}</li>)}
+            </ol>
+          )}
           <Yes items={p.items} />
           <Link href={`/start?package=${p.slug}`} scroll className={`btn ${p.featured ? 'btn-primary' : 'btn-outline'}`}>
             {ctaLabel || p.cta} <span className="arrow">→</span>

@@ -1,6 +1,6 @@
 import {NextResponse} from 'next/server'
 import {createAdminClient} from '@/lib/supabase/admin'
-import {PACKAGES} from '@/lib/status'
+import {PACKAGE_NAMES} from '@/lib/packages'
 
 const PLACEMENTS = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -35,7 +35,7 @@ export async function POST(request) {
     legal_text: str(body.legal_text),
     restrictions: str(body.restrictions),
     references_links: str(body.references_links),
-    package: PACKAGES.includes(body.package) ? body.package : null,
+    package: PACKAGE_NAMES.includes(body.package) ? body.package : null,
   }
 
   const missing = ['name', 'email', 'promoting', 'audience', 'key_message', 'desired_action'].filter(k => !project[k])

@@ -110,7 +110,7 @@ export default function Home() {
             <p className="eyebrow">Packages</p>
             <h2>Simple packages. Clear scope.</h2>
             <PackageCards />
-            <p className="package-note">Every package includes script approval and one revision round per commercial.</p>
+            <p className="package-note">Single 35 and Campaign 3 include script approval and one revision round per commercial.</p>
           </div>
         </section>
 
