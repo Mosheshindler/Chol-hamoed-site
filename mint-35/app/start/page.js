@@ -5,7 +5,7 @@ import PackageCards from '@/components/PackageCards'
 import ProjectForm from '@/components/ProjectForm'
 import FormatsModal from '@/components/FormatsModal'
 import DialogController from '@/components/DialogController'
-import {packageBySlug, NOT_SURE} from '@/lib/packages'
+import {packageBySlug, NOT_SURE, formatPrice} from '@/lib/packages'
 
 export const metadata = {title: 'Start a project · Mint 35'}
 
@@ -38,6 +38,7 @@ export default async function StartPage({searchParams}) {
               <div className="chosen">
                 <span className="chosen-label">Package</span>
                 <b>{pkg.name}</b>
+                {pkg.price && <span className="chosen-price">{formatPrice(pkg.price)}</span>}
                 <Link href="/start" className="chosen-change">Change</Link>
               </div>
               {pkg.orgOnly && <p className="org-note">{pkg.name} is for organizations running a fundraising campaign. Please include your organization&rsquo;s name.</p>}

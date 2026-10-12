@@ -1,6 +1,6 @@
 import {NextResponse} from 'next/server'
 import {createAdminClient} from '@/lib/supabase/admin'
-import {PACKAGE_NAMES, ORG_ONLY_NAMES} from '@/lib/packages'
+import {PACKAGE_NAMES, ORG_ONLY_NAMES, packageByName} from '@/lib/packages'
 
 const PLACEMENTS = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -43,6 +43,9 @@ export async function POST(request) {
   if (ORG_ONLY_NAMES.includes(project.package) && !project.company) missing.push('company')
   if (missing.length) return NextResponse.json({error: 'Please fill in every required field.', missing}, {status: 400})
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(project.email)) return NextResponse.json({error: 'Please enter a valid email address.'}, {status: 400})
+
+  const listed = packageByName(project.package)
+  if (listed) project.price_cents = listed.price * 100 // list price; the team can change it when accepting
 
   const files = (Array.isArray(body.files) ? body.files : []).slice(0, MAX_FILES)
   if (files.some(f => !f || typeof f.name !== 'string' || !(f.size > 0) || f.size > MAX_FILE_BYTES)) {

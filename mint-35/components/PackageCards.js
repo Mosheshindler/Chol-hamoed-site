@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import {PACKAGES} from '@/lib/packages'
+import {PACKAGES, formatPrice} from '@/lib/packages'
 import Yes from './Yes'
 
 // Package cards. Each button opens the Start page with that package chosen.
@@ -11,6 +11,7 @@ export default function PackageCards({selected, ctaLabel}) {
           {p.featured && <span className="badge">Most popular</span>}
           {p.tag && <span className="badge badge-org">{p.tag}</span>}
           <h3>{p.name}</h3>
+          <p className="price"><b>{formatPrice(p.price)}</b>{p.priceNote && <span>{p.priceNote}</span>}</p>
           <p className="package-blurb">{p.blurb}</p>
           {p.milestones && (
             <ol className="milestones" aria-label="The five videos">
