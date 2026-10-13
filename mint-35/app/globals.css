@@ -544,3 +544,8 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .shot-1 { opacity: 1; }
   html { scroll-behavior: auto; }
 }
+
+/* Introductory pricing callout (packages section and order builder) */
+.intro-pricing { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px; padding: 8px 16px; border-radius: 999px; background: rgba(136,192,64,.12); border: 1px solid rgba(136,192,64,.35); color: var(--text); font-size: 0.95rem; }
+.intro-pricing b { color: var(--lime); }
+.start-page .intro-pricing { margin-top: 14px; }

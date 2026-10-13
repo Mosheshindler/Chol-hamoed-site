@@ -111,6 +111,7 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">Packages</p>
             <h2>Simple packages. Clear scope.</h2>
+            <p className="intro-pricing"><span aria-hidden="true">🔥</span> <span><b>Introductory pricing.</b> Grab it while it lasts.</span></p>
             <PackageCards />
             <p className="package-note">Every package includes an approval step and one revision round.</p>
           </div>
