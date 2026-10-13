@@ -41,4 +41,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   extra revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
 
 ## Planned (owner asked)
+- AI customization limits (to decide with the owner): what the fixed scope allows, e.g. no custom
+  characters; spell it out on the site (Included / Not included, FAQ) and in the form.
+- Visual style picker on the order form (per package): e.g. Animated (Pixar-style), Realistic, plus other
+  styles the owner approves; show small example thumbnails; store it on the job for the team.
 - Automated customer emails at each job step, once the site is confirmed.
