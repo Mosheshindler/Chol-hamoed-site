@@ -146,7 +146,7 @@ export default function Home() {
         <section id="start" className="section start">
           <div className="container start-band">
             <p className="eyebrow">Ready?</p>
-            <h2>Less complexity.<br /><span className="accent">More possibilities.</span></h2>
+            <h2>Less complexity.<br /><span className="accent">Faster results.</span></h2>
             <a href="/start" className="btn btn-primary">Start My Mint 35 <span className="arrow">→</span></a>
           </div>
         </section>
