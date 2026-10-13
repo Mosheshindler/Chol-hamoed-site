@@ -37,7 +37,7 @@ export default function Hero() {
               {scenes.map((s, i) => (
                 <div key={s.tag} className={`shot shot-${i + 1}`}>
                   {s.img && <img src={s.img} alt="" className="shot-img" />}
-                  {s.end && <img src="/brand/mint35-logo.png" alt="" className="shot-logo" />}
+                  {s.end && <img src="/brand/mint35-logo-v2.png" alt="" className="shot-logo" />}
                   <span className="shot-tag">{s.tag}</span>
                   <span className={s.end ? 'shot-btn' : 'shot-line'}>{s.line}</span>
                 </div>
