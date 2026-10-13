@@ -1,8 +1,8 @@
 // Official Mint 35 logo (transparent PNGs made from the supplied artwork).
 // "full" includes the "Powered by mintmedia" line.
 const LOGOS = {
-  mark: {src: '/brand/mint35-logo.png', w: 640, h: 144},
-  full: {src: '/brand/mint35-logo-full.png', w: 900, h: 260},
+  mark: {src: '/brand/mint35-logo.png', w: 640, h: 143},
+  full: {src: '/brand/mint35-logo-full.png', w: 900, h: 255},
 }
 
 export default function Logo({variant = 'mark', className = ''}) {

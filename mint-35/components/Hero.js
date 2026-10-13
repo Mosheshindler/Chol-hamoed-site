@@ -43,7 +43,7 @@ export default function Hero() {
                 </div>
               ))}
               <div className="progress"><span /></div>
-              <div className="screen-brand">mint<b>35</b></div>
+              <div className="screen-brand">mint<b>:35</b></div>
               <div className="timecode">0:35</div>
             </div>
           </div>

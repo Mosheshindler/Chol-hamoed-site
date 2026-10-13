@@ -18,7 +18,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 ## Brand
 - Official logo: `public/brand/mint35-logo.png` (wordmark), `mint35-logo-full.png` (with "Powered by mintmedia").
-  Made transparent from the supplied artwork; never recolor or redraw.
+  Current logo is "mint:35" (colon version, supplied Oct 2026). Made transparent from the supplied artwork; never recolor or redraw.
 - Colors: lime `#88C040`, deep green `#107838`, near-black background.
 - Hidden from search until `NEXT_PUBLIC_ALLOW_INDEXING=true`.
 
