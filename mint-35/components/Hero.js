@@ -13,11 +13,11 @@ export default function Hero() {
         <div className="hero-copy">
           <p className="eyebrow">Mint 35 · by Mint Media</p>
           <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
-          <p className="lead">One form. One finished commercial.</p>
+          <p className="lead">Commercials that stop the scroll.</p>
           <ul className="nots">
             <li>No shoots</li>
             <li>No meetings</li>
-            <li>No learning curve</li>
+            <li>No editing</li>
           </ul>
           <div className="hero-ctas">
             <a href="/start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>

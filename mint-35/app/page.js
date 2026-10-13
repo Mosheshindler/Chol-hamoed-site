@@ -74,7 +74,6 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <button type="button" className="info-link" data-open="formats-dialog">Which one?<span className="info-i" aria-hidden="true">i</span></button>
           </div>
         </section>
 
@@ -148,11 +147,6 @@ export default function Home() {
           <div className="container start-band">
             <p className="eyebrow">Ready?</p>
             <h2>Your idea.<br /><span className="accent">On screen.</span></h2>
-            <ul className="nots">
-              <li>No meetings</li>
-              <li>No writing</li>
-              <li>No AI to learn</li>
-            </ul>
             <a href="/start" className="btn btn-primary">Start My Mint 35 <span className="arrow">→</span></a>
           </div>
         </section>
