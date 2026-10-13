@@ -7,7 +7,7 @@ const rows = [
   ['Script approvals', 'One', 'Collaborative'],
   ['Revision rounds', 'One', 'Multiple'],
   ['Price', 'Fixed package', 'Custom quote'],
-  ['Best for', 'Short, focused commercials', 'Custom films and campaigns'],
+  ['Best for', 'Short, focused videos', 'Custom films and campaigns'],
 ]
 
 export default function CompareModal() {

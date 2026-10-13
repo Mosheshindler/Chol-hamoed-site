@@ -1,7 +1,7 @@
 // The three Mint 35 packages, shared by the homepage and the Start page.
 export const PACKAGES = [
-  {slug: 'single-35', name: 'Single 35', price: 2800, blurb: 'One commercial, one message.', items: ['1 commercial, 30–60 sec', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round'], cta: 'Start My Commercial'},
-  {slug: 'campaign-3', name: 'Campaign 3', price: 7200, priceNote: 'Save $1,200 vs. 3 singles', featured: true, blurb: 'Three spots around one campaign.', items: ['3 commercials, 30–60 sec each', '3 unique videos, one shared style', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round each'], cta: 'Build My Campaign'},
+  {slug: 'single-35', name: 'Single 35', price: 2800, blurb: 'One video, one message.', items: ['1 video, 30–60 sec', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round'], cta: 'Start My Video'},
+  {slug: 'campaign-3', name: 'Campaign 3', price: 7200, priceNote: 'Save $1,200 vs. 3 singles', featured: true, blurb: 'Three videos, one campaign.', items: ['3 videos, 30–60 sec each', 'Each unique, one shared style', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round each'], cta: 'Build My Campaign'},
   {slug: 'online-campaign', name: 'Momentum Pack', price: 3800, tag: 'For online fundraisers', orgOnly: true, blurb: 'Milestone videos for your fundraising campaign, at a lower price.', milestones: ['Live Now', '25%', '50%', '75%', 'We Made It!'], items: ['5 milestone videos, 35–45 sec each', '1 sample video to approve', '1 revision round on the first video', 'The other 4 follow the approved look', {text: '1 platform export for all 5', info: 'formats-dialog'}], footnote: 'For organizations running a fundraising campaign.', cta: 'Launch My Campaign'},
 ]
 

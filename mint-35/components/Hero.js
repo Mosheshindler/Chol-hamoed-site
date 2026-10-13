@@ -13,7 +13,7 @@ export default function Hero() {
         <div className="hero-copy">
           <p className="eyebrow">Mint 35 · by Mint Media</p>
           <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
-          <p className="lead">Commercials that stop the scroll.</p>
+          <p className="lead">Short videos that stop the scroll.</p>
           <ul className="nots">
             <li>No shoots</li>
             <li>No meetings</li>
@@ -24,7 +24,7 @@ export default function Hero() {
             <a href="#how" className="btn btn-ghost">How It Works</a>
           </div>
           <dl className="facts">
-            <div><dt>30–60</dt><dd>second spot</dd></div>
+            <div><dt>30–60</dt><dd>second video</dd></div>
             <div><dt>1</dt><dd>questionnaire</dd></div>
             <div><dt>3<sup>*</sup></dt><dd>business days to first cut</dd></div>
           </dl>

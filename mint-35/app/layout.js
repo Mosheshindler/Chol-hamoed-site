@@ -1,7 +1,7 @@
 import './globals.css'
 
-const title = 'Mint 35 — AI-Powered Commercials by Mint Media'
-const description = 'A streamlined, fixed-scope way to create short commercials. Submit your project details and brand assets, and Mint 35 turns them into a finished 30–60 second spot.'
+const title = 'Mint 35 — Short Videos by Mint Media'
+const description = 'A streamlined, fixed-scope way to create short videos, promos and ads. Submit your project details and brand assets, and Mint 35 turns them into a finished 30–60 second video.'
 
 export const metadata = {
   title,
