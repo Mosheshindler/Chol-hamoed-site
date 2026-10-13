@@ -91,7 +91,7 @@ p { margin: 0 0 12px; }
 .hero-copy > *:nth-child(4) { animation-delay: .18s; }
 .hero-copy > *:nth-child(5) { animation-delay: .24s; }
 .hero-copy > *:nth-child(n+6) { animation-delay: .3s; }
-.hero h1 { margin-bottom: 18px; }
+.hero h1 { margin-bottom: 18px; font-size: clamp(2.9rem, 8vw, 6.2rem); line-height: 1; letter-spacing: -0.035em; }
 .hero .lead { font-size: 1.3rem; color: #c9d4c9; }
 .nots { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .nots li { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 10px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid var(--line); font-size: .92rem; font-weight: 500; }

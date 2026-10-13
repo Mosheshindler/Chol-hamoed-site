@@ -79,7 +79,7 @@ export default function Home() {
         <section id="how" className="section">
           <div className="container">
             <p className="eyebrow">How it works</p>
-            <h2>Your information in. Commercial out.</h2>
+            <h2>Your idea in. Commercial out.</h2>
             <ol className="timeline">
               {steps.map((s, i) => (
                 <li key={s.title}>
@@ -98,7 +98,7 @@ export default function Home() {
         <section id="included" className="section section-alt">
           <div className="container">
             <p className="eyebrow">What&rsquo;s included</p>
-            <h2>Fixed scope. That&rsquo;s why it costs less.</h2>
+            <h2>Fixed scope. Smaller price.</h2>
             <div className="yesno">
               <div className="card card-yes"><h3>Included</h3><Yes items={included} /></div>
               <div className="card card-no"><h3>Not included</h3><No items={notIncluded} /></div>
@@ -110,7 +110,7 @@ export default function Home() {
         <section id="packages" className="section section-alt">
           <div className="container">
             <p className="eyebrow">Packages</p>
-            <h2>Simple packages. Clear scope.</h2>
+            <h2>Simple pricing. No surprises.</h2>
             <p className="intro-pricing"><span aria-hidden="true">🔥</span> <span><b>Introductory pricing.</b> Grab it while it lasts.</span></p>
             <PackageCards />
             <p className="package-note">Every package includes an approval step and one revision round.</p>
@@ -120,7 +120,7 @@ export default function Home() {
         <section id="work" className="section">
           <div className="container">
             <p className="eyebrow">Work</p>
-            <h2>See what your idea can become.</h2>
+            <h2>Made with Mint 35.</h2>
             <div className="work-grid">
               {SAMPLES.map(v => <VideoSample key={v.id} {...v} />)}
             </div>
@@ -130,7 +130,7 @@ export default function Home() {
         <section id="faq" className="section section-alt">
           <div className="container narrow">
             <p className="eyebrow">FAQ</p>
-            <h2>Quick answers</h2>
+            <h2>Questions. Answered.</h2>
             <div className="faqs">
               {faqs.map(f => (
                 <details key={f.q}>
@@ -145,7 +145,7 @@ export default function Home() {
         <section id="start" className="section start">
           <div className="container start-band">
             <p className="eyebrow">Ready?</p>
-            <h2>Tell us your idea.<br /><span className="accent">We&rsquo;ll make the spot.</span></h2>
+            <h2>Your idea.<br /><span className="accent">On screen.</span></h2>
             <ul className="nots">
               <li>No meeting</li>
               <li>No script to write</li>

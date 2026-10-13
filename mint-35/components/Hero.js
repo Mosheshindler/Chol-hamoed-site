@@ -11,17 +11,17 @@ export default function Hero() {
       <span className="hero-ghost" aria-hidden="true">35</span>
       <div className="container hero-grid">
         <div className="hero-copy">
-          <p className="eyebrow">A new product from Mint Media</p>
-          <h1>Your next commercial.<br /><span className="accent">Without the whole production.</span></h1>
-          <p className="lead">Fill out one questionnaire. Get back a finished 30–60 second commercial.</p>
+          <p className="eyebrow">Mint 35 · by Mint Media</p>
+          <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
+          <p className="lead">One form in. One finished commercial out.</p>
           <ul className="nots">
-            <li>No shoot days</li>
+            <li>No shoots</li>
             <li>No meetings</li>
-            <li>No AI skills needed</li>
+            <li>No learning curve</li>
           </ul>
           <div className="hero-ctas">
             <a href="/start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>
-            <a href="#how" className="btn btn-ghost">See How It Works</a>
+            <a href="#how" className="btn btn-ghost">How It Works</a>
           </div>
           <dl className="facts">
             <div><dt>30–60</dt><dd>second spot</dd></div>
