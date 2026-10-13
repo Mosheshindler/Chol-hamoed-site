@@ -13,7 +13,7 @@ export default function Hero() {
         <div className="hero-copy">
           <p className="eyebrow">Mint 35 · by Mint Media</p>
           <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
-          <p className="lead">One form in. One finished commercial out.</p>
+          <p className="lead">One form. One finished commercial.</p>
           <ul className="nots">
             <li>No shoots</li>
             <li>No meetings</li>

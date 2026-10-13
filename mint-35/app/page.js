@@ -10,9 +10,9 @@ import FormatsModal from '@/components/FormatsModal'
 import DialogController from '@/components/DialogController'
 
 const formats = [
-  {ratio: '9:16', label: 'Reels · TikTok · Shorts · WhatsApp Status'},
-  {ratio: '1:1', label: 'Social'},
-  {ratio: '16:9', label: 'YouTube · Web · Digital'},
+  {ratio: '9:16', label: 'Vertical'},
+  {ratio: '1:1', label: 'Square'},
+  {ratio: '16:9', label: 'Wide'},
 ]
 
 const icon = {
@@ -65,14 +65,16 @@ export default function Home() {
 
         <section className="formats" aria-label="Formats">
           <div className="container formats-row">
-            <span className="formats-title">Every screen. Covered.</span>
-            {formats.map(f => (
-              <div key={f.ratio} className="format">
-                <span className={`format-frame r${f.ratio.replace(':', '-')}`} aria-hidden="true" />
-                <span><strong>{f.ratio}</strong> {f.label}</span>
-              </div>
-            ))}
-            <button type="button" className="info-link" data-open="formats-dialog">What&rsquo;s the difference?<span className="info-i" aria-hidden="true">i</span></button>
+            <span className="formats-title">Every screen.</span>
+            <div className="format-list">
+              {formats.map(f => (
+                <div key={f.ratio} className="format">
+                  <span className={`format-frame r${f.ratio.replace(':', '-')}`} aria-hidden="true" />
+                  <span><strong>{f.ratio}</strong> {f.label}</span>
+                </div>
+              ))}
+            </div>
+            <button type="button" className="info-link" data-open="formats-dialog">Which one?<span className="info-i" aria-hidden="true">i</span></button>
           </div>
         </section>
 
