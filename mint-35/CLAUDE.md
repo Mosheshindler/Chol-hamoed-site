@@ -17,7 +17,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Schema changes need the SQL run in Supabase's SQL Editor; tell the owner before merging code that depends on it.
 
 ## Brand
-- Official logo: `public/brand/mint35-logo.png` (wordmark), `mint35-logo-full.png` (with "Powered by mintmedia").
+- Official logo: `public/brand/mint35-logo-v2.png` (wordmark), `mint35-logo-full-v2.png` (with "Powered by mintmedia").
+  When replacing a logo, use a new file name (v3...) so phones do not keep showing a cached old copy.
   Current logo is "mint:35" (colon version, supplied Oct 2026). Made transparent from the supplied artwork; never recolor or redraw.
 - Colors: lime `#88C040`, deep green `#107838`, near-black background.
 - Hidden from search until `NEXT_PUBLIC_ALLOW_INDEXING=true`.
