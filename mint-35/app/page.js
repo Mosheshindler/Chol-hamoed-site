@@ -51,7 +51,7 @@ const faqs = [
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
   {q: 'How fast is it?', a: 'First cut in 3 business days, once your script is approved and production starts. Start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
-  {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every spot.'},
+  {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
 ]
 
 const No = ({items}) => <ul className="no">{items.map(i => <li key={i}>{i}</li>)}</ul>
@@ -80,7 +80,7 @@ export default function Home() {
         <section id="how" className="section">
           <div className="container">
             <p className="eyebrow">How it works</p>
-            <h2>Your idea in. Commercial out.</h2>
+            <h2>Your idea in. Video out.</h2>
             <ol className="timeline">
               {steps.map((s, i) => (
                 <li key={s.title}>
