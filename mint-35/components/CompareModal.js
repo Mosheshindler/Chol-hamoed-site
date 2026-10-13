@@ -14,14 +14,16 @@ export default function CompareModal() {
   return (
     <>
       <button type="button" className="tell-more" data-open="compare-dialog">
-        <span className="tell-more-icon" aria-hidden="true">?</span>
-        <span><b>Want more control?</b> Compare with Mint Media</span>
-        <span className="tell-more-cta">Tell me more <span className="arrow">→</span></span>
+        <span className="tell-more-text">
+          <b>Need a full production?</b>
+          <span>Filming, strategy calls, more revisions. That&rsquo;s Mint Media.</span>
+        </span>
+        <span className="tell-more-cta">Compare <span className="arrow">→</span></span>
       </button>
 
       <Modal id="compare-dialog" titleId="compare-title">
-        <p className="eyebrow">Mint 35 or Mint Media?</p>
-        <h2 id="compare-title">More control? Meet Mint Media.</h2>
+        <p className="eyebrow">Compare</p>
+        <h2 id="compare-title">Mint 35 or Mint Media?</h2>
         <div className="table-wrap">
           <table className="compare-table">
             <thead><tr><th /><th className="hl">Mint 35</th><th>Mint Media</th></tr></thead>

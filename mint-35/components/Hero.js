@@ -1,8 +1,8 @@
+// Hero phone plays real frames from Mint 35 work (see /public/hero), ending on a CTA card.
 const scenes = [
-  {tag: 'Hook', line: 'Stop scrolling.'},
-  {tag: 'Product', line: 'Meet your product.'},
-  {tag: 'Offer', line: '20% off this week.'},
-  {tag: 'Call to action', line: 'Shop now →'},
+  {tag: 'Hook', line: 'Stop scrolling.', img: '/hero/allfit.jpg'},
+  {tag: 'Story', line: 'Show what’s new.', img: '/hero/due5.jpg'},
+  {tag: 'Call to action', line: 'Learn more →', end: true},
 ]
 
 export default function Hero() {
@@ -24,11 +24,11 @@ export default function Hero() {
             <a href="#how" className="btn btn-ghost">How It Works</a>
           </div>
           <dl className="facts">
-            <div><dt>30–60</dt><dd>second video</dd></div>
-            <div><dt>1</dt><dd>questionnaire</dd></div>
-            <div><dt>3<sup>*</sup></dt><dd>business days to first cut</dd></div>
+            <div><dt>30–60</dt><dd>seconds</dd></div>
+            <div><dt>1</dt><dd>simple form</dd></div>
+            <div><dt>3<sup>*</sup></dt><dd>days to first cut</dd></div>
           </dl>
-          <p className="footnote">*After script approval, once your project enters production.</p>
+          <p className="footnote">*Business days, once production starts.</p>
         </div>
 
         <div className="hero-visual" aria-hidden="true">
@@ -36,13 +36,15 @@ export default function Hero() {
             <div className="phone-screen">
               {scenes.map((s, i) => (
                 <div key={s.tag} className={`shot shot-${i + 1}`}>
+                  {s.img && <img src={s.img} alt="" className="shot-img" />}
+                  {s.end && <img src="/brand/mint35-logo.png" alt="" className="shot-logo" />}
                   <span className="shot-tag">{s.tag}</span>
-                  <span className="shot-line">{s.line}</span>
+                  <span className={s.end ? 'shot-btn' : 'shot-line'}>{s.line}</span>
                 </div>
               ))}
               <div className="progress"><span /></div>
-              <div className="rec"><i />REC</div>
-              <div className="timecode">0:<span className="tc" /></div>
+              <div className="screen-brand">mint<b>35</b></div>
+              <div className="timecode">0:35</div>
             </div>
           </div>
           <div className="float-card fc-1"><b>Script</b><span>Approved ✓</span></div>
