@@ -17,7 +17,7 @@ export default function Hero() {
           <ul className="nots">
             <li>No shoots</li>
             <li>No meetings</li>
-            <li>No editing</li>
+            <li>No hassle</li>
           </ul>
           <div className="hero-ctas">
             <a href="/start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>
