@@ -23,35 +23,35 @@ const icon = {
 }
 
 const steps = [
-  {icon: 'form', title: 'Fill out the questionnaire', text: 'What you’re promoting, who it’s for, what they should do. Upload your logo and images.'},
-  {icon: 'approve', title: 'Approve the script', text: 'We write it. You review it once and approve.'},
-  {icon: 'produce', title: 'We produce it', text: 'AI production plus Mint Media editing. First cut in 3 business days.'},
-  {icon: 'deliver', title: 'One revision, then delivery', text: 'Send one round of notes. We finish it, ready to post.'},
+  {icon: 'form', title: 'Tell us.', text: 'One form. What it’s for, who it’s for. Add your logo and images.'},
+  {icon: 'approve', title: 'Approve.', text: 'We write the script. You sign off.'},
+  {icon: 'produce', title: 'We make it.', text: 'AI production. Mint Media finish. First cut in 3 business days.'},
+  {icon: 'deliver', title: 'Post it.', text: 'One round of notes. Then it’s ready to run.'},
 ]
 
 const included = [
-  'Concept and script by our team',
-  'One script approval',
+  'Concept and script',
+  'Script approval',
   'AI visuals, voice and music',
-  'Mint Media edit and finishing',
-  'Your logo and brand assets',
-  'One round of revisions',
+  'Pro edit and finish',
+  'Your logo and brand',
+  'One revision round',
 ]
 
 const notIncluded = [
-  'Meetings or strategy calls',
-  'Multiple concepts to choose from',
-  'Filming or live production',
-  'Extra revision rounds',
-  'Ongoing back-and-forth',
+  'Meetings',
+  'Multiple concepts',
+  'Filming',
+  'Extra revisions',
+  'Endless back-and-forth',
 ]
 
 const faqs = [
-  {q: 'Do I need a meeting?', a: 'No. Everything starts with the online questionnaire.'},
-  {q: 'Can I share my ideas?', a: 'Yes. The questionnaire has space for ideas and reference links. Our team makes the final creative calls.'},
-  {q: 'How fast is it?', a: 'Your first cut arrives within 3 business days after you approve the script and production begins. Start dates depend on our queue.'},
-  {q: 'What if something is wrong?', a: 'If we get a fact wrong that you supplied correctly, like a price, URL or phone number, we fix it free. Creative changes go into your one revision round.'},
-  {q: 'Is it fully automated?', a: 'No. AI does the production work. Real Mint Media creatives write, assemble and finish every spot.'},
+  {q: 'Do I need a meeting?', a: 'No. It all starts with one form.'},
+  {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
+  {q: 'How fast is it?', a: 'First cut in 3 business days, once your script is approved and production starts. Start dates depend on our queue.'},
+  {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
+  {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every spot.'},
 ]
 
 const No = ({items}) => <ul className="no">{items.map(i => <li key={i}>{i}</li>)}</ul>
@@ -65,7 +65,7 @@ export default function Home() {
 
         <section className="formats" aria-label="Formats">
           <div className="container formats-row">
-            <span className="formats-title">Ready wherever you run it</span>
+            <span className="formats-title">Every screen. Covered.</span>
             {formats.map(f => (
               <div key={f.ratio} className="format">
                 <span className={`format-frame r${f.ratio.replace(':', '-')}`} aria-hidden="true" />
@@ -113,7 +113,7 @@ export default function Home() {
             <h2>Simple pricing. No surprises.</h2>
             <p className="intro-pricing"><span aria-hidden="true">🔥</span> <span><b>Introductory pricing.</b> Grab it while it lasts.</span></p>
             <PackageCards />
-            <p className="package-note">Every package includes an approval step and one revision round.</p>
+            <p className="package-note">Every package: one approval step. One revision round.</p>
           </div>
         </section>
 
@@ -147,8 +147,8 @@ export default function Home() {
             <p className="eyebrow">Ready?</p>
             <h2>Your idea.<br /><span className="accent">On screen.</span></h2>
             <ul className="nots">
-              <li>No meeting</li>
-              <li>No script to write</li>
+              <li>No meetings</li>
+              <li>No writing</li>
               <li>No AI to learn</li>
             </ul>
             <a href="/start" className="btn btn-primary">Start My Mint 35 <span className="arrow">→</span></a>
