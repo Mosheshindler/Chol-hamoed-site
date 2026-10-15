@@ -580,3 +580,11 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .footer-copy a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .footer-copy a:hover { color: var(--lime); }
 .faq-a a { color: var(--lime); font-weight: 600; }
+
+/* Keep the close button reachable while a long popup scrolls */
+.modal-close { position: sticky; top: 16px; float: right; z-index: 3; margin: -22px -22px -40px 0; }
+.modal-done { margin-top: 8px; }
+.faq-a .faq-link { color: var(--lime); font-weight: 600; }
+.back-link { display: inline-block; margin-bottom: 20px; color: var(--muted); font-weight: 600; }
+.back-link:hover { color: var(--lime); }
+@media (max-width: 600px) { .modal-close { margin: -12px -6px -40px 0; } }

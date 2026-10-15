@@ -6,6 +6,7 @@ import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
+import DisclaimerModal from '@/components/DisclaimerModal'
 import FormatsModal from '@/components/FormatsModal'
 import DialogController from '@/components/DialogController'
 
@@ -51,7 +52,7 @@ const faqs = [
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
   {q: 'How fast is it?', a: 'First cut in 3 business days, once your script is approved and production starts. Start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
-  {q: 'Will the AI get every detail perfect?', a: 'Not always. AI isn’t an exact science, so small imperfections or variations can happen. See our AI Production Disclaimer.', link: '/ai-disclaimer'},
+  {q: 'Will the AI get every detail perfect?', a: 'Not always. AI isn’t an exact science, so small imperfections or variations can happen. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
   {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
 ]
 
@@ -137,7 +138,7 @@ export default function Home() {
               {faqs.map(f => (
                 <details key={f.q}>
                   <summary>{f.q}</summary>
-                  <p className="faq-a">{f.a}{f.link && <> <a href={f.link}>Read it →</a></>}</p>
+                  <p className="faq-a">{f.a}{f.dialog && <> <button type="button" className="link-btn faq-link" data-open={f.dialog}>Read it →</button></>}</p>
                 </details>
               ))}
             </div>
@@ -154,6 +155,7 @@ export default function Home() {
       </main>
       <Footer />
       <FormatsModal />
+      <DisclaimerModal />
       <DialogController />
     </>
   )
