@@ -41,6 +41,10 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Add-on list in `lib/addons.js`: extra orientation $450/video, 15-sec cutdown $175/video, captions $150/video;
   extra revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
 
+- AI Production Disclaimer (owner's wording) lives in `lib/disclaimer.js`: page /ai-disclaimer, footer link, FAQ,
+  and a required checkbox at checkout. The API refuses orders without the current DISCLAIMER_VERSION and logs a
+  `disclaimer_accepted` event per job. Bump the version when the wording changes.
+
 ## Planned (owner asked)
 - AI customization limits (to decide with the owner): what the fixed scope allows, e.g. no custom
   characters; spell it out on the site (Included / Not included, FAQ) and in the form.

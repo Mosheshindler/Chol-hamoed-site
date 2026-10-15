@@ -4,6 +4,7 @@ import {createAdminClient} from '@/lib/supabase/admin'
 import {PACKAGE_NAMES, ORG_ONLY_NAMES, packageByName} from '@/lib/packages'
 import {projectRef} from '@/lib/status'
 import {paymentsReady, saveCardFromToken} from '@/lib/qb'
+import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 
 const PLACEMENTS = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -21,6 +22,7 @@ export async function POST(request) {
   try { body = await request.json() } catch { return NextResponse.json({error: 'Invalid request.'}, {status: 400}) }
 
   if (body._honey) return NextResponse.json({ok: true}) // bot filled the hidden field
+  if (body.acceptedDisclaimer !== DISCLAIMER_VERSION) return NextResponse.json({error: 'Please read and accept the AI Production Disclaimer.'}, {status: 400})
 
   const shared = {
     name: str(body.name, 200),
@@ -96,6 +98,7 @@ export async function POST(request) {
   }
 
   await db.from('project_events').insert(created.map(p => ({project_id: p.id, type: 'submitted', data: {order_size: items.length}})))
+  await db.from('project_events').insert(created.map(p => ({project_id: p.id, type: 'disclaimer_accepted', data: {version: DISCLAIMER_VERSION}})))
 
   // Brand files are uploaded once, under the first job; /complete links them to every job.
   const first = created[0]

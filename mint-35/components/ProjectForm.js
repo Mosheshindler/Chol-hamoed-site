@@ -5,6 +5,7 @@ import {formats} from './formats'
 import {createClient} from '@/lib/supabase/browser'
 import {formatPrice} from '@/lib/packages'
 import CardFields, {tokenizeCard} from './CardFields'
+import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 
 const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 
@@ -36,6 +37,7 @@ export default function ProjectForm({lines, tokenUrl, onDone}) {
         orientation: g(i, 'orientation'), ideal_date: g(i, 'ideal_date'), references_links: g(i, 'references_links'),
       })),
       files: files.map(f => ({name: f.file.name, size: f.file.size, kind: f.kind})),
+      acceptedDisclaimer: fd.get('accept_disclaimer') ? DISCLAIMER_VERSION : null,
     }
 
     try {
@@ -170,6 +172,11 @@ export default function ProjectForm({lines, tokenUrl, onDone}) {
           <li>Your card is saved when you place your order. We only charge it once your order enters our production queue.</li>
         </ul>
       </div>
+
+      <label className="check accept">
+        <input type="checkbox" name="accept_disclaimer" required />
+        <span>I&rsquo;ve read and accept the <button type="button" className="info-link" data-open="disclaimer-dialog">AI Production Disclaimer</button>. AI results can vary, and extensive customization isn&rsquo;t included.</span>
+      </label>
 
       {state.phase === 'error' && <p className="form-error" role="alert">{state.message}</p>}
 

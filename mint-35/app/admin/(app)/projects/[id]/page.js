@@ -32,6 +32,7 @@ function describe(e, names) {
   const who = names[e.actor] || 'Website'
   switch (e.type) {
     case 'submitted': return 'Submitted from the website'
+    case 'disclaimer_accepted': return `Customer accepted the AI Production Disclaimer (version ${e.data.version})`
     case 'status': return `${who} moved it to “${STATUSES[e.data.to]?.label}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}`
     case 'price': return `${who} set the price to ${formatMoney(e.data.price_cents)}`
     case 'assigned': return e.data.to ? `${who} assigned it to ${names[e.data.to] || 'someone'}` : `${who} unassigned it`
