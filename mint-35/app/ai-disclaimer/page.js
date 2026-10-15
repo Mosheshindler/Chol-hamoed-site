@@ -11,6 +11,7 @@ export default function DisclaimerPage() {
       <Header />
       <main className="section">
         <div className="container narrow">
+          <a href="/" className="back-link">← Back to Mint 35</a>
           <p className="eyebrow">Good to know</p>
           <h1 className="page-title">{DISCLAIMER_TITLE}</h1>
           <DisclaimerText />
