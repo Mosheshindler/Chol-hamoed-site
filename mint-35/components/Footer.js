@@ -18,7 +18,7 @@ export default function Footer() {
           <a href="tel:+17328134222">(732) 813-4222</a>
         </div>
       </div>
-      <div className="container footer-copy muted">© {new Date().getFullYear()} Mint Media LLC</div>
+      <div className="container footer-copy muted">© {new Date().getFullYear()} Mint Media LLC · <a href="/ai-disclaimer">AI Production Disclaimer</a></div>
     </footer>
   )
 }

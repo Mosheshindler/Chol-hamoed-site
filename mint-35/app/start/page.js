@@ -1,6 +1,7 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FormatsModal from '@/components/FormatsModal'
+import DisclaimerModal from '@/components/DisclaimerModal'
 import DialogController from '@/components/DialogController'
 import StartFlow from './StartFlow'
 import {paymentsReady, tokenizeUrl} from '@/lib/qb'
@@ -22,6 +23,7 @@ export default async function StartPage({searchParams}) {
       </main>
       <Footer />
       <FormatsModal />
+      <DisclaimerModal />
       <DialogController />
     </>
   )

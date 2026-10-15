@@ -569,3 +569,14 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .nots { font-size: .95rem; }
   .nots li + li::before { margin: 0 8px; }
 }
+
+/* AI Production Disclaimer: page, checkout popup and the required checkbox */
+.page-title { font-size: clamp(2rem, 5vw, 3rem); }
+.disclaimer-text p { color: var(--muted); font-size: 1.02rem; line-height: 1.65; margin: 0 0 16px; }
+.disclaimer-text b { color: var(--text); }
+.form .check.accept { align-items: flex-start; border-radius: 16px; padding: 14px 16px; margin: 4px 0 18px; line-height: 1.5; font-weight: 400; }
+.form .check.accept input { margin-top: 4px; flex: none; width: 18px; height: 18px; }
+.form .check.accept .info-link { color: var(--lime); font-weight: 600; }
+.footer-copy a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.footer-copy a:hover { color: var(--lime); }
+.faq-a a { color: var(--lime); font-weight: 600; }
