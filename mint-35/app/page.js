@@ -6,6 +6,7 @@ import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
+import HowItWorks from '@/components/HowItWorks'
 import DisclaimerModal from '@/components/DisclaimerModal'
 import FormatsModal from '@/components/FormatsModal'
 import DialogController from '@/components/DialogController'
@@ -14,20 +15,6 @@ const formats = [
   {ratio: '9:16', label: 'Vertical'},
   {ratio: '1:1', label: 'Square'},
   {ratio: '16:9', label: 'Wide'},
-]
-
-const icon = {
-  form: <><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 4V3h6v1" /><path d="M9 10h6M9 14h6M9 18h3" /></>,
-  approve: <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /><path d="m9 14 2 2 4-4" /></>,
-  produce: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m10 9 5 3-5 3z" /></>,
-  deliver: <><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4z" /></>,
-}
-
-const steps = [
-  {icon: 'form', title: 'Tell us.', text: 'One form. What it’s for, who it’s for. Add your logo and images.'},
-  {icon: 'approve', title: 'Approve.', text: 'We write the script. You sign off.'},
-  {icon: 'produce', title: 'We make it.', text: 'AI production. Mint Media finish. First cut in 3 business days.*'},
-  {icon: 'deliver', title: 'Post it.', text: 'One round of notes. Then it’s ready to run.'},
 ]
 
 const included = [
@@ -45,6 +32,9 @@ const notIncluded = [
   'Filming',
   'Extra revisions',
   'Endless back-and-forth',
+  'Custom characters',
+  'Look-alikes of real people',
+  'Celebrities or copyrighted characters',
 ]
 
 const faqs = [
@@ -52,6 +42,8 @@ const faqs = [
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
   {q: 'How fast is it?', a: 'First cut in 3 business days, once your script is approved and production starts. Start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
+  {q: 'Can you create a custom character or make someone look like a real person?', a: 'No. We don’t build characters to your specifications, we don’t match anyone’s likeness, and we never use celebrities or copyrighted characters. Reference photos guide the general style only.'},
+  {q: 'Will my product look exactly right?', a: 'AI gets close, not exact. If your product needs to look exact, upload real photos or video of it and we’ll build around those.'},
   {q: 'Will the AI get every detail perfect?', a: 'Not always. AI isn’t an exact science, so small imperfections or variations can happen. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
   {q: 'Can I get a refund?', a: 'No. Mint 35 is a budget-friendly, fixed-scope service, so all sales are final and we don’t offer refunds. Your card is charged in full once your order moves to production. Need full customization and control? That’s a Mint Media production.', href: 'https://mintmediallc.com'},
   {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
@@ -84,19 +76,7 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">How it works</p>
             <h2>Your idea in. Video out.</h2>
-            <ol className="timeline">
-              {steps.map((s, i) => (
-                <li key={s.title}>
-                  <span className="step-num">0{i + 1}</span>
-                  <span className="dot" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icon[s.icon]}</svg>
-                  </span>
-                  <h3>{s.title}</h3>
-                  <p>{s.text}</p>
-                </li>
-              ))}
-            </ol>
-            <p id="how-note" className="how-note">*First cut in 3 business days, counted from when your order enters production, not including weekends and holidays.</p>
+            <HowItWorks />
           </div>
         </section>
 
