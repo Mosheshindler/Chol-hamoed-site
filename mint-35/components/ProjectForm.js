@@ -36,11 +36,11 @@ function Tip({children}) {
 }
 
 // Tappable cards for a single choice; the first option ("Let Mint 35 pick") starts selected.
-function Choices({name, options, onSample}) {
+function Choices({name, options, onSample, chips}) {
   return (
-    <div className="choices">
+    <div className={chips ? 'chips' : 'choices'}>
       {options.map((o, n) => (
-        <label key={o.value} className="choice">
+        <label key={o.value} className={chips ? 'chip' : 'choice'}>
           <input type="radio" name={name} value={o.value} defaultChecked={n === 0} />
           <b>{o.label}</b>
           {o.hint && <span className="choice-hint">{o.hint}</span>}
@@ -432,19 +432,21 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             )}
             <fieldset>
               <legend>How should the story be told? <Tip>
-                <span className="tip-line"><Icon name="type" /><span><b>On-screen text:</b> words animate on screen, no voice.</span></span>
-                <span className="tip-line"><Icon name="mic" /><span><b>Narration:</b> a voiceover tells the story.</span></span>
+                <span className="tip-line"><Icon name="type" /><span><b>On-screen text only:</b> words animate on screen, no voice.</span></span>
+                <span className="tip-line"><Icon name="mic" /><span><b>Narration + key text:</b> a voiceover tells the story, with key words on screen.</span></span>
+                <span className="tip-line"><Icon name="mic" /><span><b>Narration only:</b> a voiceover tells the story.</span></span>
                 <span className="tip-line"><Icon name="help" /><span>Not sure? Let us decide.</span></span>
+                <span className="tip-note">Want full subtitles? Captions are available as an add-on ($150 per video).</span>
               </Tip></legend>
-              <Choices name={p('story')} options={STORY} />
+              <Choices name={p('story')} options={STORY} chips />
             </fieldset>
             {w.story !== 'text' && (
               <>
-                <fieldset><legend>Voice</legend><Choices name={p('voice')} options={VOICES} /></fieldset>
-                <fieldset><legend>Voice tone</legend><Choices name={p('tone')} options={TONES} /></fieldset>
+                <fieldset><legend>Voice</legend><Choices name={p('voice')} options={VOICES} chips /></fieldset>
+                <fieldset><legend>Voice tone</legend><Choices name={p('tone')} options={TONES} chips /></fieldset>
               </>
             )}
-            <fieldset><legend>Music mood</legend><Choices name={p('music')} options={MUSIC} /></fieldset>
+            <fieldset><legend>Music mood</legend><Choices name={p('music')} options={MUSIC} chips /></fieldset>
             <label><span>References you like<Opt /></span><span className="hint">Links to videos or ads with a feel you like.</span><input name={p('references_links')} /></label>
 
             <h3 className="q-group">The fine print</h3>
