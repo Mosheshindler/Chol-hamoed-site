@@ -1,11 +1,15 @@
 'use client'
 
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {formats} from './formats'
 import {createClient} from '@/lib/supabase/browser'
 import {formatPrice} from '@/lib/packages'
 import CardFields, {tokenizeCard} from './CardFields'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
+import {addBusinessDays, formatDate} from '@/lib/dates'
+
+// Earliest delivery date a customer can pick: 3 business days from today.
+export const MIN_LEAD_DAYS = 3
 
 const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 
@@ -14,6 +18,8 @@ const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital
 // then confirms so the team gets notified.
 export default function ProjectForm({lines, tokenUrl, onDone}) {
   const [state, setState] = useState({phase: 'idle'})
+  const [minDate, setMinDate] = useState(null)
+  useEffect(() => { setMinDate(addBusinessDays(new Date(), MIN_LEAD_DAYS)) }, [])
   const orgRequired = lines.some(l => l.pkg.orgOnly)
   const many = lines.length > 1
 
@@ -154,7 +160,11 @@ export default function ProjectForm({lines, tokenUrl, onDone}) {
 
           <div className="form-row">
             <label>Ideal delivery date
-              <input type="date" name={`i${i}_ideal_date`} />
+              <input type="date" name={`i${i}_ideal_date`} min={minDate || undefined} onChange={e => {
+                const el = e.currentTarget
+                el.setCustomValidity(minDate && el.value && el.value < minDate ? `The earliest date we can deliver is ${formatDate(minDate)}.` : '')
+              }} />
+              {minDate && <span className="hint">Earliest: {formatDate(minDate)} (3 business days from today)</span>}
             </label>
             <label><span>References or links <span className="optional">— optional</span></span><input name={`i${i}_references_links`} /></label>
           </div>
