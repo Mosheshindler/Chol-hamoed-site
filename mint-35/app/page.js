@@ -26,7 +26,7 @@ const icon = {
 const steps = [
   {icon: 'form', title: 'Tell us.', text: 'One form. What it’s for, who it’s for. Add your logo and images.'},
   {icon: 'approve', title: 'Approve.', text: 'We write the script. You sign off.'},
-  {icon: 'produce', title: 'We make it.', text: 'AI production. Mint Media finish. First cut in 3 business days.'},
+  {icon: 'produce', title: 'We make it.', text: 'AI production. Mint Media finish. First cut in 3 business days.*'},
   {icon: 'deliver', title: 'Post it.', text: 'One round of notes. Then it’s ready to run.'},
 ]
 
@@ -96,6 +96,7 @@ export default function Home() {
                 </li>
               ))}
             </ol>
+            <p id="how-note" className="how-note">*Business days, counted from when your order enters production. Weekends and holidays are skipped.</p>
           </div>
         </section>
 

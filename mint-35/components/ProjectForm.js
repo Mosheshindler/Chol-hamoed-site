@@ -118,6 +118,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   const [watch, setWatch] = useState({})
   const [read, setRead] = useState(false)
   const [sample, setSample] = useState(null)
+  const [missing, setMissing] = useState(null) // {step, items: [{key, label}]}
   const many = lines.length > 1
   const saveKey = `${SAVE_KEY}:${lines.map(l => l.pkg.slug).join(',')}`
 
@@ -171,17 +172,75 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   }
 
   // Checks every field in a step; shows the first problem and returns false.
+  // Finds every unanswered or invalid field in a step, outlines each one in red and lists them
+  // above the buttons. Returns true when the step is complete.
   function checkStep(n) {
     const box = formRef.current.querySelector(`[data-step="${n}"]`)
+    box.querySelectorAll('.is-missing').forEach(e => e.classList.remove('is-missing'))
+    const items = []
+    const seen = new Set()
     for (const el of box.querySelectorAll('input, select, textarea')) {
       if (el.disabled || el.closest('[hidden]') !== box && el.closest('[hidden]')) continue
-      if (!el.checkValidity()) {
-        setStep(n)
-        setTimeout(() => { el.reportValidity(); el.focus?.() }, 60)
-        return false
+      if (el.checkValidity()) continue
+      const key = el.type === 'radio' ? el.name : el.name || el.id
+      if (seen.has(key)) continue
+      seen.add(key)
+      const holder = el.closest('.upload-card') || (el.type === 'radio' ? el.closest('.alert-pick, .orient, .choices, .chips') : null) || (el.type === 'checkbox' ? el.closest('label') : null) || el
+      holder.classList.add('is-missing')
+      holder.dataset.missingKey = key
+      const custom = el.validationMessage && !el.validity.valueMissing && !el.validity.typeMismatch && !el.validity.patternMismatch ? ` (${el.validationMessage.replace(/\.$/, '')})` : ''
+      items.push({key, label: fieldLabel(el) + custom})
+    }
+    if (n === last && !read) {
+      const d = box.querySelector('.disclaimer-box')
+      d.classList.add('is-missing'); d.dataset.missingKey = 'disclaimer-read'
+      items.push({key: 'disclaimer-read', label: 'Read the disclaimer to the end'})
+    }
+    if (!items.length) { if (missing?.step === n) setMissing(null); return true }
+    setMissing({step: n, items})
+    setStep(n)
+    setTimeout(() => {
+      const first = box.querySelector('.is-missing')
+      first?.scrollIntoView({behavior: 'smooth', block: 'center'})
+    }, 60)
+    return false
+  }
+
+  // Short name for a field in the "Please fill in" list.
+  function fieldLabel(el) {
+    if (el.dataset.label) return el.dataset.label
+    const card = el.closest('.upload-card')
+    const fs = el.type === 'radio' && el.closest('fieldset')
+    const text = card ? card.querySelector('.upload-body > b')?.innerText
+      : fs ? fs.querySelector('legend')?.innerText
+      : el.closest('label')?.innerText
+    return (text || el.name || 'A required field').split('\n')[0].replace(/\(optional\)|\?/g, '').trim()
+  }
+
+  function jumpTo(key) {
+    const box = formRef.current.querySelector(`[data-step="${step}"]`)
+    const h = box.querySelector(`[data-missing-key="${CSS.escape(key)}"]`)
+    h?.scrollIntoView({behavior: 'smooth', block: 'center'})
+    h?.querySelector('input:not([type=hidden]), select, textarea')?.focus({preventScroll: true})
+  }
+
+  // As fields get filled in, clear their red outline and drop them from the list.
+  function recheck(target) {
+    if (!missing || missing.step !== step) return
+    const h = target?.closest?.('.is-missing')
+    const box = formRef.current.querySelector(`[data-step="${step}"]`)
+    if (h) {
+      const fields = h.matches('input, select, textarea') ? [h] : [...h.querySelectorAll('input, select, textarea')].filter(e => !e.disabled)
+      if (fields.every(e => e.checkValidity())) {
+        h.classList.remove('is-missing')
+        const key = h.dataset.missingKey
+        setMissing(m => {
+          const items = m.items.filter(i => i.key !== key)
+          return items.length ? {...m, items} : null
+        })
       }
     }
-    return true
+    if (!box.querySelector('.is-missing')) setMissing(null)
   }
 
   function go(n) {
@@ -287,14 +346,22 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   const val = name => formRef.current?.elements[name]?.value || ''
 
   const Nav = ({n}) => (
+    <>
+    {missing?.step === n && missing.items.length > 0 && (
+      <div className="missing-box" role="alert">
+        <b>Please fill in:</b>
+        <ul>{missing.items.map(i => <li key={i.key}><button type="button" onClick={() => jumpTo(i.key)}>{i.label}</button></li>)}</ul>
+      </div>
+    )}
     <div className="step-nav">
       {n > 0 && <button type="button" className="btn btn-ghost" onClick={() => go(n - 1)}>← Back</button>}
       {n < last && <button type="button" className="btn btn-primary" onClick={next}>Continue →</button>}
     </div>
+    </>
   )
 
   return (
-    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onChange={() => { readWatch(); save() }} onInput={save} noValidate>
+    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onChange={e => { readWatch(); save(); recheck(e.target) }} onInput={e => { save(); recheck(e.target) }} noValidate>
       <input type="text" name="_honey" className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
       <div className="wizard-head">
@@ -436,7 +503,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 <span className="tip-line"><Icon name="mic" /><span><b>Narration + key text:</b> a voiceover tells the story, with key words on screen.</span></span>
                 <span className="tip-line"><Icon name="mic" /><span><b>Narration only:</b> a voiceover tells the story.</span></span>
                 <span className="tip-line"><Icon name="help" /><span>Not sure? Let us decide.</span></span>
-                <span className="tip-note">Want full subtitles? Captions are available as an add-on ($150 per video).</span>
+                <span className="tip-note">Want full subtitles? Subtitles are available as an add-on: $150 per video.</span>
               </Tip></legend>
               <Choices name={p('story')} options={STORY} chips />
             </fieldset>
@@ -508,22 +575,28 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <legend>AI Production Disclaimer</legend>
           <div className="checks-col">
             {DISCLAIMER_POINTS.map((t, n) => (
-              <label key={n} className="check check-block"><input type="checkbox" name={`dp${n}`} required /><span>{t}</span></label>
+              <label key={n} className="check check-block"><input type="checkbox" name={`dp${n}`} required data-label={`Disclaimer point ${n + 1}`} /><span>{t}</span></label>
             ))}
           </div>
           <div className="disclaimer-box" tabIndex={0} ref={el => { if (el && !read && el.scrollHeight <= el.clientHeight + 8 && step === last) setRead(true) }}
-            onScroll={e => { const el = e.currentTarget; if (el.scrollTop + el.clientHeight >= el.scrollHeight - 8) setRead(true) }}>
+            onScroll={e => { const el = e.currentTarget; if (el.scrollTop + el.clientHeight >= el.scrollHeight - 8) { setRead(true); if (el.classList.contains('is-missing')) { el.classList.remove('is-missing'); setMissing(m => { const items = (m?.items || []).filter(i => i.key !== 'disclaimer-read'); return items.length ? {...m, items} : null }) } } }}>
             <DisclaimerText />
           </div>
           {!read && <p className="hint">Scroll to the end of the disclaimer to continue.</p>}
           <label className={`check accept${read ? '' : ' is-locked'}`}>
-            <input type="checkbox" name="accept_disclaimer" disabled={!read} />
+            <input type="checkbox" name="accept_disclaimer" disabled={!read} required data-label="Accept the disclaimer" />
             <span>I&rsquo;ve read and accept the AI Production Disclaimer.</span>
           </label>
         </fieldset>
 
         {state.phase === 'error' && <p className="form-error" role="alert">{state.message}</p>}
 
+        {missing?.step === last && missing.items.length > 0 && (
+          <div className="missing-box" role="alert">
+            <b>Please fill in:</b>
+            <ul>{missing.items.map(i => <li key={i.key}><button type="button" onClick={() => jumpTo(i.key)}>{i.label}</button></li>)}</ul>
+          </div>
+        )}
         <div className="step-nav">
           <button type="button" className="btn btn-ghost" onClick={() => go(last - 1)}>← Back</button>
           <button type="submit" className="btn btn-primary" disabled={busy}>
