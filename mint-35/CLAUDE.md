@@ -57,9 +57,12 @@ separate from the Mint Media video site at the repo root (don't touch root files
   columns live in `projects.brief` (jsonb); `latest_date` is the in-hand deadline (Momentum: launch date).
   Disclaimer: 3 key points ticked + full text scrolled to the end before the accept box unlocks.
 
+- AI limits (owner decided): no custom characters to client specs, no look-alikes of real people, no celebrities or
+  copyrighted characters; exact product looks need the client's real photos/footage. Shown in Not included, FAQ, form.
+
 ## Planned (owner asked)
-- AI customization limits (to decide with the owner): what the fixed scope allows, e.g. no custom
-  characters; spell it out on the site (Included / Not included, FAQ) and in the form.
+- Legal drafts (Terms of Service + Privacy Policy) are in a Claude Doc for the owner's lawyer; once approved,
+  publish them as /terms and /privacy, link from the footer and checkout (Intuit needs both for live payments).
 - Style samples still missing for "My own photos and videos only" and "Text animation only" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).
 - Twilio texting / WhatsApp alerts (owner signing up): send alerts per `alert_channel` at each job step.
