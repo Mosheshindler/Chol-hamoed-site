@@ -529,7 +529,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 </label>
               </div>
             )}
-            {!momentum && minDate && <p className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue. Weekends and holidays are skipped, and orders after 5pm ET count from the next business day.</p>}
+            {!momentum && minDate && <p className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue, not including weekends and holidays. Orders after 5pm ET count from the next business day.</p>}
             <Nav n={n} />
           </fieldset>
         )
