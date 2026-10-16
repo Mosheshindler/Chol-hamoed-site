@@ -64,6 +64,7 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
                       <b className="mini-price">{formatPrice(p.price)}</b>
                     </div>
                     <p className="package-blurb">{p.blurb}</p>
+                    {p.why && <p className="package-why">{p.why}</p>}
                     <Yes items={p.items} />
                     <button type="button" className={`btn btn-sm ${n ? 'btn-ghost' : 'btn-primary'}`} onClick={() => add(p.slug)}>
                       {n ? `Add another (${n} in order)` : 'Add to order'} <span aria-hidden="true">+</span>
