@@ -151,7 +151,7 @@ p { margin: 0 0 12px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 28px; }
 
 /* Timeline */
-.timeline { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative; }
+.timeline { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; position: relative; }
 .timeline::before { content: ""; position: absolute; left: 40px; right: 40px; top: 50px; height: 2px; background: linear-gradient(90deg, var(--lime), rgba(136,192,64,.15)); }
 .timeline li { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 22px; transition: transform .25s, border-color .25s; }
 .timeline li:hover { transform: translateY(-4px); border-color: rgba(136,192,64,.5); }
@@ -730,7 +730,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .who { display: inline-block; margin-bottom: 8px; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .who-you { background: rgba(136,192,64,.14); color: var(--lime); }
 .who-we { background: rgba(255,255,255,.08); color: var(--text); }
-@media (max-width: 600px) {
+@media (max-width: 1080px) {
   .timeline { grid-template-columns: 1fr; gap: 10px; }
   .timeline::before { display: none; }
   .timeline li { display: grid; grid-template-columns: 44px 1fr; column-gap: 14px; padding: 16px; }
