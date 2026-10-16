@@ -53,6 +53,7 @@ const faqs = [
   {q: 'How fast is it?', a: 'First cut in 3 business days, once your script is approved and production starts. Start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
   {q: 'Will the AI get every detail perfect?', a: 'Not always. AI isn’t an exact science, so small imperfections or variations can happen. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
+  {q: 'Can I get a refund?', a: 'No. Mint 35 is a budget-friendly, fixed-scope service, so all sales are final and we don’t offer refunds. Your card is charged in full once your order moves to production. Need full customization and control? That’s a Mint Media production.', href: 'https://mintmediallc.com'},
   {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
 ]
 
@@ -138,7 +139,7 @@ export default function Home() {
               {faqs.map(f => (
                 <details key={f.q}>
                   <summary>{f.q}</summary>
-                  <p className="faq-a">{f.a}{f.dialog && <> <button type="button" className="link-btn faq-link" data-open={f.dialog}>Read it →</button></>}</p>
+                  <p className="faq-a">{f.a}{f.dialog && <> <button type="button" className="link-btn faq-link" data-open={f.dialog}>Read it →</button></>}{f.href && <> <a className="faq-link" href={f.href} target="_blank" rel="noopener noreferrer">Visit Mint Media →</a></>}</p>
                 </details>
               ))}
             </div>

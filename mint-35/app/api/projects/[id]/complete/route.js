@@ -65,7 +65,7 @@ export async function POST(request, ctx) {
       html: `<p>Hi ${esc(c.first_name || c.name.split(' ')[0])},</p>
 <p>Thanks for your order. Here's what we received:</p><ul>${lines}</ul>
 <p><b>Total:</b> ${formatMoney(total)}</p>
-<p>Our team will review it and email you next steps. Your card is only charged once your order enters our production queue.</p>
+<p>Our team will review it and email you next steps. Your card will be charged in full once your order moves to production. All sales are final.</p>
 <p><a href="${customerLink(site, c.customer_token)}">Track your order on your project page</a></p>
 <p>— The Mint 35 team</p>
 <hr><p style="color:#666;font-size:13px"><b>${esc(DISCLAIMER_TITLE)}</b> (accepted with your order)</p>

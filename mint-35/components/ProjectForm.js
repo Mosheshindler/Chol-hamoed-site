@@ -426,7 +426,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
 
       {/* Step 4 · Review & pay */}
       <fieldset className="wizard-step" data-step={last} hidden={step !== last}>
-        <p className="step-intro">Check your order, add a card, and you&rsquo;re done. Nothing is charged until your order enters production.</p>
+        <p className="step-intro">Check your order, add a card, and you&rsquo;re done. Your card will be charged in full once your order moves to production.</p>
         <ul className="review-list">
           {lines.map((l, i) => {
             const date = l.pkg.orgOnly ? val(`i${i}_launch_at`).slice(0, 10) : val(`i${i}_latest_date`)
@@ -455,7 +455,8 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <ul className="ticks">
             <li>Double-check names, prices, dates and phone numbers.</li>
             <li>Each video includes one approval step and one revision round.</li>
-            <li>Your card is saved now and charged only once your order enters production.</li>
+            <li>Your card is saved now and charged in full once your order moves to production.</li>
+            <li>All sales are final. Mint 35 doesn&rsquo;t offer refunds.</li>
           </ul>
         </div>
 
