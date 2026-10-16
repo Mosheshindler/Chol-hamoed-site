@@ -45,6 +45,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
   and a required checkbox at checkout. The API refuses orders without the current DISCLAIMER_VERSION and logs a
   `disclaimer_accepted` event per job. Bump the version when the wording changes.
 
+- Business days skip weekends and closed holidays (`lib/holidays.js`, via @hebcal/core, diaspora): Yom Tov,
+  all Chol Hamoed (incl. Hoshana Raba), Purim, Tisha B'Av, plus New Year's, Memorial Day, July 4, Labor Day,
+  Thanksgiving, Christmas. Erev days, Chanukah and minor fasts are working days. Orders at/after 5pm ET count
+  from the next business day; earliest delivery = 3 business days after that (`earliestDelivery` in lib/dates.js).
+
 ## Planned (owner asked)
 - AI customization limits (to decide with the owner): what the fixed scope allows, e.g. no custom
   characters; spell it out on the site (Included / Not included, FAQ) and in the form.

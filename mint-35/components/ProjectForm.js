@@ -6,17 +6,17 @@ import {createClient} from '@/lib/supabase/browser'
 import {formatPrice} from '@/lib/packages'
 import CardFields, {tokenizeCard} from './CardFields'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
-import {earliestDelivery, formatDate} from '@/lib/dates'
+import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
 
 const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 
 // One form for the whole order: contact and brand details once, then a project brief per package.
 // Saves through /api/projects, uploads files straight to storage with the signed URLs it returns,
 // then confirms so the team gets notified.
-export default function ProjectForm({lines, tokenUrl, onDone}) {
+export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) {
   const [state, setState] = useState({phase: 'idle'})
   const [minDate, setMinDate] = useState(null)
-  useEffect(() => { setMinDate(earliestDelivery()) }, [])
+  useEffect(() => { setMinDate(earliestDelivery(new Date(), closedDays)) }, [closedDays])
   const orgRequired = lines.some(l => l.pkg.orgOnly)
   const many = lines.length > 1
 
@@ -159,9 +159,14 @@ export default function ProjectForm({lines, tokenUrl, onDone}) {
             <label>Ideal delivery date
               <input type="date" name={`i${i}_ideal_date`} min={minDate || undefined} onChange={e => {
                 const el = e.currentTarget
-                el.setCustomValidity(minDate && el.value && el.value < minDate ? `The earliest date we can deliver is ${formatDate(minDate)}.` : '')
+                const v = el.value
+                el.setCustomValidity(
+                  minDate && v && v < minDate ? `The earliest date we can deliver is ${formatDate(minDate)}.`
+                  : v && isClosedDay(v, closedDays) ? `We’re closed on ${formatDate(v)}${closedDays[v] ? ` (${closedDays[v]})` : ' (weekend)'}. Please pick a business day.`
+                  : '')
+                el.reportValidity()
               }} />
-              {minDate && <span className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue (orders after 5pm ET count from the next business day).</span>}
+              {minDate && <span className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue. Weekends and holidays (including Jewish holidays and Chol Hamoed) are skipped, and orders after 5pm ET count from the next business day.</span>}
             </label>
             <label><span>References or links <span className="optional">— optional</span></span><input name={`i${i}_references_links`} /></label>
           </div>
