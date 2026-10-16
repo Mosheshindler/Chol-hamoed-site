@@ -10,29 +10,58 @@ import NoteForm from './NoteForm'
 import FileUpload from './FileUpload'
 import {CustomerLink, ReplyForm, AddonDecision} from './CustomerPanel'
 import {siteOrigin, customerLink} from '@/lib/site'
+import {STYLES, STORY, VOICES, TONES, MUSIC, labelOf} from '@/lib/intake'
 
-const ANSWERS = [
-  ['promoting', 'What they’re promoting'],
-  ['audience', 'Target audience'],
-  ['key_message', 'Most important thing to know'],
-  ['desired_action', 'What viewers should do'],
-  ['must_appear', 'Must appear'],
-  ['placements', 'Where it will run'],
-  ['orientation', 'Orientation'],
-  ['ideal_date', 'Ideal delivery'],
-  ['brand_colors', 'Brand colors'],
-  ['legal_text', 'Required text / legal'],
-  ['restrictions', 'Can’t do'],
-  ['references_links', 'References'],
-]
+// The customer's answers, in the order the form asks them. Older jobs only have some of these.
+function answers(p) {
+  const b = p.brief || {}
+  const momentum = b.kind === 'momentum'
+  const date = d => (d ? formatDate(d) : '')
+  const launch = v => {
+    const [d, t] = (v || '').split('T')
+    if (!d) return ''
+    const [h, m] = (t || '').split(':').map(Number)
+    return t ? `${formatDate(d)}, ${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'} ET` : formatDate(d)
+  }
+  return [
+    [momentum ? 'Raising money for' : 'What they’re promoting', p.promoting],
+    ['Website for it', b.item_website],
+    ['Campaign page', b.campaign_link],
+    ['Goal', b.goal],
+    ['Matching', b.match],
+    ['Launch', launch(b.launch_at)],
+    ['Target audience', p.audience],
+    ['One thing to remember', p.key_message],
+    ['Call to action', p.desired_action],
+    ['Tagline / hashtag', b.tagline],
+    [momentum ? 'Names / sponsors' : 'Must appear', p.must_appear],
+    ['Orientation', p.orientation],
+    ['Style', b.style && labelOf(STYLES, b.style)],
+    ['Story told with', b.story && labelOf(STORY, b.story)],
+    ['Voice', b.voice && labelOf(VOICES, b.voice)],
+    ['Voice tone', b.tone && labelOf(TONES, b.tone)],
+    ['Music mood', b.music && labelOf(MUSIC, b.music)],
+    ['References', p.references_links],
+    ['Required text / legal', p.legal_text],
+    ['Can’t do', p.restrictions],
+    ['Ideal delivery', date(p.ideal_date)],
+    ['Latest in hand', date(p.latest_date)],
+    ['Where it will run', [...(p.placements || []), p.placement_other].filter(Boolean).join(', ')],
+    ['Brand colors', p.brand_colors],
+    ['Logo', b.logo_override ? 'Customer only has a logo for what they’re promoting (see video files)' : ''],
+    ['Design files link', b.design_link],
+    ['Designer', b.designer],
+  ].filter(([, v]) => v)
+}
 
-const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', script: 'Script', first_cut: 'First cut', final: 'Final', other: 'Other'}
+const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', script: 'Script', first_cut: 'First cut', final: 'Final', other: 'Other'}
+const ALERT_LABEL = {sms: 'Text', whatsapp: 'WhatsApp', email: 'Email only'}
 
 function describe(e, names) {
   const who = names[e.actor] || 'Website'
   switch (e.type) {
     case 'submitted': return 'Submitted from the website'
-    case 'disclaimer_accepted': return `Customer accepted the AI Production Disclaimer (version ${e.data.version})`
+    case 'disclaimer_accepted': return `Customer accepted the AI Production Disclaimer (version ${e.data.version})${e.data.points ? `, ticking each key point: ${e.data.points.join(' / ')}` : ''}`
     case 'status': return `${who} moved it to “${STATUSES[e.data.to]?.label}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}`
     case 'price': return `${who} set the price to ${formatMoney(e.data.price_cents)}`
     case 'assigned': return e.data.to ? `${who} assigned it to ${names[e.data.to] || 'someone'}` : `${who} unassigned it`
@@ -70,13 +99,6 @@ export default async function ProjectPage({params}) {
     ? await supabase.storage.from('project-files').createSignedUrls(files.map(f => f.path), 3600)
     : {data: []}
   const urls = Object.fromEntries((signed || []).map(s => [s.path, s.signedUrl]))
-
-  const value = (k) => {
-    const v = p[k]
-    if (k === 'placements') return [...(v || []), p.placement_other].filter(Boolean).join(', ')
-    if (k === 'ideal_date') return v ? formatDate(v) : ''
-    return v
-  }
 
   return (
     <>
@@ -116,8 +138,10 @@ export default async function ProjectPage({params}) {
           <section className="panel">
             <h2>Customer</h2>
             <dl className="kv">
-              <dt>Name</dt><dd>{p.name}</dd>
+              <dt>Name</dt><dd>{[p.title, p.name].filter(Boolean).join(' ')}</dd>
               <dt>Email</dt><dd><a href={`mailto:${p.email}`}>{p.email}</a></dd>
+              {p.phone && <><dt>Cell</dt><dd><a href={`tel:${p.phone.replace(/[^\d+]/g, '')}`}>{p.phone}</a></dd></>}
+              {p.alert_channel && <><dt>Alerts</dt><dd>{ALERT_LABEL[p.alert_channel]}</dd></>}
               {p.company && <><dt>Company</dt><dd>{p.company}</dd></>}
               {p.website && <><dt>Website</dt><dd><a href={p.website.startsWith('http') ? p.website : `https://${p.website}`} target="_blank" rel="noopener noreferrer">{p.website}</a></dd></>}
             </dl>
@@ -126,10 +150,7 @@ export default async function ProjectPage({params}) {
           <section className="panel">
             <h2>Questionnaire</h2>
             <dl className="answers">
-              {ANSWERS.map(([k, label]) => {
-                const v = value(k)
-                return v ? <div key={k}><dt>{label}</dt><dd>{v}</dd></div> : null
-              })}
+              {answers(p).map(([label, v]) => <div key={label}><dt>{label}</dt><dd>{v}</dd></div>)}
             </dl>
           </section>
 

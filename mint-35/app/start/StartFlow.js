@@ -34,7 +34,7 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
         {done.refs?.length > 0 && (
           <p className="done-ref">Your reference number{done.refs.length > 1 ? 's are' : ' is'} <b>{done.refs.join(', ')}</b>.</p>
         )}
-        <p>We&rsquo;ll review your order and email you. Your card is only charged once your order enters our production queue.</p>
+        <p>We&rsquo;ll review your order and email you. Your card will be charged in full once your order moves to production.</p>
         {done.missed > 0 && <p className="form-error">{done.missed} file(s) didn&rsquo;t upload. Reply to our email and attach them there.</p>}
         <Link href="/" className="btn btn-ghost">Back to home</Link>
       </div>
@@ -93,7 +93,7 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
               </ul>
             )}
             <div className="order-total"><span>Total</span><b>{formatPrice(total)}{hasUnpriced ? ' + quote' : ''}</b></div>
-            <p className="order-fine">Your card is saved when you place your order. We only charge it once your order enters our production queue.</p>
+            <p className="order-fine">Your card is saved when you place your order and charged in full once your order moves to production.</p>
             {lines.length > 0
               ? <Link href="/start?step=details" className="btn btn-primary order-continue">Continue to project details →</Link>
               : <button type="button" className="btn btn-primary order-continue" disabled>Continue to project details →</button>}
@@ -120,9 +120,6 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
             <span className="chosen-price">{formatPrice(total)}{hasUnpriced ? ' + quote' : ''}</span>
             <Link href="/start" className="chosen-change">Edit order</Link>
           </div>
-          {lines.some(l => l.pkg.orgOnly) && (
-            <p className="org-note">{lines.find(l => l.pkg.orgOnly).pkg.name} is for organizations running a fundraising campaign. Please include your organization&rsquo;s name.</p>
-          )}
           <ProjectForm lines={lines} tokenUrl={tokenUrl} closedDays={closedDays} onDone={result => { setDone(result); clear() }} />
         </section>
       )}

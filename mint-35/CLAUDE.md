@@ -50,9 +50,17 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Thanksgiving, Christmas. Erev Yom Tov (RH, YK, Sukkot, Pesach, Shavuot) is closed; Chanukah, other fasts and other US holidays are working days. Orders at/after 5pm ET count
   from the next business day; earliest delivery = 3 business days after that (`earliestDelivery` in lib/dates.js).
 
+- Order form v2 (`components/ProjectForm.js`): steps 1 You, 2 Your brand, 3 one page per video (classic vs
+  Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (title, name,
+  email, cell, company always required, alert channel sms/whatsapp/email). Logo required unless "I only have a
+  logo for what I'm promoting" (then each video's media upload is required). Per-video answers beyond the old
+  columns live in `projects.brief` (jsonb); `latest_date` is the in-hand deadline (Momentum: launch date).
+  Disclaimer: 3 key points ticked + full text scrolled to the end before the accept box unlocks.
+
 ## Planned (owner asked)
 - AI customization limits (to decide with the owner): what the fixed scope allows, e.g. no custom
   characters; spell it out on the site (Included / Not included, FAQ) and in the form.
-- Visual style picker on the order form (per package): e.g. Animated (Pixar-style), Realistic, plus other
-  styles the owner approves; show small example thumbnails; store it on the job for the team.
+- Style samples still missing for "My own photos and videos only" and "Text animation only" (owner will send);
+  add the YouTube id as `sample` in STYLES (`lib/intake.js`).
+- Twilio texting / WhatsApp alerts (owner signing up): send alerts per `alert_channel` at each job step.
 - Automated customer emails at each job step, once the site is confirmed.
