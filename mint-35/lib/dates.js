@@ -1,17 +1,56 @@
-// Adds business days (Mon–Fri) to a date. Holidays aren't skipped; adjust the due date by hand if needed.
-export function addBusinessDays(from, days) {
-  const d = new Date(Date.UTC(from.getFullYear(), from.getMonth(), from.getDate()))
-  let left = days
-  while (left > 0) {
-    d.setUTCDate(d.getUTCDate() + 1)
-    const wd = d.getUTCDay()
-    if (wd !== 0 && wd !== 6) left--
-  }
-  return d.toISOString().slice(0, 10)
-}
-
 // Times render on the server (UTC), so pin them to the business's time zone.
 const TZ = 'America/New_York'
+
+// Orders placed at or after 5pm Eastern, or on a weekend or holiday, count as placed the next
+// business day. `closed` is a list/Set of 'YYYY-MM-DD' holidays (see lib/holidays.js).
+export const CUTOFF_HOUR = 17
+export const LEAD_BUSINESS_DAYS = 3
+
+const iso = d => d.toISOString().slice(0, 10)
+const asSet = closed => closed instanceof Set ? closed : new Set(Array.isArray(closed) ? closed : Object.keys(closed || {}))
+
+// True if the day (YYYY-MM-DD) is a weekend or a closed holiday.
+export function isClosedDay(day, closed) {
+  const wd = new Date(day + 'T00:00:00Z').getUTCDay()
+  return wd === 0 || wd === 6 || asSet(closed).has(day)
+}
+
+function nextOpenDay(d, closed) {
+  do d.setUTCDate(d.getUTCDate() + 1); while (isClosedDay(iso(d), closed))
+  return d
+}
+
+function stepBusinessDays(d, days, closed) {
+  const out = new Date(d)
+  for (let i = 0; i < days; i++) nextOpenDay(out, closed)
+  return out
+}
+
+// Eastern date and hour for a moment, as {day: Date at UTC midnight, hour}.
+function eastern(now) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', {timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23'})
+    .formatToParts(now).map(x => [x.type, x.value]))
+  return {day: new Date(Date.UTC(+p.year, +p.month - 1, +p.day)), hour: +p.hour}
+}
+
+// Adds business days to today's Eastern date, skipping weekends and closed holidays.
+export function addBusinessDays(from, days, closed) {
+  return iso(stepBusinessDays(eastern(from).day, days, asSet(closed)))
+}
+
+// The business day an order placed at `now` counts from.
+export function orderDay(now = new Date(), closed) {
+  const set = asSet(closed)
+  const {day, hour} = eastern(now)
+  if (isClosedDay(iso(day), set) || hour >= CUTOFF_HOUR) nextOpenDay(day, set)
+  return day
+}
+
+// Earliest delivery date a customer can pick (YYYY-MM-DD).
+export function earliestDelivery(now = new Date(), closed) {
+  const set = asSet(closed)
+  return iso(stepBusinessDays(orderDay(now, set), LEAD_BUSINESS_DAYS, set))
+}
 
 export function formatDate(value) {
   if (!value) return '—'

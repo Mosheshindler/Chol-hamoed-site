@@ -5,7 +5,8 @@ import {PACKAGE_NAMES, ORG_ONLY_NAMES, packageByName} from '@/lib/packages'
 import {projectRef} from '@/lib/status'
 import {paymentsReady, saveCardFromToken} from '@/lib/qb'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
-import {addBusinessDays} from '@/lib/dates'
+import {earliestDelivery, isClosedDay} from '@/lib/dates'
+import {upcomingClosedDays} from '@/lib/holidays'
 
 const PLACEMENTS = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -54,11 +55,15 @@ export async function POST(request) {
     references_links: str(it?.references_links),
   }))
 
-  // Delivery dates start 3 business days out (counted from yesterday here, so a customer in a
-  // time zone behind the server is never refused a date the form allowed).
-  const earliest = addBusinessDays(new Date(Date.now() - 86400000), 3)
+  // Delivery dates start 3 business days after the order day (5pm ET cutoff). Checked as of an hour
+  // ago, so a form opened just before the cutoff and sent just after is not refused.
+  const closed = upcomingClosedDays()
+  const earliest = earliestDelivery(new Date(Date.now() - 3600000), closed)
   if (items.some(it => it.ideal_date && it.ideal_date < earliest)) {
     return NextResponse.json({error: 'Please pick a delivery date at least 3 business days from today.'}, {status: 400})
+  }
+  if (items.some(it => it.ideal_date && isClosedDay(it.ideal_date, closed))) {
+    return NextResponse.json({error: 'Please pick a delivery date on a business day (not a weekend or holiday).'}, {status: 400})
   }
 
   const incomplete = items.findIndex(it => !it.promoting || !it.audience || !it.key_message || !it.desired_action || !it.orientation)

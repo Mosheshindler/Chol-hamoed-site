@@ -6,6 +6,7 @@ import {createClient} from '@/lib/supabase/server'
 import {createAdminClient} from '@/lib/supabase/admin'
 import {TRANSITIONS, STATUSES, projectRef, formatMoney} from '@/lib/status'
 import {addBusinessDays} from '@/lib/dates'
+import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
 import {siteOrigin, customerLink} from '@/lib/site'
 import {scriptWord} from '@/lib/status'
@@ -83,7 +84,7 @@ export async function moveStatus(formData) {
     }
   }
   if (to === 'in_production') {
-    patch.due_date = addBusinessDays(new Date(), 3)
+    patch.due_date = addBusinessDays(new Date(), 3, upcomingClosedDays())
     event.due_date = patch.due_date
   }
 

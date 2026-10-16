@@ -5,6 +5,7 @@ import DisclaimerModal from '@/components/DisclaimerModal'
 import DialogController from '@/components/DialogController'
 import StartFlow from './StartFlow'
 import {paymentsReady, tokenizeUrl} from '@/lib/qb'
+import {upcomingClosedDays} from '@/lib/holidays'
 
 export const metadata = {title: 'Start a project · Mint 35'}
 export const dynamic = 'force-dynamic'
@@ -18,7 +19,7 @@ export default async function StartPage({searchParams}) {
       <Header />
       <main className="start-page">
         <div className="container">
-          <StartFlow step={step === 'details' ? 'details' : 'order'} legacyPackage={legacyPackage || null} tokenUrl={tokenUrl} />
+          <StartFlow step={step === 'details' ? 'details' : 'order'} legacyPackage={legacyPackage || null} tokenUrl={tokenUrl} closedDays={upcomingClosedDays()} />
         </div>
       </main>
       <Footer />
