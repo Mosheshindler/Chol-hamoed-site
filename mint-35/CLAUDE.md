@@ -47,7 +47,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Business days skip weekends and closed holidays (`lib/holidays.js`, via @hebcal/core, diaspora): Yom Tov,
   all Chol Hamoed (incl. Hoshana Raba), Purim, Tisha B'Av, plus New Year's, Memorial Day, July 4, Labor Day,
-  Thanksgiving, Christmas. Erev days, Chanukah and minor fasts are working days. Orders at/after 5pm ET count
+  Thanksgiving, Christmas. Erev Yom Tov (RH, YK, Sukkot, Pesach, Shavuot) is closed; Chanukah, other fasts and other US holidays are working days. Orders at/after 5pm ET count
   from the next business day; earliest delivery = 3 business days after that (`earliestDelivery` in lib/dates.js).
 
 ## Planned (owner asked)

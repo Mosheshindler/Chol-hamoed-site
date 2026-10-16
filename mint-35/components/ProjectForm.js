@@ -166,7 +166,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                   : '')
                 el.reportValidity()
               }} />
-              {minDate && <span className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue. Weekends and holidays (including Jewish holidays and Chol Hamoed) are skipped, and orders after 5pm ET count from the next business day.</span>}
+              {minDate && <span className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue. Weekends and holidays are skipped, and orders after 5pm ET count from the next business day.</span>}
             </label>
             <label><span>References or links <span className="optional">— optional</span></span><input name={`i${i}_references_links`} /></label>
           </div>

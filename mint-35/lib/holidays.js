@@ -3,9 +3,10 @@ import {HebrewCalendar, flags} from '@hebcal/core'
 
 // Days Mint 35 is closed besides weekends: they are skipped when counting business days and can't
 // be picked as a delivery date. Jewish holidays follow the diaspora calendar (two-day Yom Tov).
-// Erev days, Chanukah and minor fasts are working days; add them here if that changes.
+// Erev Yom Tov is closed too. Chanukah and fast days other than Tisha B'Av are working days.
 const JEWISH_CLOSED = flags.CHAG | flags.CHOL_HAMOED
 const JEWISH_EXTRA = new Set(['Purim', "Tish'a B'Av"])
+const EREV_YOM_TOV = /^Erev (Rosh Hashana|Yom Kippur|Sukkot|Pesach|Shavuot)\b/
 
 const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const ymd = (y, m, d) => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
@@ -45,7 +46,7 @@ export function closedDays(fromYear, toYear) {
   const out = new Map()
   const events = HebrewCalendar.calendar({start: new Date(fromYear, 0, 1), end: new Date(toYear, 11, 31), il: false, noModern: true, noRoshChodesh: true, noSpecialShabbat: true})
   for (const e of events) {
-    if ((e.getFlags() & JEWISH_CLOSED) || JEWISH_EXTRA.has(e.getDesc())) {
+    if ((e.getFlags() & JEWISH_CLOSED) || JEWISH_EXTRA.has(e.getDesc()) || EREV_YOM_TOV.test(e.getDesc())) {
       const day = iso(e.getDate().greg())
       if (!out.has(day)) out.set(day, niceName(e.render('en')))
     }
