@@ -3,9 +3,12 @@ import {createAdminClient} from '@/lib/supabase/admin'
 import {sendEmail, esc} from '@/lib/email'
 import {projectRef, formatMoney} from '@/lib/status'
 import {customerLink} from '@/lib/site'
+import {UPLOAD_KINDS} from '@/lib/intake'
+import {DISCLAIMER, DISCLAIMER_TITLE} from '@/lib/disclaimer'
 
-// Step 2 of a submission: after the browser has uploaded files, link them to every job in the
-// order and send one confirmation email. Guarded by the first job's intake token.
+// Step 2 of a submission: after the browser has uploaded files, link order-wide files (logo, brand
+// materials) to every job and each video's own files to its job, then send one confirmation email.
+// Guarded by the first job's intake token.
 export async function POST(request, ctx) {
   const {id} = await ctx.params
   let body
@@ -19,17 +22,26 @@ export async function POST(request, ctx) {
   if (first.files_received) return NextResponse.json({ok: true})
 
   const {data: jobs} = first.order_id
-    ? await db.from('projects').select('id, number, name, email, company, promoting, package, price_cents, customer_token').eq('order_id', first.order_id).order('order_item')
-    : await db.from('projects').select('id, number, name, email, company, promoting, package, price_cents, customer_token').eq('id', id)
+    ? await db.from('projects').select('id, number, name, first_name, email, company, promoting, package, price_cents, customer_token').eq('order_id', first.order_id).order('order_item')
+    : await db.from('projects').select('id, number, name, first_name, email, company, promoting, package, price_cents, customer_token').eq('id', id)
 
-  const kinds = new Map((Array.isArray(body.files) ? body.files : []).map(f => [f.path, f]))
-  const {data: listed} = await db.storage.from('project-files').list(`${id}/intake`, {limit: 100})
-  const files = (listed || []).map(o => {
-    const path = `${id}/intake/${o.name}`
-    const meta = kinds.get(path)
-    return {path, name: meta?.name || o.name.replace(/^\d+-/, ''), kind: meta?.kind === 'logo' ? 'logo' : 'brand_image', size: o.metadata?.size ?? null}
-  })
-  if (files.length) await db.from('project_files').insert(jobs.flatMap(j => files.map(f => ({...f, project_id: j.id}))))
+  const meta = new Map((Array.isArray(body.files) ? body.files : []).map(f => [f.path, f]))
+  const rows = []
+  let fileCount = 0
+  for (const job of jobs) {
+    const {data: listed} = await db.storage.from('project-files').list(`${job.id}/intake`, {limit: 200})
+    for (const o of listed || []) {
+      const path = `${job.id}/intake/${o.name}`
+      const m = o.name.match(/^(shared|video)-([a-z_]+)-\d+-(.*)$/)
+      const kind = m && UPLOAD_KINDS[m[2]] ? m[2] : 'brand_image' // files from the older form
+      const file = {path, name: meta.get(path)?.name || (m ? m[3] : o.name.replace(/^\d+-/, '')), kind, size: o.metadata?.size ?? null}
+      fileCount++
+      // Order-wide files sit under the first job and belong to every job in the order.
+      const owners = !m || m[1] === 'shared' ? jobs : [job]
+      for (const j of owners) rows.push({...file, project_id: j.id})
+    }
+  }
+  if (rows.length) await db.from('project_files').insert(rows)
   await db.from('projects').update({files_received: true}).in('id', jobs.map(j => j.id))
 
   const c = jobs[0]
@@ -45,19 +57,21 @@ export async function POST(request, ctx) {
       replyTo: c.email,
       subject: `New Mint 35 ${jobs.length > 1 ? `order (${jobs.length} projects)` : 'request'} ${refs.join(', ')}: ${c.company || c.name}`,
       html: `<p><b>${esc(c.name)}</b>${c.company ? ` (${esc(c.company)})` : ''} submitted ${jobs.length > 1 ? `an order with ${jobs.length} projects` : 'a project'}.</p>
-<ul>${lines}</ul><p><b>List total:</b> ${formatMoney(total)} · <b>Files:</b> ${files.length}</p><ul>${teamLinks}</ul>`,
+<ul>${lines}</ul><p><b>List total:</b> ${formatMoney(total)} · <b>Files:</b> ${fileCount}</p><ul>${teamLinks}</ul>`,
     }),
     sendEmail({
       to: c.email,
       subject: `We got your Mint 35 order (${refs.join(', ')})`,
-      html: `<p>Hi ${esc(c.name.split(' ')[0])},</p>
+      html: `<p>Hi ${esc(c.first_name || c.name.split(' ')[0])},</p>
 <p>Thanks for your order. Here's what we received:</p><ul>${lines}</ul>
 <p><b>Total:</b> ${formatMoney(total)}</p>
 <p>Our team will review it and email you next steps. Your card is only charged once your order enters our production queue.</p>
 <p><a href="${customerLink(site, c.customer_token)}">Track your order on your project page</a></p>
-<p>— The Mint 35 team</p>`,
+<p>— The Mint 35 team</p>
+<hr><p style="color:#666;font-size:13px"><b>${esc(DISCLAIMER_TITLE)}</b> (accepted with your order)</p>
+${DISCLAIMER.map(d => `<p style="color:#666;font-size:13px">${d.lead ? `<b>${esc(d.lead)}</b> ` : ''}${esc(d.text)}</p>`).join('')}`,
     }),
   ])
 
-  return NextResponse.json({ok: true, files: files.length})
+  return NextResponse.json({ok: true, files: fileCount})
 }

@@ -120,9 +120,6 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
             <span className="chosen-price">{formatPrice(total)}{hasUnpriced ? ' + quote' : ''}</span>
             <Link href="/start" className="chosen-change">Edit order</Link>
           </div>
-          {lines.some(l => l.pkg.orgOnly) && (
-            <p className="org-note">{lines.find(l => l.pkg.orgOnly).pkg.name} is for organizations running a fundraising campaign. Please include your organization&rsquo;s name.</p>
-          )}
           <ProjectForm lines={lines} tokenUrl={tokenUrl} closedDays={closedDays} onDone={result => { setDone(result); clear() }} />
         </section>
       )}
