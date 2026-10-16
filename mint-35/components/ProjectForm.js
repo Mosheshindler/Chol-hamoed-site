@@ -14,13 +14,24 @@ import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, 
 const SAVE_KEY = 'mint35-intake'
 
 // Small "?" next to a question that opens a short explanation underneath it.
+// "?" next to a question: hover shows the explanation and moving away hides it; on phones a tap opens
+// it and a tap anywhere else closes it.
 function Tip({children}) {
   const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    if (!open) return
+    const close = e => { if (!ref.current?.contains(e.target)) setOpen(false) }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [open])
+  const mouse = fn => e => { if (e.pointerType === 'mouse') fn() }
   return (
-    <>
-      <button type="button" className="q-tip" aria-expanded={open} onClick={() => setOpen(o => !o)} aria-label="More about this question">?</button>
-      {open && <span className="q-tip-text">{children}</span>}
-    </>
+    <span className="tip-wrap" ref={ref} onPointerEnter={mouse(() => setOpen(true))} onPointerLeave={mouse(() => setOpen(false))}>
+      <button type="button" className="q-tip" aria-expanded={open} aria-label="More about this question"
+        onClick={e => { e.preventDefault(); setOpen(o => e.nativeEvent.pointerType === 'mouse' ? true : !o) }}>?</button>
+      {open && <span className="tip-pop" role="tooltip">{children}</span>}
+    </span>
   )
 }
 
@@ -72,12 +83,11 @@ const Opt = () => <span className="optional"> (optional)</span>
 // An upload as a compact card: icon, title, one short line, an Upload button and the chosen file names.
 function UploadCard({name, icon, title, hint, accept, multiple, required, optional, tip, children}) {
   const [names, setNames] = useState([])
-  const [tipOpen, setTipOpen] = useState(false)
   return (
     <div className="upload-card">
       <span className="upload-icon"><Icon name={icon} /></span>
       <div className="upload-body">
-        <b>{title}{tip && <button type="button" className="q-tip" aria-expanded={tipOpen} onClick={() => setTipOpen(o => !o)} aria-label="More about this">?</button>}</b>
+        <b>{title}{tip && <> <Tip>{tip}</Tip></>}</b>
         {optional && <span className="opt-tag">Optional</span>}
         {hint && <span className="upload-hint">{hint}</span>}
         {names.length > 0 && <span className="upload-names">✓ {names.join(', ')}</span>}
@@ -87,7 +97,6 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
         <input type="file" name={name} accept={accept} multiple={multiple} required={required}
           onChange={e => setNames([...e.currentTarget.files].map(f => f.name))} />
       </label>
-      {tipOpen && <span className="q-tip-text upload-tip">{tip}</span>}
       {children && <div className="upload-extra">{children}</div>}
     </div>
   )
@@ -369,7 +378,6 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <fieldset key={l.id} className="wizard-step" data-step={n} hidden={step !== n}>
             <p className="step-intro">
               {momentum ? 'Tell us about your fundraising campaign. All 5 milestone videos will be ready before launch.' : 'Now tell us about the video you’re ordering.'}
-              {l.pkg.price ? <span className="section-price">{formatPrice(l.pkg.price)}</span> : null}
             </p>
 
             {momentum ? (
@@ -387,7 +395,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 </label>
 
                 <h3 className="q-group">The message</h3>
-                <label><span>Call to action: what should donors do? <Tip>For example: &ldquo;Donate now at…&rdquo;, &ldquo;Double your gift by midnight&rdquo;.</Tip></span><input name={p('desired_action')} required /></label>
+                <label><span>Call to action: what should donors do? <Tip>For example: &ldquo;Donate today&rdquo;, &ldquo;Donate now at…&rdquo;, &ldquo;Double your gift by midnight&rdquo;.</Tip></span><input name={p('desired_action')} required /></label>
                 <label><span>Tagline or hashtag<Opt /></span><input name={p('tagline')} /></label>
                 <label><span>Names or sponsors that must appear<Opt /></span><textarea name={p('must_appear')} rows={2} /></label>
               </>
@@ -400,7 +408,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
 
                 <h3 className="q-group">The message</h3>
                 <label><span>The one thing viewers should remember <Tip>If viewers forget everything else, what should stick? For example: &ldquo;Same-day delivery anywhere in town.&rdquo;</Tip></span><textarea name={p('key_message')} rows={2} required /></label>
-                <label><span>Call to action: what should viewers do after watching? <Tip>For example: &ldquo;Call 732-555-1234&rdquo;, &ldquo;Shop at yoursite.com&rdquo;, &ldquo;Register by May 1&rdquo;.</Tip></span><input name={p('desired_action')} required /></label>
+                <label><span>Call to action: what should viewers do after watching? <Tip>For example: &ldquo;Call 732-555-1234&rdquo;, &ldquo;Shop at yoursite.com&rdquo;, &ldquo;Register by May 1&rdquo;, &ldquo;Donate today&rdquo;.</Tip></span><input name={p('desired_action')} required /></label>
                 <label><span>Info that must appear<Opt /></span><span className="hint">Price, offer, dates, phone, address.</span><textarea name={p('must_appear')} rows={2} /></label>
               </>
             )}
@@ -423,7 +431,11 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 tip="Age, look, style of dress. These guide the style; we don’t create exact look-alikes of real people." />
             )}
             <fieldset>
-              <legend>How should the story be told? <Tip>On-screen text: words animate on screen, no voice. Narration: a voiceover tells the story. Not sure? Let us decide.</Tip></legend>
+              <legend>How should the story be told? <Tip>
+                <span className="tip-line"><Icon name="type" /><span><b>On-screen text:</b> words animate on screen, no voice.</span></span>
+                <span className="tip-line"><Icon name="mic" /><span><b>Narration:</b> a voiceover tells the story.</span></span>
+                <span className="tip-line"><Icon name="help" /><span>Not sure? Let us decide.</span></span>
+              </Tip></legend>
               <Choices name={p('story')} options={STORY} />
             </fieldset>
             {w.story !== 'text' && (

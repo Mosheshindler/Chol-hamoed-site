@@ -692,3 +692,12 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 
 .opt-tag { justify-self: start; font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .upload-tip { grid-column: 1 / -1; margin-top: -4px; }
+
+/* Hover / tap explanations */
+.tip-wrap { display: inline; }
+.form label > span:first-child, .wizard legend, .upload-body > b { position: relative; }
+.tip-pop { position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 40; display: grid; gap: 8px; max-width: 440px; padding: 12px 14px; border-radius: 12px; background: #f2f6f2; color: #0a0c0a; font-size: .88rem; font-weight: 500; line-height: 1.5; text-transform: none; letter-spacing: 0; box-shadow: 0 16px 40px rgba(0,0,0,.55); }
+.tip-pop b { font-weight: 700; }
+.tip-line { display: grid; grid-template-columns: 20px 1fr; gap: 8px; align-items: start; }
+.tip-line .icon { width: 18px; height: 18px; color: var(--green); margin-top: 2px; }
+.stats dd small { display: block; margin-top: 2px; font-size: .72rem; color: var(--lime); opacity: .85; }

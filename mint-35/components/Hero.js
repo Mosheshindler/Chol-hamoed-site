@@ -28,7 +28,7 @@ export default function Hero() {
           <dl className="stats">
             <div><Icon name="clock" /><dt>30–60</dt><dd>seconds</dd></div>
             <div><Icon name="form" /><dt>1</dt><dd>simple form</dd></div>
-            <div><Icon name="bolt" /><dt>3</dt><dd>business days to first cut</dd></div>
+            <div><Icon name="bolt" /><dt>3</dt><dd>business days to first cut<small>once in production</small></dd></div>
           </dl>
         </div>
 
