@@ -96,7 +96,7 @@ export default function Home() {
                 </li>
               ))}
             </ol>
-            <p id="how-note" className="how-note">*Business days, counted from when your order enters production. Weekends and holidays are skipped.</p>
+            <p id="how-note" className="how-note">*First cut in 3 business days, counted from when your order enters production. Weekends and holidays are skipped.</p>
           </div>
         </section>
 
@@ -118,7 +118,6 @@ export default function Home() {
             <h2>Simple pricing. No surprises.</h2>
             <p className="intro-pricing"><span aria-hidden="true">🔥</span> <span><b>Introductory pricing.</b> Grab it while it lasts.</span></p>
             <PackageCards />
-            <p className="package-note">Every package: one approval step. One revision round.</p>
           </div>
         </section>
 

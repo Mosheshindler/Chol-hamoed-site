@@ -17,7 +17,7 @@ export default function Hero() {
           <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
           <p className="lead">Short videos that stop the scroll.</p>
           <ul className="nots">
-            <li>No shoots</li>
+            <li>No film shoots</li>
             <li>No meetings</li>
             <li>No hassle</li>
           </ul>
@@ -28,7 +28,7 @@ export default function Hero() {
           <dl className="stats">
             <div><Icon name="clock" /><dt>30–60</dt><dd>seconds</dd></div>
             <div><Icon name="form" /><dt>1</dt><dd>simple form</dd></div>
-            <div><Icon name="bolt" /><dt>3<a href="#how-note" className="stat-star" aria-label="See note">*</a></dt><dd>business days to first cut</dd></div>
+            <div><Icon name="bolt" /><dt>3<a href="#how-note" className="stat-star" aria-label="See note">*</a></dt><dd>business days</dd></div>
           </dl>
         </div>
 
