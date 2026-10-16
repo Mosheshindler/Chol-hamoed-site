@@ -14,13 +14,14 @@ export const STYLES = [
   {value: 'own', label: 'My own photos and videos only', hint: 'We build the video from your footage and images.'},
   {value: 'realistic', label: 'AI realistic characters', hint: 'Lifelike people. You can share reference photos.', sample: 'ImL5bp028ns'},
   {value: 'animated', label: 'Pixar-style animated characters', hint: '3D cartoon-style people.', sample: 'K2B9m_QTuGA'},
-  {value: 'text', label: 'Text animation only', hint: 'Bold animated text and graphics, no characters.'},
+  {value: 'text', label: 'Animated graphics & text', hint: 'Motion graphics and bold text, no characters.'},
 ]
 
 export const STORY = [
   {value: 'pick', label: 'Let Mint 35 decide'},
-  {value: 'text', label: 'On-screen text'},
-  {value: 'narration', label: 'Narration (voiceover)'},
+  {value: 'text', label: 'On-screen text only'},
+  {value: 'narration_text', label: 'Narration + key text on screen'},
+  {value: 'narration', label: 'Narration only'},
 ]
 
 export const VOICES = [
