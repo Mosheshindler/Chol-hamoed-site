@@ -8,10 +8,10 @@ export default function CardFields() {
       <legend className="section-title">Payment</legend>
       <p className="hint">Your card is saved securely with QuickBooks Payments when you place your order. We only charge it once your order enters our production queue.</p>
       <label>Name on card<input id="cc-name" autoComplete="cc-name" required /></label>
-      <label>Card number<input id="cc-number" inputMode="numeric" autoComplete="cc-number" placeholder="1234 1234 1234 1234" required /></label>
+      <label>Card number<input id="cc-number" inputMode="numeric" autoComplete="cc-number" placeholder="1234 1234 1234 1234" maxLength={23} onInput={formatNumber} required /></label>
       <div className="form-row card-row">
         <label>Expiry<input id="cc-exp" inputMode="numeric" autoComplete="cc-exp" placeholder="MM / YY" maxLength={9} onInput={formatExpiry} required /></label>
-        <label>CVC<input id="cc-cvc" inputMode="numeric" autoComplete="cc-csc" placeholder="123" required /></label>
+        <label>CVC<input id="cc-cvc" inputMode="numeric" autoComplete="cc-csc" placeholder="123" maxLength={4} onInput={formatCvc} required /></label>
         <label>Billing ZIP<input id="cc-zip" inputMode="numeric" autoComplete="postal-code" placeholder="08701" required /></label>
       </div>
       <p className="secure-note">🔒 Card details go straight to QuickBooks Payments. Mint 35 never sees or stores your card number.</p>
@@ -21,6 +21,33 @@ export default function CardFields() {
 
 const digits = s => String(s || '').replace(/\D/g, '')
 
+// Card number length and grouping by brand: Amex 15 digits as 4-6-5, Diners 14 as 4-6-4,
+// Visa / Mastercard / Discover 16 as 4-4-4-4 (other cards up to 19).
+function cardShape(d) {
+  if (/^3[47]/.test(d)) return {max: 15, groups: [4, 6, 5]}
+  if (/^3(0[0-5]|[68])/.test(d)) return {max: 14, groups: [4, 6, 4]}
+  if (/^(4|5[1-5]|2[2-7]|6)/.test(d)) return {max: 16, groups: [4, 4, 4, 4]}
+  return {max: 19, groups: [4, 4, 4, 4, 3]}
+}
+
+// Spaces the number as people type, stops at the brand's length, then moves on to the expiry.
+function formatNumber(e) {
+  const el = e.currentTarget
+  const {max, groups} = cardShape(digits(el.value))
+  const d = digits(el.value).slice(0, max)
+  const out = []
+  let i = 0
+  for (const g of groups) { if (i >= d.length) break; out.push(d.slice(i, i + g)); i += g }
+  el.value = out.join(' ')
+  if (!e.nativeEvent?.inputType?.startsWith('delete') && d.length === max && luhn(d)) document.getElementById('cc-exp')?.focus()
+}
+
+// CVC is 4 digits on Amex, 3 on other cards.
+function formatCvc(e) {
+  const amex = /^3[47]/.test(digits(document.getElementById('cc-number')?.value))
+  e.currentTarget.value = digits(e.currentTarget.value).slice(0, amex ? 4 : 3)
+}
+
 // Phone number pads have no "/" key, so add it as people type: "1230" shows as "12 / 30".
 function formatExpiry(e) {
   const el = e.currentTarget
@@ -28,6 +55,7 @@ function formatExpiry(e) {
   let d = digits(el.value)
   if (d.length === 1 && Number(d) > 1) d = '0' + d
   el.value = d.length > 2 ? `${d.slice(0, 2)} / ${d.slice(2, 6)}` : d
+  if (d.length === 4 && parseExpiry(el.value)) document.getElementById('cc-cvc')?.focus()
 }
 
 // Accepts "12/30", "12 / 2030", "1230", "122030", "1/30"; returns {mm, yyyy} or null.
