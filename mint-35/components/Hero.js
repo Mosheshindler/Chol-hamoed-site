@@ -1,3 +1,5 @@
+import Icon from './Icon'
+
 // Hero phone plays real frames from Mint 35 work (see /public/hero), ending on a CTA card.
 const scenes = [
   {tag: 'Hook', line: 'Stop scrolling.', img: '/hero/allfit.jpg'},
@@ -23,12 +25,11 @@ export default function Hero() {
             <a href="/start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>
             <a href="#how" className="btn btn-ghost">How It Works</a>
           </div>
-          <dl className="facts">
-            <div><dt>30–60</dt><dd>seconds</dd></div>
-            <div><dt>1</dt><dd>simple form</dd></div>
-            <div><dt>3<sup>*</sup></dt><dd>days to first cut</dd></div>
+          <dl className="stats">
+            <div><Icon name="clock" /><dt>30–60</dt><dd>seconds</dd></div>
+            <div><Icon name="form" /><dt>1</dt><dd>simple form</dd></div>
+            <div><Icon name="bolt" /><dt>3</dt><dd>business days to first cut</dd></div>
           </dl>
-          <p className="footnote">*Business days, once production starts.</p>
         </div>
 
         <div className="hero-visual" aria-hidden="true">
