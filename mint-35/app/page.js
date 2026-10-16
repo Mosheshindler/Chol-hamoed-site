@@ -96,7 +96,7 @@ export default function Home() {
                 </li>
               ))}
             </ol>
-            <p id="how-note" className="how-note">*First cut in 3 business days, counted from when your order enters production. Weekends and holidays are skipped.</p>
+            <p id="how-note" className="how-note">*First cut in 3 business days, counted from when your order enters production, not including weekends and holidays.</p>
           </div>
         </section>
 
