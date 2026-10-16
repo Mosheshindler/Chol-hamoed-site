@@ -16,10 +16,10 @@ export default function Hero() {
           <p className="eyebrow">Mint 35 · by Mint Media</p>
           <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
           <p className="lead">Short videos that stop the scroll.</p>
-          <ul className="nots">
-            <li>No film shoots</li>
-            <li>No meetings</li>
-            <li>No hassle</li>
+          <ul className="nots-big">
+            <li><Icon name="camera-off" />No film shoots</li>
+            <li><Icon name="calendar-off" />No meetings</li>
+            <li><Icon name="smile" />No hassle</li>
           </ul>
           <div className="hero-ctas">
             <a href="/start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>
