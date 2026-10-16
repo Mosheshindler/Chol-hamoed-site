@@ -6,10 +6,7 @@ import {createClient} from '@/lib/supabase/browser'
 import {formatPrice} from '@/lib/packages'
 import CardFields, {tokenizeCard} from './CardFields'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
-import {addBusinessDays, formatDate} from '@/lib/dates'
-
-// Earliest delivery date a customer can pick: 3 business days from today.
-export const MIN_LEAD_DAYS = 3
+import {earliestDelivery, formatDate} from '@/lib/dates'
 
 const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital Signage', 'Streaming', 'Other']
 
@@ -19,7 +16,7 @@ const placements = ['Social', 'Paid Advertising', 'YouTube', 'Website', 'Digital
 export default function ProjectForm({lines, tokenUrl, onDone}) {
   const [state, setState] = useState({phase: 'idle'})
   const [minDate, setMinDate] = useState(null)
-  useEffect(() => { setMinDate(addBusinessDays(new Date(), MIN_LEAD_DAYS)) }, [])
+  useEffect(() => { setMinDate(earliestDelivery()) }, [])
   const orgRequired = lines.some(l => l.pkg.orgOnly)
   const many = lines.length > 1
 
@@ -164,7 +161,7 @@ export default function ProjectForm({lines, tokenUrl, onDone}) {
                 const el = e.currentTarget
                 el.setCustomValidity(minDate && el.value && el.value < minDate ? `The earliest date we can deliver is ${formatDate(minDate)}.` : '')
               }} />
-              {minDate && <span className="hint">Earliest: {formatDate(minDate)} (3 business days from today)</span>}
+              {minDate && <span className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue (orders after 5pm ET count from the next business day).</span>}
             </label>
             <label><span>References or links <span className="optional">— optional</span></span><input name={`i${i}_references_links`} /></label>
           </div>
