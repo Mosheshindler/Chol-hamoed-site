@@ -4,9 +4,9 @@
 export const TITLES = ['Mr.', 'Mrs.', 'Ms.', 'Rabbi', 'Dr.', 'Other']
 
 export const ALERTS = [
-  {value: 'sms', label: 'Text me'},
-  {value: 'whatsapp', label: 'WhatsApp me'},
-  {value: 'email', label: 'Email only, no alerts needed'},
+  {value: 'sms', label: 'Text', icon: 'text'},
+  {value: 'whatsapp', label: 'WhatsApp', icon: 'whatsapp'},
+  {value: 'email', label: 'Email only', icon: 'mail'},
 ]
 
 export const STYLES = [

@@ -6,6 +6,7 @@ import {createClient} from '@/lib/supabase/browser'
 import {formatPrice} from '@/lib/packages'
 import CardFields, {tokenizeCard} from './CardFields'
 import DisclaimerText from './DisclaimerText'
+import Icon from './Icon'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
 import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
@@ -67,6 +68,35 @@ function Orientation({name, label}) {
 }
 
 const Opt = () => <span className="optional"> (optional)</span>
+
+// An upload as a compact card: icon, title, one short line, an Upload button and the chosen file names.
+function UploadCard({name, icon, title, hint, accept, multiple, required, optional, tip, children}) {
+  const [names, setNames] = useState([])
+  const [tipOpen, setTipOpen] = useState(false)
+  return (
+    <div className="upload-card">
+      <span className="upload-icon"><Icon name={icon} /></span>
+      <div className="upload-body">
+        <b>{title}{tip && <button type="button" className="q-tip" aria-expanded={tipOpen} onClick={() => setTipOpen(o => !o)} aria-label="More about this">?</button>}</b>
+        {optional && <span className="opt-tag">Optional</span>}
+        {hint && <span className="upload-hint">{hint}</span>}
+        {names.length > 0 && <span className="upload-names">✓ {names.join(', ')}</span>}
+      </div>
+      <label className="upload-btn">
+        {names.length ? 'Change' : 'Upload'}
+        <input type="file" name={name} accept={accept} multiple={multiple} required={required}
+          onChange={e => setNames([...e.currentTarget.files].map(f => f.name))} />
+      </label>
+      {tipOpen && <span className="q-tip-text upload-tip">{tip}</span>}
+      {children && <div className="upload-extra">{children}</div>}
+    </div>
+  )
+}
+
+function Reveal({label, children}) {
+  const [open, setOpen] = useState(false)
+  return open ? children : <button type="button" className="reveal-link" onClick={() => setOpen(true)}>{label}</button>
+}
 
 // Multi-step order form: 1 You · 2 Your brand · 3 one page per video · 4 Review & pay.
 // Every step stays in one <form> (hidden when not current) so answers and chosen files survive
@@ -287,11 +317,12 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         </div>
         <fieldset>
           <legend>How should we alert you?</legend>
-          <p className="hint">Everything comes to you by email. We can also send a quick alert when something new is waiting for you.</p>
-          <div className="choices choices-row">
+          <p className="hint">Everything comes by email. Want a quick heads-up too?</p>
+          <div className="alert-pick">
             {ALERTS.map(a => (
-              <label key={a.value} className="choice">
+              <label key={a.value} className="alert-opt">
                 <input type="radio" name="alert_channel" value={a.value} required />
+                <Icon name={a.icon} />
                 <b>{a.label}</b>
               </label>
             ))}
@@ -304,28 +335,27 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       {/* Step 2 · Brand */}
       <fieldset className="wizard-step" data-step={1} hidden={step !== 1}>
         <p className="step-intro">Let&rsquo;s get to know your brand so your video looks and sounds like you.</p>
-        <p className="callout">💡 This step is about your company or organization as a whole. Graphics for what you&rsquo;re promoting in this video come in the next step.</p>
-        <label><span>Your main logo{watch.override && <Opt />}</span>
-          <span className="hint">Your everyday company or organization logo, not a logo for a specific product, service or campaign. High-res, PDF or PNG preferred.</span>
-          <input type="file" name="logo" accept="image/*,.pdf,.svg,.ai,.eps" required={!watch.override} />
-        </label>
-        <label className="check check-inline">
-          <input type="checkbox" name="logo_override" />
-          <span>I only have a logo for what I&rsquo;m promoting</span>
-        </label>
-        {watch.override && <p className="hint">No problem. You&rsquo;ll upload it in the next step.</p>}
-        <label><span>Brand materials<Opt /></span>
-          <span className="hint">Brochures, flyers, infographics or anything else that shows your colors, fonts and overall look.</span>
-          <input type="file" name="brand_materials" accept="image/*,.pdf" multiple />
-        </label>
-        <fieldset>
-          <legend>Open design files<Opt /> <Tip>The original, editable versions of your graphics: Illustrator (.ai), Photoshop (.psd), InDesign, layered PDF, or a Canva or Figma link. They let us use your exact fonts, colors and artwork cleanly. Don&rsquo;t have them? No problem. Your designer&rsquo;s email works too, or we&rsquo;ll work from what you send.</Tip></legend>
-          <div className="stack">
-            <input type="file" name="design_files" multiple aria-label="Upload open design files" />
-            <input name="design_link" placeholder="Or paste a link (Drive, Dropbox, Canva)" aria-label="Link to design files" />
-            <input name="designer" placeholder="Or your designer’s email" aria-label="Designer name and email" />
-          </div>
-        </fieldset>
+        <p className="callout">💡 About your company as a whole. Graphics for this video come next.</p>
+        <UploadCard name="logo" icon="badge" title="Main logo" hint="Your everyday logo · PDF or PNG" accept="image/*,.pdf,.svg,.ai,.eps"
+          required={!watch.override} optional={watch.override}>
+          <label className="mini-check">
+            <input type="checkbox" name="logo_override" />
+            <span>I only have a logo for what I&rsquo;m promoting</span>
+          </label>
+          {watch.override && <span className="upload-hint">No problem. You&rsquo;ll add it in the next step.</span>}
+        </UploadCard>
+        <UploadCard name="brand_materials" icon="palette" title="Brand materials" optional multiple accept="image/*,.pdf"
+          hint="Brochures, flyers, anything that shows your look" />
+        <UploadCard name="design_files" icon="layers" title="Open design files" optional multiple
+          hint="Editable files: AI, PSD, Canva…"
+          tip="The original, editable versions of your graphics: Illustrator (.ai), Photoshop (.psd), InDesign, layered PDF, or a Canva or Figma link. They let us use your exact fonts, colors and artwork. Don’t have them? Your designer’s email works too, or we’ll work from what you send.">
+          <Reveal label="Share a link or your designer’s email instead">
+            <div className="stack">
+              <input name="design_link" placeholder="Link (Drive, Dropbox, Canva)" aria-label="Link to design files" />
+              <input name="designer" placeholder="Designer’s email" aria-label="Designer email" />
+            </div>
+          </Reveal>
+        </UploadCard>
         <Nav n={1} />
       </fieldset>
 
@@ -376,21 +406,21 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             )}
 
             <h3 className="q-group">The look and sound</h3>
-            <label><span>{momentum ? 'Campaign graphics, photos and videos' : 'Photos, videos and graphics to use in your video'}{!watch.override && <Opt />}</span>
-              <span className="hint">{momentum ? 'Campaign logo, artwork, flyers, photos or footage.' : 'Product photos, footage, its own logo, artwork, flyers.'}</span>
-              <input type="file" name={p('media')} multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd" required={!!watch.override} />
-              <span className="upload-warn">⚠️ Anything you upload here may appear in your video. Please don&rsquo;t include anything you don&rsquo;t want shown.</span>
-            </label>
+            <UploadCard name={p('media')} icon="image" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd"
+              title={momentum ? 'Campaign graphics, photos & videos' : 'Photos, videos & graphics to use'}
+              hint={momentum ? 'Campaign logo, artwork, flyers, footage' : 'Product photos, footage, its own logo, artwork'}
+              required={!!watch.override} optional={!watch.override}>
+              <span className="upload-warn">⚠️ Anything you upload here may appear in your video.</span>
+            </UploadCard>
             <Orientation name={p('orientation')} label={momentum ? 'Orientation (one for all 5 videos)' : 'Orientation'} />
             <fieldset>
               <legend>What style do you want? <Tip>This sets the overall look. Not sure? Let us pick what fits your message best.</Tip></legend>
               <Choices name={p('style')} options={STYLES} onSample={setSample} />
             </fieldset>
             {w.style === 'realistic' && (
-              <label><span>Reference photos<Opt /></span>
-                <span className="hint">Show us the kind of people you&rsquo;d like to see: age, look, style of dress. These guide the style; we don&rsquo;t create exact look-alikes of real people.</span>
-                <input type="file" name={p('refs')} accept="image/*" multiple />
-              </label>
+              <UploadCard name={p('refs')} icon="user" title="Reference photos" optional multiple accept="image/*"
+                hint="The kind of people you’d like to see"
+                tip="Age, look, style of dress. These guide the style; we don’t create exact look-alikes of real people." />
             )}
             <fieldset>
               <legend>How should the story be told? <Tip>On-screen text: words animate on screen, no voice. Narration: a voiceover tells the story. Not sure? Let us decide.</Tip></legend>

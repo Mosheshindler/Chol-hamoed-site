@@ -97,13 +97,6 @@ p { margin: 0 0 12px; }
 .nots li { white-space: nowrap; }
 .nots li + li::before { content: "·"; color: var(--lime); font-weight: 800; margin: 0 10px; }
 .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
-.facts { display: flex; gap: 0; margin: 28px 0 8px; border-top: 1px solid var(--line); padding-top: 20px; }
-.facts div { display: grid; align-content: start; padding-right: 28px; margin-right: 28px; border-right: 1px solid var(--line); }
-.facts div:last-child { border-right: 0; margin-right: 0; }
-.facts dt { font-family: var(--display); font-size: 2.4rem; font-weight: 800; color: var(--text); line-height: 1; letter-spacing: -0.03em; }
-.facts dt sup { color: var(--lime); font-size: .9rem; }
-.facts dd { margin: 6px 0 0; color: var(--muted); font-size: .88rem; white-space: nowrap; }
-.footnote { color: var(--muted); font-size: .78rem; opacity: .8; }
 
 /* Hero phone: plays a 3-shot sample (two real frames + CTA card) on a 9s loop */
 .hero-visual { position: relative; height: 540px; animation: rise .9s .2s cubic-bezier(.2,.7,.2,1) both; }
@@ -516,12 +509,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .section { padding: 52px 0; }
   .form-row, .timeline { grid-template-columns: 1fr; }
   .card, .form, .package { padding: 24px; }
-  .facts { display: grid; grid-template-columns: repeat(3, 1fr); padding-top: 16px; margin-top: 22px; }
-  .facts div { padding: 0 10px; margin: 0; }
-  .facts div:first-child { padding-left: 0; }
-  .facts dt { font-size: 1.6rem; }
-  .facts dd { font-size: .78rem; margin-top: 4px; }
-  .phone { width: 230px; height: 460px; margin-left: -115px; }
+            .phone { width: 230px; height: 460px; margin-left: -115px; }
   .hero-visual { height: 470px; }
   .fc-1 { left: -4px; top: 60px; }
   .fc-2 { right: -4px; bottom: 110px; }
@@ -654,3 +642,53 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .choices-row .choice:last-child { grid-column: 1 / -1; }
   .step-nav .btn { flex: 1; justify-content: center; }
 }
+
+/* Hero stat tiles */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0 0; max-width: 560px; }
+.stats div { display: grid; justify-items: start; align-content: start; gap: 2px; padding: 16px; border-radius: 18px; border: 1px solid rgba(136,192,64,.22); background: rgba(10,12,10,.45); backdrop-filter: blur(6px); }
+.stats .icon { width: 22px; height: 22px; color: var(--lime); margin-bottom: 8px; }
+.stats dt { font-family: var(--display); font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: var(--text); }
+.stats dd { margin: 4px 0 0; color: var(--muted); font-size: .82rem; line-height: 1.3; }
+@media (max-width: 600px) {
+  .stats { gap: 8px; margin-top: 24px; }
+  .stats div { padding: 12px; border-radius: 14px; }
+  .stats dt { font-size: 1.5rem; }
+  .stats dd { font-size: .74rem; }
+  .stats .icon { width: 18px; height: 18px; margin-bottom: 6px; }
+}
+
+/* Order form: alert picker and upload cards */
+.alert-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.form .alert-opt { position: relative; display: grid; justify-items: center; gap: 6px; padding: 14px 8px; border: 1px solid var(--line); background: var(--bg); border-radius: 14px; cursor: pointer; font-weight: 400; text-align: center; transition: border-color .2s, background .2s; }
+.form .alert-opt:has(input:checked) { border-color: var(--lime); background: rgba(136,192,64,.1); box-shadow: 0 0 0 1px var(--lime); }
+.form .alert-opt:has(input:focus-visible) { outline: 2px solid var(--lime); outline-offset: 2px; }
+.alert-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.alert-opt .icon { width: 24px; height: 24px; color: var(--lime); }
+.alert-opt b { font-size: .92rem; }
+.upload-card { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; padding: 14px 16px; border: 1px solid var(--line); background: var(--bg); border-radius: 16px; }
+.upload-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: rgba(136,192,64,.12); color: var(--lime); }
+.upload-icon .icon { width: 22px; height: 22px; }
+.upload-body { display: grid; gap: 3px; min-width: 0; }
+.upload-body > b { font-size: .98rem; }
+.upload-hint { color: var(--muted); font-size: .85rem; line-height: 1.4; }
+.upload-names { color: var(--lime); font-size: .85rem; font-weight: 600; overflow-wrap: anywhere; }
+.upload-extra .upload-warn { font-size: .8rem; }
+.upload-extra .stack { margin-top: 4px; }
+.upload-btn { position: relative; align-self: start; padding: 8px 16px; border-radius: 999px; background: var(--lime); color: #0a0c0a; font-weight: 700; font-size: .88rem; cursor: pointer; white-space: nowrap; }
+.form .upload-btn { display: inline-block; }
+.upload-btn input[type=file] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; padding: 0; border: 0; }
+.upload-btn:has(input:focus-visible) { outline: 2px solid var(--lime); outline-offset: 3px; }
+.form .mini-check { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: .85rem; font-weight: 500; color: var(--text); cursor: pointer; }
+.form .mini-check input { width: 16px; height: 16px; margin: 0; padding: 0; accent-color: var(--lime); flex: none; }
+.reveal-link { justify-self: start; margin-top: 6px; padding: 0; border: 0; background: none; color: var(--lime); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.upload-extra { grid-column: 2 / -1; display: grid; gap: 4px; margin-top: -6px; }
+.upload-extra .mini-check { margin-top: 0; }
+.reveal-link { text-align: left; }
+@media (max-width: 600px) {
+  .upload-card { padding: 12px 14px; gap: 12px; }
+  .upload-btn { padding: 7px 13px; font-size: .84rem; }
+  .upload-icon { width: 38px; height: 38px; }
+}
+
+.opt-tag { justify-self: start; font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.upload-tip { grid-column: 1 / -1; margin-top: -4px; }
