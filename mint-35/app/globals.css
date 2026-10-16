@@ -726,18 +726,10 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .stat-star { color: var(--lime); font-size: .55em; vertical-align: super; margin-left: 2px; text-decoration: none; }
 .how-note { margin: 14px 0 0; color: var(--muted); font-size: .85rem; scroll-margin-top: 110px; }
 
-/* How it works: package tabs and Your part / Our part tags */
-.how-tabs { display: inline-flex; gap: 4px; padding: 4px; margin-top: 22px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); }
-.how-tabs button { padding: 9px 18px; border: 0; border-radius: 999px; background: none; color: var(--muted); font: inherit; font-weight: 600; font-size: .92rem; cursor: pointer; }
-.how-tabs button.on { background: var(--lime); color: #0a0c0a; }
+/* How it works: Your part / Our part tags */
 .who { display: inline-block; margin-bottom: 8px; padding: 2px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .who-you { background: rgba(136,192,64,.14); color: var(--lime); }
 .who-we { background: rgba(255,255,255,.08); color: var(--text); }
-.timeline { margin-top: 22px; }
-@media (max-width: 600px) {
-  .how-tabs { display: flex; }
-  .how-tabs button { flex: 1; padding: 9px 10px; font-size: .85rem; }
-}
 @media (max-width: 600px) {
   .timeline { grid-template-columns: 1fr; gap: 10px; }
   .timeline::before { display: none; }
