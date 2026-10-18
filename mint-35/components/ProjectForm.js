@@ -8,6 +8,7 @@ import CardFields, {tokenizeCard} from './CardFields'
 import DisclaimerText from './DisclaimerText'
 import Icon from './Icon'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
+import {loadFiles, saveFiles, clearFiles} from '@/lib/fileStash'
 import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
 import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
 
@@ -139,6 +140,8 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   const [read, setRead] = useState(false)
   const [sample, setSample] = useState(null)
   const [missing, setMissing] = useState(null) // {step, items: [{key, label}]}
+  const pendingFiles = useRef({})
+  const [filesLoaded, setFilesLoaded] = useState(0)
   const many = lines.length > 1
   const saveKey = `${SAVE_KEY}:${lines.map(l => l.pkg.slug).join(',')}`
 
@@ -184,7 +187,26 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       else el.value = saved[el.name]
     }
     readWatch()
+    loadFiles(saveKey).then(saved => { pendingFiles.current = saved; setFilesLoaded(n => n + 1) })
   }, [saveKey, readWatch])
+
+  // Put saved files back into their upload fields. Some fields only appear after other answers are
+  // restored (e.g. reference photos), so this runs again whenever those answers change.
+  useEffect(() => {
+    const f = formRef.current
+    for (const [name, files] of Object.entries(pendingFiles.current)) {
+      const el = f.elements[name]
+      if (!el || el.type !== 'file') continue
+      delete pendingFiles.current[name]
+      if (el.files.length) continue
+      try {
+        const dt = new DataTransfer()
+        for (const file of files) dt.items.add(file)
+        el.files = dt.files
+        el.dispatchEvent(new Event('change', {bubbles: true}))
+      } catch {}
+    }
+  }, [watch, filesLoaded])
 
   function save() {
     const f = formRef.current
@@ -372,6 +394,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         body: JSON.stringify({intakeToken: data.intakeToken, files: uploaded}),
       })
       try { localStorage.removeItem(saveKey) } catch {}
+      clearFiles(saveKey)
       onDone({refs: data.refs, missed: data.uploads.length - uploaded.length})
       window.scrollTo({top: 0, behavior: 'smooth'})
     } catch (err) {
@@ -399,7 +422,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   )
 
   return (
-    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onKeyDown={onKeyDown} onChange={e => { readWatch(); save(); recheck(e.target) }} onInput={e => { save(); recheck(e.target) }} noValidate>
+    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onKeyDown={onKeyDown} onChange={e => { if (e.target.type === 'file') saveFiles(saveKey, e.target.name, e.target.files); readWatch(); save(); recheck(e.target) }} onInput={e => { save(); recheck(e.target) }} noValidate>
       <input type="text" name="_honey" className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
       <div className="wizard-head">
