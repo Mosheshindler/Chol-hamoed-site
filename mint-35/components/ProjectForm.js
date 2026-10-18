@@ -83,6 +83,12 @@ const Opt = () => <span className="optional"> (optional)</span>
 // An upload as a compact card: icon, title, one short line, an Upload button and the chosen file names.
 function UploadCard({name, icon, title, hint, accept, multiple, required, optional, tip, children}) {
   const [names, setNames] = useState([])
+  const input = useRef(null)
+  function clear() {
+    input.current.value = ''
+    setNames([])
+    input.current.dispatchEvent(new Event('change', {bubbles: true}))
+  }
   return (
     <div className="upload-card">
       <span className="upload-icon"><Icon name={icon} /></span>
@@ -90,11 +96,11 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
         <b>{title}{tip && <> <Tip>{tip}</Tip></>}</b>
         {optional && <span className="opt-tag">Optional</span>}
         {hint && <span className="upload-hint">{hint}</span>}
-        {names.length > 0 && <span className="upload-names">✓ {names.join(', ')}</span>}
+        {names.length > 0 && <span className="upload-names">✓ {names.join(', ')} <button type="button" className="link-btn upload-remove" onClick={clear}>Remove</button></span>}
       </div>
       <label className="upload-btn">
         {names.length ? 'Change' : 'Upload'}
-        <input type="file" name={name} accept={accept} multiple={multiple} required={required}
+        <input ref={input} type="file" name={name} accept={accept} multiple={multiple} required={required}
           onChange={e => setNames([...e.currentTarget.files].map(f => f.name))} />
       </label>
       {children && <div className="upload-extra">{children}</div>}
@@ -102,9 +108,23 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
   )
 }
 
+// Optional extra questions behind a link. The fields stay in the form while closed so saved answers
+// restore into them; if any comes back filled in, the box opens by itself.
 function Reveal({label, children}) {
   const [open, setOpen] = useState(false)
-  return open ? children : <button type="button" className="reveal-link" onClick={() => setOpen(true)}>{label}</button>
+  const ref = useRef(null)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      if ([...(ref.current?.querySelectorAll('input, textarea') || [])].some(e => e.value)) setOpen(true)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [])
+  return (
+    <>
+      {!open && <button type="button" className="reveal-link" onClick={() => setOpen(true)}>{label}</button>}
+      <div ref={ref} hidden={!open}>{children}</div>
+    </>
+  )
 }
 
 // Multi-step order form: 1 You · 2 Your brand · 3 one page per video · 4 Review & pay.
@@ -144,6 +164,13 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   }, [lines.length])
 
   useEffect(() => { setMinDate(earliestDelivery(new Date(), closedDays)) }, [closedDays])
+
+  useEffect(() => {
+    if (!sample) return
+    const onKey = e => { if (e.key === 'Escape') setSample(null) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [sample])
 
   // Restore saved text answers once, then keep saving them as the customer types.
   useEffect(() => {
@@ -188,7 +215,11 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       const holder = el.closest('.upload-card') || (el.type === 'radio' ? el.closest('.alert-pick, .orient, .choices, .chips') : null) || (el.type === 'checkbox' ? el.closest('label') : null) || el
       holder.classList.add('is-missing')
       holder.dataset.missingKey = key
-      const custom = el.validationMessage && !el.validity.valueMissing && !el.validity.typeMismatch && !el.validity.patternMismatch ? ` (${el.validationMessage.replace(/\.$/, '')})` : ''
+      const custom = el.validity.valueMissing ? ''
+        : el.validity.typeMismatch && el.type === 'email' ? ' (check the email address)'
+        : el.validity.patternMismatch && el.type === 'tel' ? ' (needs 10 digits)'
+        : el.validity.rangeUnderflow && minDate ? ` (earliest is ${formatDate(minDate)})`
+        : el.validity.customError ? ` (${el.validationMessage.replace(/\.$/, '')})` : ''
       items.push({key, label: fieldLabel(el) + custom})
     }
     if (n === last && !read) {
@@ -248,6 +279,13 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
     requestAnimationFrame(() => formRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'}))
   }
   const next = () => { if (checkStep(step)) go(step + 1) }
+
+  // Enter in a text field moves to the next step (like Continue) instead of submitting the whole form.
+  function onKeyDown(e) {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT' || ['checkbox', 'radio', 'file', 'submit', 'button'].includes(e.target.type)) return
+    e.preventDefault()
+    if (step < last) next()
+  }
 
   function dateCheck(e) {
     const el = e.currentTarget
@@ -361,7 +399,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   )
 
   return (
-    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onChange={e => { readWatch(); save(); recheck(e.target) }} onInput={e => { save(); recheck(e.target) }} noValidate>
+    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onKeyDown={onKeyDown} onChange={e => { readWatch(); save(); recheck(e.target) }} onInput={e => { save(); recheck(e.target) }} noValidate>
       <input type="text" name="_honey" className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
       <div className="wizard-head">
@@ -451,7 +489,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               <>
                 <h3 className="q-group">The campaign</h3>
                 <label><span>What is the campaign raising money for? <Tip>Two or three sentences: the cause, and why now.</Tip></span><textarea name={p('promoting')} rows={3} required /></label>
-                <label>Campaign page link<input type="url" name={p('campaign_link')} placeholder="https://" required /></label>
+                <label>Campaign page link<input name={p('campaign_link')} inputMode="url" placeholder="https://" required /></label>
                 <div className="form-row">
                   <label>Goal amount<input name={p('goal')} placeholder="$250,000" required /></label>
                   <label><span>Matching?<Opt /> <Tip>If a matcher multiplies gifts, tell us the match (2x, 3x) and the matcher&rsquo;s name, if it can be shown.</Tip></span><input name={p('match')} placeholder="e.g. 2x by the Cohen Family" /></label>
@@ -566,7 +604,8 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <h3>Before you submit</h3>
           <ul className="ticks">
             <li>Double-check names, prices, dates and phone numbers.</li>
-            <li>Each video includes one approval step and one revision round.</li>
+            {lines.some(l => !l.pkg.orgOnly) && <li>Each video includes one approval step and one revision round.</li>}
+            {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes one sample to approve and one revision round for all 5 videos.</li>}
             <li>Your card is saved now and charged in full once your order moves to production.</li>
             <li>All sales are final. Mint 35 doesn&rsquo;t offer refunds.</li>
           </ul>
