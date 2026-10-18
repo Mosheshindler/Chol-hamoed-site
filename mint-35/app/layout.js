@@ -1,4 +1,9 @@
 import './globals.css'
+import {Bricolage_Grotesque, Onest} from 'next/font/google'
+
+// Fonts are downloaded at build time and served from our own domain (no Google request per visit).
+const display = Bricolage_Grotesque({subsets: ['latin'], axes: ['opsz'], variable: '--font-display', display: 'swap'})
+const body = Onest({subsets: ['latin'], variable: '--font-body', display: 'swap'})
 
 const title = 'Mint 35 — Short Videos by Mint Media'
 const description = 'A streamlined, fixed-scope way to create short videos, promos and ads. Submit your project details and brand assets, and Mint 35 turns them into a finished 30–60 second video.'
@@ -15,12 +20,7 @@ export const viewport = {themeColor: '#0a0c0a'}
 
 export default function RootLayout({children}) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Onest:wght@400;500;600;700&display=swap" />
-      </head>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   )

@@ -26,7 +26,7 @@ export default function CompareModal() {
         <h2 id="compare-title">Mint 35 or Mint Media?</h2>
         <div className="table-wrap">
           <table className="compare-table">
-            <thead><tr><th /><th className="hl"><img src="/brand/mint35-logo-v2.png" alt="Mint 35" className="compare-logo" /></th><th><img src="/brand/mint-media-logo.png" alt="Mint Media" className="compare-logo compare-logo-mm" /></th></tr></thead>
+            <thead><tr><th /><th className="hl"><img src="/brand/mint35-logo-v3.webp" alt="Mint 35" className="compare-logo" /></th><th><img src="/brand/mint-media-logo.png" alt="Mint Media" className="compare-logo compare-logo-mm" /></th></tr></thead>
             <tbody>
               {rows.map(([k, a, b]) => (
                 <tr key={k}><th scope="row">{k}</th><td className="hl">{a}</td><td>{b}</td></tr>

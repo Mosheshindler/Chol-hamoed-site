@@ -12,8 +12,8 @@
   --green: #107838;
   --red: #e07a6b;
   --radius: 20px;
-  --display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
-  --body: "Onest", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --display: var(--font-display), "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body: var(--font-body), "Onest", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   color-scheme: dark;
 }
 
