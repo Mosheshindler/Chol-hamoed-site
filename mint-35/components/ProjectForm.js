@@ -483,7 +483,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             <h3 className="q-group">The look and sound</h3>
             <UploadCard name={p('media')} icon="image" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd"
               title={momentum ? 'Campaign graphics, photos & videos' : 'Photos, videos & graphics to use'}
-              hint={momentum ? 'Campaign logo, artwork, flyers, footage' : 'Product photos, footage, its own logo, artwork. Need your product to look exact? Upload real photos or video of it.'}
+              hint={momentum ? 'Campaign logo, artwork, flyers, footage. Different photos for each video? Number the files 1–5.' : 'Product photos, footage, its own logo, artwork. Need your product to look exact? Upload real photos or video of it.'}
               required={!!watch.override} optional={!watch.override}>
               <span className="upload-warn">⚠️ Anything you upload here may appear in your video.</span>
             </UploadCard>

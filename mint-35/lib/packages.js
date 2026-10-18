@@ -2,7 +2,7 @@
 export const PACKAGES = [
   {slug: 'single-35', name: 'Single 35', price: 2800, blurb: 'One video, one message.', items: ['1 video, 30–60 sec', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round'], cta: 'Start My Video'},
   {slug: 'campaign-3', name: 'Campaign 3', price: 7200, priceNote: 'Save $1,200 vs. 3 singles', featured: true, blurb: 'Three different videos, one campaign.', items: ['3 videos, 30–60 sec each', '3 different stories, one shared style', {text: '1 platform export', info: 'formats-dialog'}, '1 revision round each'], cta: 'Build My Campaign'},
-  {slug: 'online-campaign', name: 'Momentum Pack', price: 3800, tag: 'For online fundraisers', orgOnly: true, blurb: 'One video that keeps pace with your campaign.', why: 'Designed once, updated at every milestone. That’s why it costs less.', milestones: ['Launch', '25%', '50%', '75%', 'Goal!'], items: ['5 videos, 35–45 sec each', '1 sample to approve first', '1 revision round', {text: '1 platform export for all 5', info: 'formats-dialog'}], cta: 'Launch My Campaign'},
+  {slug: 'online-campaign', name: 'Momentum Pack', price: 3800, tag: 'For online fundraisers', orgOnly: true, blurb: '5 videos that follow your campaign from launch to goal.', why: 'We design it once, then update it for each milestone. That’s why it costs less.', milestones: ['Launch', '25%', '50%', '75%', 'Goal!'], items: ['5 videos, 35–45 sec each', 'Swap photos in each video', '1 sample to approve first', '1 revision round', {text: '1 platform export for all 5', info: 'formats-dialog'}], cta: 'Launch My Campaign'},
 ]
 
 export const NOT_SURE = {slug: 'not-sure', name: 'Not sure yet'}
