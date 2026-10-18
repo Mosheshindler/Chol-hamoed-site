@@ -14,7 +14,7 @@ import DialogController from '@/components/DialogController'
 const formats = [
   {ratio: '9:16', label: 'Vertical'},
   {ratio: '1:1', label: 'Square'},
-  {ratio: '16:9', label: 'Wide'},
+  {ratio: '16:9', label: 'Horizontal'},
 ]
 
 const included = [
@@ -40,7 +40,7 @@ const notIncluded = [
 const faqs = [
   {q: 'Do I need a meeting?', a: 'No. It all starts with one form.'},
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
-  {q: 'How fast is it?', a: 'First cut in 3 business days, once your script is approved and production starts. Start dates depend on our queue.'},
+  {q: 'How fast is it?', a: 'First cut in 3 business days, counted from when your order enters production. Weekends and holidays aren’t counted. Start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
   {q: 'Can you create a custom character or make someone look like a real person?', a: 'No. We don’t build characters to your specifications, we don’t match anyone’s likeness, and we never use celebrities or copyrighted characters. Reference photos guide the general style only.'},
   {q: 'Will my product look exactly right?', a: 'AI gets close, not exact. If your product needs to look exact, upload real photos or video of it and we’ll build around those.'},
