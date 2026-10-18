@@ -35,6 +35,7 @@ function answers(p) {
     ['Call to action', p.desired_action],
     ['Tagline / hashtag', b.tagline],
     [momentum ? 'Names / sponsors' : 'Must appear', p.must_appear],
+    ['Changes per video', b.per_video],
     ['Orientation', p.orientation],
     ['Style', b.style && labelOf(STYLES, b.style)],
     ['Story told with', b.story && labelOf(STORY, b.story)],
