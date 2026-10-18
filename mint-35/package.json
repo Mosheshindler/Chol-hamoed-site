@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "check:site": "node scripts/site-check.mjs"
   },
   "dependencies": {
     "@hebcal/core": "^5.10.1",
