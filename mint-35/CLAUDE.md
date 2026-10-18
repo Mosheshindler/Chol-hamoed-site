@@ -55,6 +55,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
   email, cell, company always required, alert channel sms/whatsapp/email). Logo required unless "I only have a
   logo for what I'm promoting" (then each video's media upload is required). Per-video answers beyond the old
   columns live in `projects.brief` (jsonb); `latest_date` is the in-hand deadline (Momentum: launch date).
+  Chosen files are also kept in the browser (IndexedDB, `lib/fileStash.js`) so a reload keeps them; cleared on submit or after 14 days.
   Disclaimer: 3 key points ticked + full text scrolled to the end before the accept box unlocks.
 
 - AI limits (owner decided): no custom characters to client specs, no look-alikes of real people, no celebrities or
