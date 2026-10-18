@@ -63,7 +63,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Site check: `npm run check:site [url] [out-dir]` (scripts/site-check.mjs) screenshots the site on phone + desktop
   and checks loading, errors, images, sideways scroll, prices (from lib/packages.js), promise tiles, 5 How it works
   steps, order form steps, missing-field list, disclaimer page, admin login and that the order API refuses an empty
-  order. It never submits an order. A daily Routine runs it against the live site and also reviews the screenshots
+  order. It never submits an order. A weekly Routine (Mondays 8:56am ET) runs it against the live site and also reviews the screenshots
   by eye. Update the script's expectations when content changes on purpose.
 
 ## Planned (owner asked)
