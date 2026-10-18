@@ -302,7 +302,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         legal_text: g(i, 'legal_text'), restrictions: g(i, 'restrictions'),
         ideal_date: g(i, 'ideal_date'), latest_date: g(i, 'latest_date'),
         campaign_link: g(i, 'campaign_link'), goal: g(i, 'goal'), match: g(i, 'match'),
-        launch_at: g(i, 'launch_at'), tagline: g(i, 'tagline'),
+        launch_at: g(i, 'launch_at'), tagline: g(i, 'tagline'), per_video: g(i, 'per_video'),
       })),
       files: files.map(f => ({name: f.file.name, size: f.file.size, kind: f.kind, item: f.item})),
       acceptedDisclaimer: DISCLAIMER_VERSION,
@@ -465,6 +465,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 <label><span>Call to action: what should donors do? <Tip>For example: &ldquo;Donate today&rdquo;, &ldquo;Donate now at…&rdquo;, &ldquo;Double your gift by midnight&rdquo;.</Tip></span><input name={p('desired_action')} required /></label>
                 <label><span>Tagline or hashtag<Opt /></span><input name={p('tagline')} /></label>
                 <label><span>Names or sponsors that must appear<Opt /></span><textarea name={p('must_appear')} rows={2} /></label>
+                <label><span>What changes from video to video?<Opt /> <Tip>Photos and text can be different in each video. For example: &ldquo;Video 3 thanks our new sponsor&rdquo; or &ldquo;Use photo 4 in the 75% video&rdquo;.</Tip></span><textarea name={p('per_video')} rows={2} /></label>
               </>
             ) : (
               <>

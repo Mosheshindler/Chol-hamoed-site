@@ -86,7 +86,7 @@ export async function POST(request) {
     if (momentum) {
       Object.assign(brief, {
         campaign_link: str(it?.campaign_link, 1000), goal: str(it?.goal, 100), match: str(it?.match, 300),
-        launch_at: str(it?.launch_at, 40), tagline: str(it?.tagline, 300),
+        launch_at: str(it?.launch_at, 40), tagline: str(it?.tagline, 300), per_video: str(it?.per_video, 2000),
       })
       if (!brief.campaign_link || !brief.goal || !brief.launch_at) return bad(`Please fill in every required question${which}.`)
       const launch = brief.launch_at.slice(0, 10)
