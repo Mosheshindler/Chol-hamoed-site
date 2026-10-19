@@ -13,6 +13,7 @@ import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
 import {TITLES, STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
 
 const SAVE_KEY = 'mint35-intake'
+const TURNSTILE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 // Small "?" next to a question that opens a short explanation underneath it.
 // "?" next to a question: hover shows the explanation and moving away hides it; on phones a tap opens
@@ -141,6 +142,9 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   const [sample, setSample] = useState(null)
   const [missing, setMissing] = useState(null) // {step, items: [{key, label}]}
   const pendingFiles = useRef({})
+  const humanBox = useRef(null)
+  const humanWidget = useRef(null)
+  const [human, setHuman] = useState(null) // Turnstile token
   const [filesLoaded, setFilesLoaded] = useState(0)
   const many = lines.length > 1
   const saveKey = `${SAVE_KEY}:${lines.map(l => l.pkg.slug).join(',')}`
@@ -166,6 +170,29 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   }, [lines.length])
 
   useEffect(() => { setMinDate(earliestDelivery(new Date(), closedDays)) }, [closedDays])
+
+  // Cloudflare Turnstile on the last step (only when its site key is set).
+  useEffect(() => {
+    if (!TURNSTILE_KEY || step !== last || humanWidget.current !== null) return
+    const draw = () => {
+      if (humanWidget.current !== null || !window.turnstile || !humanBox.current) return
+      humanWidget.current = window.turnstile.render(humanBox.current, {
+        sitekey: TURNSTILE_KEY, theme: 'dark', size: 'flexible',
+        callback: t => setHuman(t), 'expired-callback': () => setHuman(null), 'error-callback': () => setHuman(null),
+      })
+    }
+    if (window.turnstile) return draw()
+    let s = document.getElementById('cf-turnstile')
+    if (!s) {
+      s = document.createElement('script')
+      s.id = 'cf-turnstile'
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+      s.async = true
+      document.head.appendChild(s)
+    }
+    s.addEventListener('load', draw)
+    return () => s.removeEventListener('load', draw)
+  }, [step, last])
 
   useEffect(() => {
     if (!sample) return
@@ -332,6 +359,10 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       setState({phase: 'error', message: 'Please read the AI Production Disclaimer to the end and accept it.'})
       return
     }
+    if (TURNSTILE_KEY && !human) {
+      setState({phase: 'error', message: 'Please wait a moment for the security check above the Submit button to finish.'})
+      return
+    }
 
     const fd = new FormData(formRef.current)
     const g = (i, k) => fd.get(`i${i}_${k}`)
@@ -346,6 +377,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
 
     const payload = {
       _honey: fd.get('_honey'),
+      turnstileToken: human,
       contact: {
         title: fd.get('title'), first_name: fd.get('first_name'), last_name: fd.get('last_name'),
         email: fd.get('email'), phone: fd.get('phone'), company: fd.get('company'), website: fd.get('website'),
@@ -398,6 +430,8 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       window.scrollTo({top: 0, behavior: 'smooth'})
     } catch (err) {
       setState({phase: 'error', message: err.message})
+      // A Turnstile token works once; get a fresh one for the next try.
+      if (humanWidget.current !== null) { window.turnstile?.reset(humanWidget.current); setHuman(null) }
     }
   }
 
@@ -640,6 +674,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           </label>
         </fieldset>
 
+        {TURNSTILE_KEY && <div ref={humanBox} className="human-check" />}
         <p className="checkout-terms">By submitting, you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.</p>
 
         {state.phase === 'error' && <p className="form-error" role="alert">{state.message}</p>}

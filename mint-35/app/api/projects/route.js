@@ -4,6 +4,7 @@ import {createAdminClient} from '@/lib/supabase/admin'
 import {PACKAGE_NAMES, ORG_ONLY_NAMES, packageByName} from '@/lib/packages'
 import {projectRef} from '@/lib/status'
 import {paymentsReady, saveCardFromToken} from '@/lib/qb'
+import {verifyHuman} from '@/lib/turnstile'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 import {earliestDelivery, isClosedDay} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
@@ -29,6 +30,8 @@ export async function POST(request) {
   if (body.acceptedDisclaimer !== DISCLAIMER_VERSION || body.acceptedPoints !== DISCLAIMER_POINTS.length) {
     return bad('Please read and accept the AI Production Disclaimer.')
   }
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+  if (!(await verifyHuman(body.turnstileToken, ip))) return bad('We couldn’t confirm you’re a person. Please complete the check above the Submit button and try again.')
 
   // Step 1: one point of contact.
   const c = body.contact || {}
@@ -133,7 +136,7 @@ export async function POST(request) {
     try {
       card = await saveCardFromToken(orderId, cardToken)
     } catch (e) {
-      console.error('Card save failed', e.message)
+      console.error('Card save failed', e.message, e.intuitTid ? `intuit_tid ${e.intuitTid}` : '')
       return NextResponse.json({error: `We couldn’t save that card: ${e.message} Please check it or try another card.`}, {status: 402})
     }
   }

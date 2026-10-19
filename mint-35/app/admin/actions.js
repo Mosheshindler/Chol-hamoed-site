@@ -78,7 +78,7 @@ export async function moveStatus(formData) {
       event.charge_id = charge.id
       event.charged_cents = p.price_cents
     } catch (e) {
-      await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'charge_failed', data: {message: e.message}})
+      await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'charge_failed', data: {message: e.message, intuit_tid: e.intuitTid || null}})
       revalidatePath(`/admin/projects/${id}`)
       return {error: `Charge failed: ${e.message} The job was not started.`}
     }

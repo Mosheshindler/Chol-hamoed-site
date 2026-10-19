@@ -774,3 +774,4 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .legal-links { display: flex; gap: 18px; flex-wrap: wrap; }
 .checkout-terms { color: var(--muted); font-size: .88rem; }
 .checkout-terms a { color: var(--lime); }
+.human-check { min-height: 65px; margin: 4px 0; }
