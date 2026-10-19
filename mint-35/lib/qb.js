@@ -32,7 +32,8 @@ async function tokenRequest(params) {
   return data
 }
 
-// QuickBooks tokens are encrypted (AES-256-GCM) before they're stored. The key comes from QB_TOKEN_KEY,
+// Access tokens live only in this server's memory (never stored); a fresh one is fetched with the
+// refresh token when needed. The refresh token is encrypted (AES-256-GCM) before it's stored. The key comes from QB_TOKEN_KEY,
 // or from the QuickBooks client secret when that isn't set, so a copy of the database alone can't be used.
 // Switching to new QuickBooks keys means reconnecting QuickBooks, which stores fresh tokens.
 const tokenKey = () => createHash('sha256').update(`mint35-qb-tokens:${process.env.QB_TOKEN_KEY || process.env.QB_CLIENT_SECRET || ''}`).digest()
@@ -52,12 +53,20 @@ function unseal(value) {
   return Buffer.concat([d.update(raw.subarray(28)), d.final()]).toString('utf8')
 }
 
+let memToken = null // {token, exp, env}
+
+function remember(t) {
+  memToken = {token: t.access_token, exp: Date.now() + (Number(t.expires_in) || 3600) * 1000, env: QB_ENV}
+  return t.access_token
+}
+
 const expiresAt = secs => new Date(Date.now() + (Number(secs) || 3600) * 1000).toISOString()
 
 async function saveTokens(t, extra = {}) {
   const row = {
     id: 1, environment: QB_ENV,
-    access_token: seal(t.access_token), refresh_token: seal(t.refresh_token),
+    access_token: '', // kept in memory only, see remember()
+    refresh_token: seal(t.refresh_token),
     access_expires_at: expiresAt(t.expires_in),
     refresh_expires_at: t.x_refresh_token_expires_in ? expiresAt(t.x_refresh_token_expires_in) : null,
     updated_at: new Date().toISOString(), ...extra,
@@ -69,6 +78,7 @@ async function saveTokens(t, extra = {}) {
 export async function connectWithCode({code, realmId, redirectUri, memberId}) {
   const t = await tokenRequest({grant_type: 'authorization_code', code, redirect_uri: redirectUri})
   await saveTokens(t, {realm_id: realmId, connected_by: memberId})
+  remember(t)
 }
 
 export async function getConnection() {
@@ -77,6 +87,7 @@ export async function getConnection() {
 }
 
 export async function disconnect() {
+  memToken = null
   await createAdminClient().from('qb_connection').delete().eq('id', 1)
 }
 
@@ -85,15 +96,15 @@ export async function paymentsReady() {
 }
 
 async function accessToken(force = false) {
+  if (!force && memToken?.env === QB_ENV && memToken.exp - Date.now() > 120000) return memToken.token
   const db = createAdminClient()
   const {data: c} = await db.from('qb_connection').select('*').eq('id', 1).maybeSingle()
   if (!c || c.environment !== QB_ENV) throw new Error('QuickBooks isn’t connected.')
-  let access, refresh
-  try { access = unseal(c.access_token); refresh = unseal(c.refresh_token) } catch { throw new Error('QuickBooks needs to be reconnected in Settings.') }
-  if (!force && new Date(c.access_expires_at).getTime() - Date.now() > 120000 && c.access_token?.startsWith('v1:')) return access
+  let refresh
+  try { refresh = unseal(c.refresh_token) } catch { throw new Error('QuickBooks needs to be reconnected in Settings.') }
   const t = await tokenRequest({grant_type: 'refresh_token', refresh_token: refresh})
   await saveTokens(t, {realm_id: c.realm_id, connected_by: c.connected_by})
-  return t.access_token
+  return remember(t)
 }
 
 async function qbFetch(path, body, retried = false) {

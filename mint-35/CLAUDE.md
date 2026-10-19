@@ -32,7 +32,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
   endpoint; numbers never hit our server), the server saves it as a card on file under customer id = order_id.
   Accepting a job with a card moves it to `card_saved`; "Start job & charge card" charges the job price;
   confirming an add-on charges it. Owner connects QuickBooks at /admin/settings (OAuth, tokens in `qb_connection`,
-  service-role only, AES-256-GCM encrypted with a key from QB_TOKEN_KEY or the client secret). Without keys/connection, checkout takes orders with no card.
+  service-role only; access tokens kept in memory only, refresh token AES-256-GCM encrypted with a key from QB_TOKEN_KEY or the client secret). Without keys/connection, checkout takes orders with no card.
 - No WhatsApp. Plan: shared admin Inbox fed by a website chat bubble, email (hello@mint35.com) and a customer
   job page thread; AI drafts every reply and learns from approved answers.
 
