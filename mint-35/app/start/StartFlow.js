@@ -7,6 +7,7 @@ import {useCart, addToCart} from '@/lib/cart'
 import {PACKAGES, NOT_SURE, packageBySlug, formatPrice} from '@/lib/packages'
 import Yes from '@/components/Yes'
 import ProjectForm from '@/components/ProjectForm'
+import AddonsCard from '@/components/AddonsCard'
 
 export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
   const router = useRouter()
@@ -22,6 +23,9 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
     router.replace('/start?step=details')
   }, [legacyPackage, router])
 
+  // Always open at the top (links from the middle of the homepage otherwise keep the scroll position).
+  useEffect(() => { window.scrollTo(0, 0) }, [step])
+
   const lines = items.map(i => ({...i, pkg: packageBySlug(i.slug)}))
   const total = lines.reduce((s, l) => s + (l.pkg.price || 0), 0)
   const hasUnpriced = lines.some(l => !l.pkg.price)
@@ -34,7 +38,7 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
         {done.refs?.length > 0 && (
           <p className="done-ref">Your reference number{done.refs.length > 1 ? 's are' : ' is'} <b>{done.refs.join(', ')}</b>.</p>
         )}
-        <p>We&rsquo;ll review your order and email you. Your card will be charged in full once your order moves to production.</p>
+        <p>We&rsquo;ll review your order and email you. Your card will be charged in full when we start your project.</p>
         {done.missed > 0 && <p className="form-error">{done.missed} file(s) didn&rsquo;t upload. Reply to our email and attach them there.</p>}
         <Link href="/" className="btn btn-ghost">Back to home</Link>
       </div>
@@ -76,6 +80,7 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
             <p className="package-note">
               Not sure which fits? <button type="button" className="link-btn" onClick={() => add(NOT_SURE.slug)}>Add a project and we&rsquo;ll recommend a package</button>
             </p>
+            <AddonsCard />
           </section>
 
           <aside className="order-summary" aria-label="Your order">
@@ -94,7 +99,7 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
               </ul>
             )}
             <div className="order-total"><span>Total</span><b>{formatPrice(total)}{hasUnpriced ? ' + quote' : ''}</b></div>
-            <p className="order-fine">Your card is saved when you place your order and charged in full once your order moves to production.</p>
+            <p className="order-fine">Your card is saved when you place your order and charged in full when we start your project. Cancel free before then.</p>
             {lines.length > 0
               ? <Link href="/start?step=details" className="btn btn-primary order-continue">Continue to project details →</Link>
               : <button type="button" className="btn btn-primary order-continue" disabled>Continue to project details →</button>}

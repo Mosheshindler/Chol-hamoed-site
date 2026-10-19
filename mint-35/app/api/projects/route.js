@@ -93,7 +93,7 @@ export async function POST(request) {
       })
       if (!brief.campaign_link || !brief.goal || !brief.launch_at) return bad(`Please fill in every required question${which}.`)
       const launch = brief.launch_at.slice(0, 10)
-      if (!isDate(launch) || launch < earliest) return bad(`The launch date${which} needs to be at least 3 business days out, so all 5 videos are ready in time.`)
+      if (!isDate(launch) || launch < earliest) return bad(`The launch date${which} needs to be at least 6 business days out, so all 5 videos are ready in time.`)
       row.latest_date = launch
     } else {
       Object.assign(row, {
@@ -105,7 +105,7 @@ export async function POST(request) {
       if (!row.audience || !row.key_message) return bad(`Please fill in every required question${which}.`)
       if (!row.latest_date) return bad(`Please add the latest date you need the video in hand${which}.`)
       for (const d of [row.ideal_date, row.latest_date].filter(Boolean)) {
-        if (d < earliest) return bad(`Please pick dates at least 3 business days from today${which}.`)
+        if (d < earliest) return bad(`Please pick dates at least 6 business days from today${which}.`)
         if (isClosedDay(d, closed)) return bad(`Please pick dates on business days (not weekends or holidays)${which}.`)
       }
       if (row.ideal_date && row.ideal_date > row.latest_date) return bad(`The ideal date can’t be after the latest date${which}.`)

@@ -4,7 +4,9 @@ const TZ = 'America/New_York'
 // Orders placed at or after 5pm Eastern, or on a weekend or holiday, count as placed the next
 // business day. `closed` is a list/Set of 'YYYY-MM-DD' holidays (see lib/holidays.js).
 export const CUTOFF_HOUR = 17
+// First cut takes 3 business days; with the revision round, the final is in hand about 6 business days out.
 export const LEAD_BUSINESS_DAYS = 3
+export const FINAL_LEAD_BUSINESS_DAYS = 6
 
 const iso = d => d.toISOString().slice(0, 10)
 const asSet = closed => closed instanceof Set ? closed : new Set(Array.isArray(closed) ? closed : Object.keys(closed || {}))
@@ -46,10 +48,10 @@ export function orderDay(now = new Date(), closed) {
   return day
 }
 
-// Earliest delivery date a customer can pick (YYYY-MM-DD).
+// Earliest date a customer can pick to have the final video in hand (YYYY-MM-DD).
 export function earliestDelivery(now = new Date(), closed) {
   const set = asSet(closed)
-  return iso(stepBusinessDays(orderDay(now, set), LEAD_BUSINESS_DAYS, set))
+  return iso(stepBusinessDays(orderDay(now, set), FINAL_LEAD_BUSINESS_DAYS, set))
 }
 
 export function formatDate(value) {

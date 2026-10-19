@@ -2,7 +2,7 @@ import Modal from './Modal'
 
 const rows = [
   ['How we start', 'Online questionnaire', 'Strategy meetings'],
-  ['Who decides the creative', 'Our team', 'Together with you'],
+  ['Creative direction', 'Our team leads, you approve the script', 'Built together with you'],
   ['Filming', 'No', 'Yes'],
   ['Script approvals', 'One', 'Collaborative'],
   ['Revision rounds', 'One', 'Multiple'],

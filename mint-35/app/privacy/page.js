@@ -38,7 +38,7 @@ export default function PrivacyPage() {
       <ul>
         <li>To produce, deliver and support your videos.</li>
         <li>To send emails about your order.</li>
-        <li>To charge your saved card when your order moves to production, and for add-ons you confirm.</li>
+        <li>To charge your saved card when we start your project, and for add-ons you confirm.</li>
         <li>To keep records required for accounting and legal purposes.</li>
       </ul>
       <p>We do not sell your information or use it for third-party advertising.</p>
