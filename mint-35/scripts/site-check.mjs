@@ -4,7 +4,7 @@
 // It never places an order.
 //
 //   node scripts/site-check.mjs [base-url] [output-dir]
-//   defaults: https://chol-hamoed-site-43jl.vercel.app  ./site-check-output
+//   defaults: https://www.mint35.com  ./site-check-output
 //
 // Exit code 0 = all checks passed, 1 = something failed (see report.md in the output dir).
 // Needs Playwright with Chromium (preinstalled in Claude Code cloud sessions).
@@ -17,7 +17,7 @@ import {PACKAGES, formatPrice} from '../lib/packages.js'
 // require() also finds a globally installed Playwright (NODE_PATH), which a plain import does not.
 const {chromium} = createRequire(import.meta.url)('playwright')
 
-const BASE = (process.argv[2] || 'https://chol-hamoed-site-43jl.vercel.app').replace(/\/$/, '')
+const BASE = (process.argv[2] || 'https://www.mint35.com').replace(/\/$/, '')
 const OUT = process.argv[3] || 'site-check-output'
 const CHROMIUM = process.env.CHROMIUM_PATH || '/opt/pw-browsers/chromium'
 

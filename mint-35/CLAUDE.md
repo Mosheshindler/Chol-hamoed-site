@@ -7,13 +7,14 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Next.js 16 (app router, `proxy.js` instead of middleware), plain CSS (`app/globals.css`, `app/admin/admin.css`)
 - Supabase (Postgres, auth, private storage bucket `project-files`); schema in `supabase/migrations/`
 - Resend for email (`lib/email.js`); Vercel project `chol-hamoed-site-43jl`, Root Directory `mint-35`
-- Review link: https://chol-hamoed-site-43jl.vercel.app (production branch `main`). mint35.com is NOT connected yet.
+- Live at https://www.mint35.com (mint35.com redirects there; DNS at GoDaddy), connected Oct 19 2026. The vercel.app
+  link still works for testing. Production branch `main`. Email links use NEXT_PUBLIC_SITE_URL (https://www.mint35.com).
 
 ## Workflow the owner approved
 - **Auto-merge:** for changes inside `mint-35/` only, Claude opens the PR and merges it after testing
   (build, click-through, desktop + phone screenshots), then checks the live review link and sends a screenshot.
 - Anything touching files outside `mint-35/` (the Mint Media video site): ask first.
-- Once mint35.com is connected, merges go live to customers: ask before merging larger changes.
+- mint35.com is connected, so merges go live to customers: ask before merging larger changes.
 - Schema changes need the SQL run in Supabase's SQL Editor; tell the owner before merging code that depends on it.
 
 ## Brand
