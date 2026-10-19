@@ -52,25 +52,27 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Order form v2 (`components/ProjectForm.js`): steps 1 You, 2 Your brand, 3 one page per video (classic vs
   Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (title, name,
-  email, cell, company always required, alert channel sms/whatsapp/email). Logo required unless "I only have a
+  email, cell, company always required, alerts by email only for now). Logo required unless "I only have a
   logo for what I'm promoting" (then each video's media upload is required). Per-video answers beyond the old
   columns live in `projects.brief` (jsonb); `latest_date` is the in-hand deadline (Momentum: launch date).
   Chosen files are also kept in the browser (IndexedDB, `lib/fileStash.js`) so a reload keeps them; cleared on submit or after 14 days.
   Disclaimer: 3 key points ticked + full text scrolled to the end before the accept box unlocks.
+
+- Terms of Service (/terms) and Privacy Policy (/privacy), owner-approved Oct 2026 (`components/LegalPage.js`, effective date there);
+  linked in the footer and above Submit on checkout.
 
 - AI limits (owner decided): no custom characters to client specs, no look-alikes of real people, no celebrities or
   copyrighted characters; exact product looks need the client's real photos/footage. Shown in Not included, FAQ, form.
 
 - Site check: `npm run check:site [url] [out-dir]` (scripts/site-check.mjs) screenshots the site on phone + desktop
   and checks loading, errors, images, sideways scroll, prices (from lib/packages.js), promise tiles, 5 How it works
-  steps, order form steps, missing-field list, disclaimer page, admin login and that the order API refuses an empty
+  steps, order form steps, missing-field list, disclaimer, terms and privacy pages, admin login and that the order API refuses an empty
   order. It never submits an order. A weekly Routine (Mondays 8:56am ET) runs it against the live site and also reviews the screenshots
   by eye. Update the script's expectations when content changes on purpose.
 
 ## Planned (owner asked)
-- Legal drafts (Terms of Service + Privacy Policy) are in a Claude Doc for the owner's lawyer; once approved,
-  publish them as /terms and /privacy, link from the footer and checkout (Intuit needs both for live payments).
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).
-- Twilio texting / WhatsApp alerts (owner signing up): send alerts per `alert_channel` at each job step.
+- Twilio texting / WhatsApp alerts (after launch): the form's alert choice is hidden and sends 'email'; restore it
+  in ProjectForm step 1, then send alerts per `alert_channel` at each job step. Add SMS wording back to /terms and /privacy.
 - Automated customer emails at each job step, once the site is confirmed.

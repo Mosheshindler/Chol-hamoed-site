@@ -20,7 +20,11 @@ export default function Footer() {
       </div>
       <div className="container footer-copy">
         <span>© {new Date().getFullYear()} Mint Media LLC</span>
-        <a href="/ai-disclaimer">AI Production Disclaimer</a>
+        <span className="legal-links">
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/ai-disclaimer">AI Production Disclaimer</a>
+        </span>
       </div>
     </footer>
   )

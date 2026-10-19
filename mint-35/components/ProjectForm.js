@@ -10,7 +10,7 @@ import Icon from './Icon'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 import {loadFiles, saveFiles, clearFiles} from '@/lib/fileStash'
 import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
-import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
+import {TITLES, STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
 
 const SAVE_KEY = 'mint35-intake'
 
@@ -160,7 +160,6 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
     const fd = new FormData(f)
     setWatch({
       override: fd.get('logo_override') === 'on',
-      alert: fd.get('alert_channel'),
       items: Array.from({length: lines.length}, (_, i) => ({style: fd.get(`i${i}_style`), story: fd.get(`i${i}_story`)})),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -452,20 +451,9 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <label>Company / Organization<input name="company" required autoComplete="organization" /></label>
           <label><span>Website<Opt /></span><input name="website" placeholder="https://" autoComplete="url" /></label>
         </div>
-        <fieldset>
-          <legend>How should we alert you?</legend>
-          <p className="hint">Everything comes by email. Want a quick heads-up too?</p>
-          <div className="alert-pick">
-            {ALERTS.map(a => (
-              <label key={a.value} className="alert-opt">
-                <input type="radio" name="alert_channel" value={a.value} required />
-                <Icon name={a.icon} />
-                <b>{a.label}</b>
-              </label>
-            ))}
-          </div>
-          {(watch.alert === 'sms' || watch.alert === 'whatsapp') && <p className="hint">Message and data rates may apply. Reply STOP to opt out.</p>}
-        </fieldset>
+        {/* Text/WhatsApp alerts are hidden until Twilio is set up; every order gets email. To bring them
+            back, restore the "How should we alert you?" choice over ALERTS (lib/intake.js). */}
+        <input type="hidden" name="alert_channel" value="email" />
         <Nav n={0} />
       </fieldset>
 
@@ -651,6 +639,8 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             <span>I&rsquo;ve read and accept the AI Production Disclaimer.</span>
           </label>
         </fieldset>
+
+        <p className="checkout-terms">By submitting, you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.</p>
 
         {state.phase === 'error' && <p className="form-error" role="alert">{state.message}</p>}
 

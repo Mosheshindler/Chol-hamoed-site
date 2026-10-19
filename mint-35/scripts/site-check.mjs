@@ -105,7 +105,8 @@ for (const d of DEVICES) {
     // Fill step 1 with test data and move on, to see each step render (no order is submitted).
     await page.fill('[name=first_name]', 'Site'); await page.fill('[name=last_name]', 'Check')
     await page.fill('[name=email]', 'site-check@example.com'); await page.fill('[name=phone]', '7325550000')
-    await page.fill('[name=company]', 'Site Check'); await page.locator('.alert-opt').last().click()
+    await page.fill('[name=company]', 'Site Check')
+    if (await page.locator('.alert-opt').count()) await page.locator('.alert-opt').last().click()
     await page.locator('.wizard-step:not([hidden]) .step-nav .btn-primary').click(); await page.waitForTimeout(500)
     expect(d.name, 'Form step 2 (brand) opens', /brand/i.test(await page.locator('#form-title').innerText()))
     await shot('06-form-step2-brand')
@@ -122,6 +123,14 @@ for (const d of DEVICES) {
   await health('/ai-disclaimer', 'Disclaimer page')
   expect(d.name, 'Disclaimer text shows', (await text()).includes('AI Production Disclaimer'))
   await shot('08-disclaimer')
+
+  // Terms and Privacy (Intuit needs both live for payments)
+  await health('/terms', 'Terms page')
+  expect(d.name, 'Terms text shows', (await text()).includes('All sales are final'))
+  await shot('08b-terms')
+  await health('/privacy', 'Privacy page')
+  expect(d.name, 'Privacy text shows', (await text()).includes('What we collect'))
+  await shot('08c-privacy')
 
   // Admin login page (no sign-in)
   await health('/admin/login', 'Admin login')
