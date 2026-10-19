@@ -684,7 +684,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         <section className="addons-card checkout-extras" aria-labelledby="extras-title">
           <div className="addons-head">
             <h3 id="extras-title">Add extras</h3>
-            <p className="muted">Optional. Priced extras are added to your total. For quoted ones, we&rsquo;ll confirm a price with you before anything is charged.</p>
+            <p className="muted">Optional, and you can also add these later from your project page. Priced extras are added to your total. For quoted ones, we&rsquo;ll confirm a price with you before anything is charged.</p>
           </div>
           {lines.map((l, i) => (
             <div key={l.id}>

@@ -89,7 +89,7 @@ export default function Home() {
             <div className="formats-band">
               <div>
                 <h3>Your video. Your format.</h3>
-                <p className="muted">One format included with every package. Need more? Add extra formats, subtitles or a 15-second cutdown when you order.</p>
+                <p className="muted">One format included with every package.</p>
               </div>
               <div className="format-list">
                 {formats.map(f => (
@@ -99,6 +99,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+              <p className="formats-more"><b>Need more?</b> Extra formats, subtitles and a 15-second cutdown can be added at any stage, when you order or later from your project page. No need to decide now.</p>
             </div>
           </div>
         </section>
