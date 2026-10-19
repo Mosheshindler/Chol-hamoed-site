@@ -1,5 +1,5 @@
 import 'server-only'
-import {randomUUID} from 'node:crypto'
+import {randomUUID, randomBytes, createHash, createCipheriv, createDecipheriv} from 'node:crypto'
 import {createAdminClient} from './supabase/admin'
 
 // QuickBooks Payments API. Cards are tokenized in the customer's browser (card numbers never
@@ -32,12 +32,32 @@ async function tokenRequest(params) {
   return data
 }
 
+// QuickBooks tokens are encrypted (AES-256-GCM) before they're stored. The key comes from QB_TOKEN_KEY,
+// or from the QuickBooks client secret when that isn't set, so a copy of the database alone can't be used.
+// Switching to new QuickBooks keys means reconnecting QuickBooks, which stores fresh tokens.
+const tokenKey = () => createHash('sha256').update(`mint35-qb-tokens:${process.env.QB_TOKEN_KEY || process.env.QB_CLIENT_SECRET || ''}`).digest()
+
+function seal(text) {
+  const iv = randomBytes(12)
+  const c = createCipheriv('aes-256-gcm', tokenKey(), iv)
+  const body = Buffer.concat([c.update(text, 'utf8'), c.final()])
+  return 'v1:' + Buffer.concat([iv, c.getAuthTag(), body]).toString('base64')
+}
+
+function unseal(value) {
+  if (!value?.startsWith('v1:')) return value // stored before encryption was added; re-saved sealed on next refresh
+  const raw = Buffer.from(value.slice(3), 'base64')
+  const d = createDecipheriv('aes-256-gcm', tokenKey(), raw.subarray(0, 12))
+  d.setAuthTag(raw.subarray(12, 28))
+  return Buffer.concat([d.update(raw.subarray(28)), d.final()]).toString('utf8')
+}
+
 const expiresAt = secs => new Date(Date.now() + (Number(secs) || 3600) * 1000).toISOString()
 
 async function saveTokens(t, extra = {}) {
   const row = {
     id: 1, environment: QB_ENV,
-    access_token: t.access_token, refresh_token: t.refresh_token,
+    access_token: seal(t.access_token), refresh_token: seal(t.refresh_token),
     access_expires_at: expiresAt(t.expires_in),
     refresh_expires_at: t.x_refresh_token_expires_in ? expiresAt(t.x_refresh_token_expires_in) : null,
     updated_at: new Date().toISOString(), ...extra,
@@ -68,8 +88,10 @@ async function accessToken(force = false) {
   const db = createAdminClient()
   const {data: c} = await db.from('qb_connection').select('*').eq('id', 1).maybeSingle()
   if (!c || c.environment !== QB_ENV) throw new Error('QuickBooks isn’t connected.')
-  if (!force && new Date(c.access_expires_at).getTime() - Date.now() > 120000) return c.access_token
-  const t = await tokenRequest({grant_type: 'refresh_token', refresh_token: c.refresh_token})
+  let access, refresh
+  try { access = unseal(c.access_token); refresh = unseal(c.refresh_token) } catch { throw new Error('QuickBooks needs to be reconnected in Settings.') }
+  if (!force && new Date(c.access_expires_at).getTime() - Date.now() > 120000 && c.access_token?.startsWith('v1:')) return access
+  const t = await tokenRequest({grant_type: 'refresh_token', refresh_token: refresh})
   await saveTokens(t, {realm_id: c.realm_id, connected_by: c.connected_by})
   return t.access_token
 }
