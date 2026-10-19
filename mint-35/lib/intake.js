@@ -3,6 +3,7 @@
 
 export const TITLES = ['Mr.', 'Mrs.', 'Ms.', 'Rabbi', 'Dr.', 'Other']
 
+// Text and WhatsApp are not offered yet (the form sends 'email'); kept so old orders still show their choice.
 export const ALERTS = [
   {value: 'sms', label: 'Text', icon: 'text'},
   {value: 'whatsapp', label: 'WhatsApp', icon: 'whatsapp'},
