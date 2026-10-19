@@ -65,7 +65,7 @@ for (const d of DEVICES) {
   await shot('00-homepage-full', true)
   const home = await text()
   const has = t => home.toLowerCase().includes(t.toLowerCase()) // some labels are shown in capitals
-  for (const t of ['Powerful video.', 'Simplified.', 'No film shoots', 'No meetings', 'No hassle', 'Introductory pricing']) {
+  for (const t of ['Powerful video.', 'Simplified.', 'Mint Media creativity. AI-powered.', 'No film shoots', 'No meetings', 'No hassle', 'Introductory pricing']) {
     expect(d.name, `Homepage shows "${t}"`, has(t))
   }
   for (const p of PACKAGES) {

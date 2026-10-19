@@ -804,3 +804,6 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .addons-list .muted { font-size: .86rem; }
 .addons-price { font-weight: 700; color: var(--lime); white-space: nowrap; }
 .addons-price small { color: var(--muted); font-weight: 500; }
+
+/* Hero line under the headline */
+.hero-sub { text-wrap: balance; font-family: var(--display); font-weight: 700; font-size: clamp(1.3rem, 2.4vw, 1.75rem); letter-spacing: -0.02em; color: var(--text); margin: 6px 0 10px; }
