@@ -2,6 +2,7 @@ import Link from 'next/link'
 import {notFound} from 'next/navigation'
 import {createClient} from '@/lib/supabase/server'
 import {STATUSES, TRANSITIONS, projectRef, formatMoney} from '@/lib/status'
+import {addonByKey} from '@/lib/addons'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import StatusPill from '../../StatusPill'
 import StatusActions from './StatusActions'
@@ -37,6 +38,8 @@ function answers(p) {
     [momentum ? 'Names / sponsors' : 'Must appear', p.must_appear],
     ['Changes per video', b.per_video],
     ['Orientation', p.orientation],
+    ['Extra formats (paid at checkout)', b.extra_formats?.join(', ')],
+    ['Extras chosen at checkout', b.extras?.map(k => addonByKey(k)?.label + (addonByKey(k)?.price == null ? ' (needs a quote)' : '')).join(', ')],
     ['Style', b.style && labelOf(STYLES, b.style)],
     ['Story told with', b.story && labelOf(STORY, b.story)],
     ['Voice', b.voice && labelOf(VOICES, b.voice)],

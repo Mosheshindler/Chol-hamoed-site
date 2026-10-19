@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server'
 import {randomUUID} from 'node:crypto'
 import {createAdminClient} from '@/lib/supabase/admin'
-import {PACKAGE_NAMES, ORG_ONLY_NAMES, packageByName} from '@/lib/packages'
+import {PACKAGE_NAMES, ORG_ONLY_NAMES, packageByName, extraFormatsCost, CHECKOUT_EXTRAS, checkoutExtrasCost} from '@/lib/packages'
 import {projectRef} from '@/lib/status'
 import {paymentsReady, saveCardFromToken} from '@/lib/qb'
 import {verifyHuman} from '@/lib/turnstile'
@@ -85,6 +85,14 @@ export async function POST(request) {
       restrictions: str(it?.restrictions),
     }
     if (!row.promoting || !row.desired_action || !row.orientation) return bad(`Please fill in every required question${which}.`)
+    // Extra formats bought at checkout (not the main orientation; "Not sure" keeps them).
+    const main = row.orientation.split(' ')[0]
+    const extra = [...new Set(Array.isArray(it?.extra_formats) ? it.extra_formats : [])]
+      .filter(f => ORIENTATIONS.slice(0, 3).includes(f) && f.split(' ')[0] !== main)
+    if (extra.length) brief.extra_formats = extra
+    // Other extras chosen on Review & pay (keys from CHECKOUT_EXTRAS).
+    const extras = CHECKOUT_EXTRAS.map(a => a.key).filter(k => Array.isArray(it?.extras) && it.extras.includes(k))
+    if (extras.length) brief.extras = extras
 
     if (momentum) {
       Object.assign(brief, {
@@ -146,7 +154,8 @@ export async function POST(request) {
       ...contact, name, ...it,
       order_id: orderId, order_item: i + 1, order_size: items.length,
       ...(card && {qb_customer_id: orderId, qb_card_id: card.id, card_last4: card.last4, card_brand: card.brand}),
-      price_cents: listed ? listed.price * 100 : null, // list price; the team can change it when accepting
+      // list price + extra formats chosen at checkout; the team can change it when accepting
+      price_cents: listed ? (listed.price + extraFormatsCost(listed, it.brief.extra_formats?.length || 0) + checkoutExtrasCost(listed, it.brief.extras)) * 100 : null,
     }
   })
 
