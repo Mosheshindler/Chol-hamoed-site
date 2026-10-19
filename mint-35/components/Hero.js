@@ -13,9 +13,8 @@ export default function Hero() {
       <span className="hero-ghost" aria-hidden="true">35</span>
       <div className="container hero-grid">
         <div className="hero-copy">
-          <p className="eyebrow">Mint 35 · by Mint Media</p>
           <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
-          <p className="lead">Short videos that stop the scroll.</p>
+          <p className="hero-sub">Mint Media creativity. AI-powered.</p>
           <ul className="nots-big">
             <li><Icon name="camera-off" />No film shoots</li>
             <li><Icon name="calendar-off" />No meetings</li>
@@ -23,13 +22,8 @@ export default function Hero() {
           </ul>
           <div className="hero-ctas">
             <a href="/start" className="btn btn-primary">Start a Project <span className="arrow">→</span></a>
-            <a href="#how" className="btn btn-ghost">How It Works</a>
+            <a href="#work" className="btn btn-ghost">Watch Our Work</a>
           </div>
-          <dl className="stats">
-            <div><Icon name="clock" /><dt>30–60</dt><dd>seconds</dd></div>
-            <div><Icon name="form" /><dt>1</dt><dd>simple form</dd></div>
-            <div><Icon name="bolt" /><dt>3<a href="#how-note" className="stat-star" aria-label="See note">*</a></dt><dd>business days</dd></div>
-          </dl>
         </div>
 
         <div className="hero-visual" aria-hidden="true">
