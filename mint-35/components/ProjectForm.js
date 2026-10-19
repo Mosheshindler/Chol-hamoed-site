@@ -30,8 +30,10 @@ function Tip({children}) {
   const mouse = fn => e => { if (e.pointerType === 'mouse') fn() }
   return (
     <span className="tip-wrap" ref={ref} onPointerEnter={mouse(() => setOpen(true))} onPointerLeave={mouse(() => setOpen(false))}>
-      <button type="button" className="q-tip" aria-expanded={open} aria-label="More about this question"
-        onClick={e => { e.preventDefault(); setOpen(o => e.nativeEvent.pointerType === 'mouse' ? true : !o) }}>?</button>
+      {/* A span, not a <button>: a button inside a <label> would take over the label from its field. */}
+      <span role="button" tabIndex={0} className="q-tip" aria-expanded={open} aria-label="More about this question"
+        onClick={e => { e.preventDefault(); setOpen(o => e.nativeEvent.pointerType === 'mouse' ? true : !o) }}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setOpen(o => !o) } }}>?</span>
       {open && <span className="tip-pop" role="tooltip">{children}</span>}
     </span>
   )
@@ -328,6 +330,14 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   }
   const next = () => { if (checkStep(step)) go(step + 1) }
 
+  // Website fields (placeholder https://) accept "example.com"; add the https:// on the way out.
+  function fixUrl(e) {
+    const el = e.target
+    if (el.tagName !== 'INPUT' || el.placeholder !== 'https://') return
+    const v = el.value.trim()
+    if (v && !/^https?:\/\//i.test(v) && /^[^\s]+\.[^\s]+$/.test(v)) { el.value = 'https://' + v; save() }
+  }
+
   // Enter in a text field moves to the next step (like Continue) instead of submitting the whole form.
   function onKeyDown(e) {
     if (e.key !== 'Enter' || e.target.tagName !== 'INPUT' || ['checkbox', 'radio', 'file', 'submit', 'button'].includes(e.target.type)) return
@@ -455,7 +465,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   )
 
   return (
-    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onKeyDown={onKeyDown} onChange={e => { if (e.target.type === 'file') saveFiles(saveKey, e.target.name, e.target.files); readWatch(); save(); recheck(e.target) }} onInput={e => { save(); recheck(e.target) }} noValidate>
+    <form id="project-form" ref={formRef} className="form wizard" onSubmit={onSubmit} onKeyDown={onKeyDown} onChange={e => { if (e.target.type === 'file') saveFiles(saveKey, e.target.name, e.target.files); readWatch(); save(); recheck(e.target) }} onInput={e => { save(); recheck(e.target) }} onBlur={fixUrl} noValidate>
       <input type="text" name="_honey" className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" />
 
       <div className="wizard-head">
@@ -495,7 +505,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       <fieldset className="wizard-step" data-step={1} hidden={step !== 1}>
         <p className="step-intro">Let&rsquo;s get to know your brand so your video looks and sounds like you.</p>
         <p className="callout">💡 About your company as a whole. Graphics for this video come next.</p>
-        <UploadCard name="logo" icon="badge" title="Main logo" hint="Your everyday logo · PDF or PNG" accept="image/*,.pdf,.svg,.ai,.eps"
+        <UploadCard name="logo" icon="badge" title="Main logo" hint="Your everyday logo · PNG, PDF, SVG, AI or EPS (vector preferred)" accept="image/*,.pdf,.svg,.ai,.eps"
           required={!watch.override} optional={watch.override}>
           <label className="mini-check">
             <input type="checkbox" name="logo_override" />
@@ -613,7 +623,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 </label>
               </div>
             )}
-            {!momentum && minDate && <p className="hint">Earliest: {formatDate(minDate)}. Our 3 business days start once your order enters the production queue, not including weekends and holidays. Orders after 5pm ET count from the next business day.</p>}
+            {!momentum && minDate && <p className="hint">Earliest: {formatDate(minDate)}. Your first cut takes 3 business days once production starts; with your revision round, allow about 6 business days for the final. Weekends and holidays aren’t counted, and orders after 5pm ET count from the next business day.</p>}
             <Nav n={n} />
           </fieldset>
         )
@@ -621,7 +631,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
 
       {/* Step 4 · Review & pay */}
       <fieldset className="wizard-step" data-step={last} hidden={step !== last}>
-        <p className="step-intro">Check your order, add a card, and you&rsquo;re done. Your card will be charged in full once your order moves to production.</p>
+        <p className="step-intro">Check your order, add a card, and you&rsquo;re done. Your card will be charged in full when we start your project.</p>
         <ul className="review-list">
           {lines.map((l, i) => {
             const date = l.pkg.orgOnly ? val(`i${i}_launch_at`).slice(0, 10) : val(`i${i}_latest_date`)
@@ -651,8 +661,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             <li>Double-check names, prices, dates and phone numbers.</li>
             {lines.some(l => !l.pkg.orgOnly) && <li>Each video includes one approval step and one revision round.</li>}
             {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes one sample to approve and one revision round for all 5 videos.</li>}
-            <li>Your card is saved now and charged in full once your order moves to production.</li>
-            <li>All sales are final. Mint 35 doesn&rsquo;t offer refunds.</li>
+            <li>Your card is saved now and charged in full when we start your project. Cancel free before then.</li>
           </ul>
         </div>
 

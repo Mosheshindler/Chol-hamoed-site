@@ -6,7 +6,7 @@ export default function CardFields() {
   return (
     <fieldset className="form-section card-section">
       <legend className="section-title">Payment</legend>
-      <p className="hint">Your card is saved securely with QuickBooks Payments when you place your order and charged in full once your order moves to production.</p>
+      <p className="hint">Your card is saved securely with QuickBooks Payments when you place your order and charged in full when we start your project.</p>
       <label>Name on card<input id="cc-name" autoComplete="cc-name" required /></label>
       <label>Card number<input id="cc-number" inputMode="numeric" autoComplete="cc-number" placeholder="1234 1234 1234 1234" maxLength={23} onInput={formatNumber} required /></label>
       <div className="form-row card-row">

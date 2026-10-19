@@ -3,21 +3,25 @@
 import {useState} from 'react'
 
 // Shows the YouTube thumbnail and only loads the player when clicked, to keep the page fast.
+// The thumbnail stays on top until the player has loaded, so there's no black box while it starts.
 export default function VideoSample({id, title}) {
   const [playing, setPlaying] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   return (
     <figure className="work-item">
       <div className="work-frame">
-        {playing ? (
+        {playing && (
           <iframe
-            src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+            src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1&cc_load_policy=0`}
             title={title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
+            onLoad={() => setTimeout(() => setLoaded(true), 900)}
           />
-        ) : (
-          <button type="button" className="work-poster" onClick={() => setPlaying(true)} aria-label={`Play ${title}`}>
-            <img src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`} alt="" loading="lazy" />
+        )}
+        {!loaded && (
+          <button type="button" className={`work-poster${playing ? ' is-loading' : ''}`} onClick={() => setPlaying(true)} aria-label={`Play ${title}`} disabled={playing}>
+            <img src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`} alt={`${title} video`} loading="lazy" />
             <span className="play" aria-hidden="true" />
           </button>
         )}

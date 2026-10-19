@@ -6,6 +6,7 @@ import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
+import AddonsCard from '@/components/AddonsCard'
 import HowItWorks from '@/components/HowItWorks'
 import DisclaimerModal from '@/components/DisclaimerModal'
 import FormatsModal from '@/components/FormatsModal'
@@ -40,13 +41,15 @@ const notIncluded = [
 const faqs = [
   {q: 'Do I need a meeting?', a: 'No. It all starts with one form.'},
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
-  {q: 'How fast is it?', a: 'First cut in 3 business days, counted from when your order enters production. Weekends and holidays aren’t counted. Start dates depend on our queue.'},
+  {q: 'How fast is it?', a: 'First cut in 3 business days, counted from when your order enters production. Plan on about 6 business days to have your final video in hand, including one revision round. Weekends and holidays aren’t counted, and start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
   {q: 'Can you create a custom character or make someone look like a real person?', a: 'No. We don’t build characters to your specifications, we don’t match anyone’s likeness, and we never use celebrities or copyrighted characters. Reference photos guide the general style only.'},
   {q: 'Will my product look exactly right?', a: 'AI gets close, not exact. If your product needs to look exact, upload real photos or video of it and we’ll build around those.'},
   {q: 'Will the AI get every detail perfect?', a: 'Not always. AI isn’t an exact science, so small imperfections or variations can happen. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
-  {q: 'Can I get a refund?', a: 'No. Mint 35 is a budget-friendly, fixed-scope service, so all sales are final and we don’t offer refunds. Your card is charged in full once your order moves to production. Need full customization and control? That’s a Mint Media production.', href: 'https://mintmediallc.com'},
+  {q: 'Can I cancel or get a refund?', a: 'Cancel free anytime before we start your project. Nothing is charged until then. Once we start, your card is charged in full, and because Mint 35 is a fixed-scope service, all sales are final. Need full customization and control? That’s a Mint Media production.', href: 'https://mintmediallc.com'},
+  {q: 'Who owns the video? Can I run it as a paid ad?', a: 'Yes. Once your order is paid, you can use your videos to market your business, product or campaign, including paid ads on social media and YouTube.', terms: true},
   {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
+  {q: 'Why the name Mint 35?', a: 'Many of our videos land around 35 seconds, a sweet spot for social. Every package runs 30 to 60 seconds, and we fit the length to your message.'},
 ]
 
 const No = ({items}) => <ul className="no">{items.map(i => <li key={i}>{i}</li>)}</ul>
@@ -88,6 +91,7 @@ export default function Home() {
               <div className="card card-yes"><h3>Included</h3><Yes items={included} /></div>
               <div className="card card-no"><h3>Not included</h3><No items={notIncluded} /></div>
             </div>
+            <AddonsCard />
             <CompareModal />
           </div>
         </section>
@@ -119,7 +123,7 @@ export default function Home() {
               {faqs.map(f => (
                 <details key={f.q}>
                   <summary>{f.q}</summary>
-                  <p className="faq-a">{f.a}{f.dialog && <> <button type="button" className="link-btn faq-link" data-open={f.dialog}>Read it →</button></>}{f.href && <> <a className="faq-link" href={f.href} target="_blank" rel="noopener noreferrer">Visit Mint Media →</a></>}</p>
+                  <p className="faq-a">{f.a}{f.dialog && <> <button type="button" className="link-btn faq-link" data-open={f.dialog}>Read it →</button></>}{f.href && <> <a className="faq-link" href={f.href} target="_blank" rel="noopener noreferrer">Visit Mint Media →</a></>}{f.terms && <> <a className="faq-link" href="/terms">See our Terms →</a></>}</p>
                 </details>
               ))}
             </div>

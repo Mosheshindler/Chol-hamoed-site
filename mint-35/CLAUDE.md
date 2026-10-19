@@ -51,7 +51,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Business days skip weekends and closed holidays (`lib/holidays.js`, via @hebcal/core, diaspora): Yom Tov,
   all Chol Hamoed (incl. Hoshana Raba), Purim, Tisha B'Av, plus New Year's, Memorial Day, July 4, Labor Day,
   Thanksgiving, Christmas. Erev Yom Tov (RH, YK, Sukkot, Pesach, Shavuot) is closed; Chanukah, other fasts and other US holidays are working days. Orders at/after 5pm ET count
-  from the next business day; earliest delivery = 3 business days after that (`earliestDelivery` in lib/dates.js).
+  from the next business day; earliest in-hand date = 6 business days after that (`earliestDelivery`, FINAL_LEAD_BUSINESS_DAYS in lib/dates.js; first cut is 3).
 
 - Order form v2 (`components/ProjectForm.js`): steps 1 You, 2 Your brand, 3 one page per video (classic vs
   Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (title, name,
@@ -66,6 +66,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Terms of Service (/terms) and Privacy Policy (/privacy), owner-approved Oct 2026 (`components/LegalPage.js`, effective date there);
   linked in the footer and above Submit on checkout.
+
+- Owner decisions Oct 19 (site review): no "budget-friendly"; FAQ says cancel free before we start the project;
+  card charge phrase everywhere = "when we start your project"; earliest in-hand date 6 business days; Extras price card
+  (`components/AddonsCard.js`) on the homepage and order builder; style renamed "3D animated characters" (no Pixar);
+  intro pricing stays open-ended; no testimonials yet. Header nav collapses into a menu button below 1120px.
 
 - AI limits (owner decided): no custom characters to client specs, no look-alikes of real people, no celebrities or
   copyrighted characters; exact product looks need the client's real photos/footage. Shown in Not included, FAQ, form.
