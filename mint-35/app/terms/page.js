@@ -30,7 +30,7 @@ export default function TermsPage() {
       <p>The first cut is delivered within 3 business days after your order enters production, not including weekends and holidays (including US federal holidays and Jewish holidays such as Yom Tov and Chol Hamoed). Orders placed after 5pm Eastern count from the next business day. Start dates depend on our production queue. Delivery dates you request are goals, not guarantees, unless we confirm them in writing.</p>
 
       <h2>6. Prices and payment</h2>
-      <p>Prices are shown at checkout in US dollars. When you place an order, your card is saved securely with our payment processor, Intuit QuickBooks Payments. Your card is charged in full once your order moves to production. Add-ons you request later are charged when we confirm them. We never see or store your full card number.</p>
+      <p>Prices are shown at checkout in US dollars. When you place an order, your card is saved securely with our payment processor. The payment service is provided by Intuit Payments Inc. (QuickBooks Payments). Your card is charged in full once your order moves to production. Add-ons you request later are charged when we confirm them. We never see or store your full card number.</p>
 
       <h2>7. All sales are final</h2>
       <p>Mint 35 is a budget-friendly, fixed-scope service. All sales are final and we do not offer refunds once your card is charged. You may cancel an order before it moves to production, at no charge, by emailing us.</p>

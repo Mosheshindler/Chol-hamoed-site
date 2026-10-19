@@ -12,7 +12,7 @@ const COLLECT = [
 ]
 
 const PROVIDERS = [
-  ['Intuit QuickBooks Payments', 'Card processing and saved cards'],
+  ['Intuit Payments Inc. (QuickBooks Payments)', 'Card processing and saved cards'],
   ['Supabase', 'Database and secure file storage'],
   ['Vercel', 'Website hosting'],
   ['Resend', 'Order emails'],
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
           <tbody>{COLLECT.map(([a, b, c]) => <tr key={a}><td>{a}</td><td>{b}</td><td>{c}</td></tr>)}</tbody>
         </table>
       </div>
-      <p>Your full card number is entered into a secure form from Intuit QuickBooks Payments and goes straight to Intuit. We never see or store it.</p>
+      <p>Your full card number is entered into a secure form from Intuit Payments Inc. (QuickBooks Payments) and goes straight to Intuit. We never see or store it.</p>
 
       <h2>How we use it</h2>
       <ul>
