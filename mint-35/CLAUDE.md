@@ -58,6 +58,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Chosen files are also kept in the browser (IndexedDB, `lib/fileStash.js`) so a reload keeps them; cleared on submit or after 14 days.
   Disclaimer: 3 key points ticked + full text scrolled to the end before the accept box unlocks.
 
+- Checkout has Cloudflare Turnstile (`lib/turnstile.js`, widget above Submit) when NEXT_PUBLIC_TURNSTILE_SITE_KEY and
+  TURNSTILE_SECRET_KEY are set in Vercel; the order API refuses orders without a valid token. QuickBooks errors log intuit_tid.
+
 - Terms of Service (/terms) and Privacy Policy (/privacy), owner-approved Oct 2026 (`components/LegalPage.js`, effective date there);
   linked in the footer and above Submit on checkout.
 

@@ -108,11 +108,15 @@ async function qbFetch(path, body, retried = false) {
     body: JSON.stringify(body),
   })
   if (res.status === 401 && !retried) return qbFetch(path, body, true)
+  // Intuit's transaction id for this request; their support asks for it when troubleshooting.
+  const tid = res.headers.get('intuit_tid')
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     const msg = data?.errors?.[0]?.message || data?.errors?.[0]?.moreInfo || `QuickBooks error (${res.status})`
+    console.error('QuickBooks API error', {path, status: res.status, intuit_tid: tid, message: msg})
     const err = new Error(msg)
     err.status = res.status
+    err.intuitTid = tid
     throw err
   }
   return data
@@ -137,6 +141,7 @@ export async function chargeCard({cardId, amountCents, description}) {
   if (charge.status !== 'CAPTURED') {
     const err = new Error(charge.status === 'DECLINED' ? 'The card was declined.' : `The charge wasn’t completed (${charge.status || 'unknown status'}).`)
     err.charge = charge
+    console.error('QuickBooks charge not captured', {status: charge.status, charge_id: charge.id})
     throw err
   }
   return charge

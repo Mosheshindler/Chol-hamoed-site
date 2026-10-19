@@ -17,6 +17,7 @@ const PROVIDERS = [
   ['Vercel', 'Website hosting'],
   ['Resend', 'Order emails'],
   ['YouTube', 'Plays the sample videos on our site'],
+  ['Cloudflare Turnstile', 'Checks that orders come from a person, not a bot'],
 ]
 
 export default function PrivacyPage() {
