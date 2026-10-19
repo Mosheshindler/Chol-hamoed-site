@@ -19,7 +19,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="container footer-copy">
-        <span>© {new Date().getFullYear()} Mint Media LLC</span>
+        <span>© {new Date().getFullYear()} Mint Media LLC · Payments processed by Intuit Payments Inc.</span>
         <span className="legal-links">
           <a href="/terms">Terms</a>
           <a href="/privacy">Privacy</a>

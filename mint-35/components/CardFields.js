@@ -14,7 +14,7 @@ export default function CardFields() {
         <label>CVC<input id="cc-cvc" inputMode="numeric" autoComplete="cc-csc" placeholder="123" maxLength={4} onInput={formatCvc} required /></label>
         <label>Billing ZIP<input id="cc-zip" inputMode="numeric" autoComplete="postal-code" placeholder="08701" required /></label>
       </div>
-      <p className="secure-note">🔒 Card details go straight to QuickBooks Payments. Mint 35 never sees or stores your card number.</p>
+      <p className="secure-note">🔒 Payments are processed by Intuit Payments Inc. (QuickBooks Payments). Card details go straight to Intuit; Mint 35 never sees or stores your card number.</p>
     </fieldset>
   )
 }
