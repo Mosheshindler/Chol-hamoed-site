@@ -7,7 +7,6 @@ import {useCart, addToCart} from '@/lib/cart'
 import {PACKAGES, NOT_SURE, packageBySlug, formatPrice} from '@/lib/packages'
 import Yes from '@/components/Yes'
 import ProjectForm from '@/components/ProjectForm'
-import AddonsCard from '@/components/AddonsCard'
 
 export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
   const router = useRouter()
@@ -80,7 +79,6 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
             <p className="package-note">
               Not sure which fits? <button type="button" className="link-btn" onClick={() => add(NOT_SURE.slug)}>Add a project and we&rsquo;ll recommend a package</button>
             </p>
-            <AddonsCard />
           </section>
 
           <aside className="order-summary" aria-label="Your order">

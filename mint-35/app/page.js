@@ -6,7 +6,6 @@ import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
-import AddonsCard from '@/components/AddonsCard'
 import HowItWorks from '@/components/HowItWorks'
 import DisclaimerModal from '@/components/DisclaimerModal'
 import FormatsModal from '@/components/FormatsModal'
@@ -61,20 +60,6 @@ export default function Home() {
       <main>
         <Hero />
 
-        <section className="formats" aria-label="Formats">
-          <div className="container formats-row">
-            <span className="formats-title">Every screen.</span>
-            <div className="format-list">
-              {formats.map(f => (
-                <div key={f.ratio} className="format">
-                  <span className={`format-frame r${f.ratio.replace(':', '-')}`} aria-hidden="true" />
-                  <span><strong>{f.ratio}</strong> {f.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section id="how" className="section">
           <div className="container">
             <p className="eyebrow">How it works</p>
@@ -91,7 +76,6 @@ export default function Home() {
               <div className="card card-yes"><h3>Included</h3><Yes items={included} /></div>
               <div className="card card-no"><h3>Not included</h3><No items={notIncluded} /></div>
             </div>
-            <AddonsCard />
             <CompareModal />
           </div>
         </section>
@@ -102,6 +86,20 @@ export default function Home() {
             <h2>Simple pricing. No surprises.</h2>
             <p className="intro-pricing"><span aria-hidden="true">🔥</span> <span><b>Introductory pricing.</b> Grab it while it lasts.</span></p>
             <PackageCards />
+            <div className="formats-band">
+              <div>
+                <h3>Your video. Your format.</h3>
+                <p className="muted">One format included with every package. Need more? Add extra formats, subtitles or a 15-second cutdown when you order.</p>
+              </div>
+              <div className="format-list">
+                {formats.map(f => (
+                  <div key={f.ratio} className="format">
+                    <span className={`format-frame r${f.ratio.replace(':', '-')}`} aria-hidden="true" />
+                    <span><strong>{f.ratio}</strong> {f.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 

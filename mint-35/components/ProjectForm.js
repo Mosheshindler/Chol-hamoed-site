@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {formats} from './formats'
 import {createClient} from '@/lib/supabase/browser'
-import {formatPrice} from '@/lib/packages'
+import {formatPrice, EXTRA_FORMAT_PRICE, extraFormatsCost, CHECKOUT_EXTRAS, checkoutExtrasCost} from '@/lib/packages'
 import CardFields, {tokenizeCard} from './CardFields'
 import DisclaimerText from './DisclaimerText'
 import Icon from './Icon'
@@ -55,7 +55,10 @@ function Choices({name, options, onSample, chips}) {
   )
 }
 
-function Orientation({name, label}) {
+const xfName = (name, f) => `${name}_xf_${f.ratio.replace(':', '-')}`
+
+function Orientation({name, label, pkg, chosen}) {
+  const videos = pkg?.videos || 1
   return (
     <fieldset>
       <legend className="legend-row">
@@ -78,6 +81,22 @@ function Orientation({name, label}) {
           <span className="orient-name">Recommend one for me</span>
         </label>
       </div>
+      {pkg?.price ? (
+        <div className="extra-formats">
+          <p><b>Need it in another shape too?</b> <span className="muted">Add a format for {formatPrice(EXTRA_FORMAT_PRICE)} per video{videos > 1 ? ` (${formatPrice(EXTRA_FORMAT_PRICE * videos)} for all ${videos})` : ''}.</span></p>
+          <div className="extra-formats-opts">
+            {formats.map(f => {
+              const isMain = chosen?.startsWith(f.ratio + ' ')
+              return (
+                <label key={f.ratio} className={`check xf-opt${isMain ? ' is-main' : ''}`}>
+                  <input type="checkbox" name={xfName(name, f)} disabled={isMain} />
+                  <span>+ {f.ratio} {f.name}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
     </fieldset>
   )
 }
@@ -166,7 +185,12 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
     const fd = new FormData(f)
     setWatch({
       override: fd.get('logo_override') === 'on',
-      items: Array.from({length: lines.length}, (_, i) => ({style: fd.get(`i${i}_style`), story: fd.get(`i${i}_story`)})),
+      items: Array.from({length: lines.length}, (_, i) => {
+        const orientation = fd.get(`i${i}_orientation`)
+        const xf = formats.filter(f => fd.get(xfName(`i${i}_orientation`, f)) === 'on' && !orientation?.startsWith(f.ratio + ' ')).map(f => `${f.ratio} ${f.name}`)
+        const extras = CHECKOUT_EXTRAS.filter(a => fd.get(`i${i}_x_${a.key}`) === 'on').map(a => a.key)
+        return {style: fd.get(`i${i}_style`), story: fd.get(`i${i}_story`), orientation, xf, extras}
+      }),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lines.length])
@@ -398,7 +422,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         package: l.pkg.name,
         promoting: g(i, 'promoting'), item_website: g(i, 'item_website'), audience: g(i, 'audience'),
         key_message: g(i, 'key_message'), desired_action: g(i, 'desired_action'), must_appear: g(i, 'must_appear'),
-        orientation: g(i, 'orientation'), style: g(i, 'style'), story: g(i, 'story'), voice: g(i, 'voice'),
+        orientation: g(i, 'orientation'), extra_formats: watch.items?.[i]?.xf || [], extras: watch.items?.[i]?.extras || [], style: g(i, 'style'), story: g(i, 'story'), voice: g(i, 'voice'),
         tone: g(i, 'tone'), music: g(i, 'music'), references_links: g(i, 'references_links'),
         legal_text: g(i, 'legal_text'), restrictions: g(i, 'restrictions'),
         ideal_date: g(i, 'ideal_date'), latest_date: g(i, 'latest_date'),
@@ -446,7 +470,9 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   }
 
   const busy = state.phase === 'card' || state.phase === 'saving' || state.phase === 'uploading'
-  const total = lines.reduce((s, l) => s + (l.pkg.price || 0), 0)
+  const xfCost = i => extraFormatsCost(lines[i].pkg, watch.items?.[i]?.xf?.length || 0)
+  const exCost = i => checkoutExtrasCost(lines[i].pkg, watch.items?.[i]?.extras)
+  const total = lines.reduce((s, l, i) => s + (l.pkg.price || 0) + xfCost(i) + exCost(i), 0)
   const val = name => formRef.current?.elements[name]?.value || ''
 
   const Nav = ({n}) => (
@@ -581,7 +607,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               required={!!watch.override} optional={!watch.override}>
               <span className="upload-warn">⚠️ Anything you upload here may appear in your video.</span>
             </UploadCard>
-            <Orientation name={p('orientation')} label={momentum ? 'Orientation (one for all 5 videos)' : 'Orientation'} />
+            <Orientation name={p('orientation')} label={momentum ? 'Orientation (one for all 5 videos)' : 'Orientation'} pkg={l.pkg} chosen={watch.items?.[i]?.orientation} />
             <fieldset>
               <legend>What style do you want? <Tip>This sets the overall look. Not sure? Let us pick what fits your message best.</Tip></legend>
               <Choices name={p('style')} options={STYLES} onSample={setSample} />
@@ -641,9 +667,11 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                   <b>{many ? `Video ${i + 1}: ` : ''}{l.pkg.name}</b>
                   <span className="muted">{val(`i${i}_promoting`).slice(0, 90) || '—'}</span>
                   <span className="muted">Style: {labelOf(STYLES, watch.items?.[i]?.style)}{date ? ` · ${l.pkg.orgOnly ? 'Launch' : 'Needed by'} ${formatDate(date)}` : ''}</span>
+                  {xfCost(i) > 0 && <span className="muted">+ Extra format{watch.items[i].xf.length > 1 ? 's' : ''}: {watch.items[i].xf.join(', ')} ({formatPrice(xfCost(i))})</span>}
+                  {watch.items?.[i]?.extras?.length > 0 && <span className="muted">+ {CHECKOUT_EXTRAS.filter(a => watch.items[i].extras.includes(a.key)).map(a => a.label + (a.price == null ? ' (quote)' : '')).join(', ')}{exCost(i) > 0 ? ` (${formatPrice(exCost(i))})` : ''}</span>}
                 </div>
                 <div className="review-side">
-                  {l.pkg.price ? <b>{formatPrice(l.pkg.price)}</b> : <b>Quote</b>}
+                  {l.pkg.price ? <b>{formatPrice(l.pkg.price + xfCost(i) + exCost(i))}</b> : <b>Quote</b>}
                   <button type="button" className="link-btn" onClick={() => go(2 + i)}>Edit</button>
                 </div>
               </li>
@@ -652,6 +680,32 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <li className="review-total"><span>Total <span className="intro-tag">Introductory pricing</span></span><b>{formatPrice(total)}</b></li>
         </ul>
         <p className="review-edit"><button type="button" className="link-btn" onClick={() => go(0)}>Edit contact details</button> · <button type="button" className="link-btn" onClick={() => go(1)}>Edit brand</button></p>
+
+        <section className="addons-card checkout-extras" aria-labelledby="extras-title">
+          <div className="addons-head">
+            <h3 id="extras-title">Add extras</h3>
+            <p className="muted">Optional. Priced extras are added to your total. For quoted ones, we&rsquo;ll confirm a price with you before anything is charged.</p>
+          </div>
+          {lines.map((l, i) => (
+            <div key={l.id}>
+              {many && <p className="xtra-for">Video {i + 1}: {l.pkg.name}</p>}
+              <ul className="addons-list">
+                {CHECKOUT_EXTRAS.map(a => {
+                  const videos = l.pkg.videos || 1
+                  return (
+                    <li key={a.key}>
+                      <label>
+                        <input type="checkbox" name={`i${i}_x_${a.key}`} />
+                        <span><b>{a.label}</b><span className="muted">{a.desc}</span></span>
+                      </label>
+                      <span className="addons-price">{a.price != null ? <>{formatPrice(a.price * videos)}{videos > 1 && <small> ({formatPrice(a.price)} × {videos})</small>}</> : 'Quote'}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ))}
+        </section>
 
         {tokenUrl && <CardFields />}
 

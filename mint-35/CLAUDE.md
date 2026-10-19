@@ -68,8 +68,10 @@ separate from the Mint Media video site at the repo root (don't touch root files
   linked in the footer and above Submit on checkout.
 
 - Owner decisions Oct 19 (site review): no "budget-friendly"; FAQ says cancel free before we start the project;
-  card charge phrase everywhere = "when we start your project"; earliest in-hand date 6 business days; Extras price card
-  (`components/AddonsCard.js`) on the homepage and order builder; style renamed "3D animated characters" (no Pixar);
+  card charge phrase everywhere = "when we start your project"; earliest in-hand date 6 business days; extras are offered only at checkout (owner):
+  an "Add extras" card on Review & pay above the card (CHECKOUT_EXTRAS in lib/packages.js, priced per video, quote ones
+  flagged; saved in brief.extras and added to price_cents); the homepage only mentions it. Extra formats: checkboxes under
+  Orientation (`extraFormatsCost`, $450 x videos, brief.extra_formats); style renamed "3D animated characters" (no Pixar);
   intro pricing stays open-ended; no testimonials yet. Header nav collapses into a menu button below 1120px.
 
 - AI limits (owner decided): no custom characters to client specs, no look-alikes of real people, no celebrities or
