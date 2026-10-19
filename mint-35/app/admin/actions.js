@@ -5,11 +5,25 @@ import {revalidatePath} from 'next/cache'
 import {createClient} from '@/lib/supabase/server'
 import {createAdminClient} from '@/lib/supabase/admin'
 import {TRANSITIONS, STATUSES, projectRef, formatMoney} from '@/lib/status'
-import {addBusinessDays} from '@/lib/dates'
+import {addBusinessDays, formatDate} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
 import {siteOrigin, customerLink} from '@/lib/site'
 import {scriptWord} from '@/lib/status'
+
+// Payment receipt added to every email that follows a charge.
+function receipt({cents, brand, last4, chargeId, ref, item}) {
+  const row = (k, v) => `<tr><td style="padding:3px 16px 3px 0;color:#666">${k}</td><td style="padding:3px 0"><b>${v}</b></td></tr>`
+  return `<p style="margin:18px 0 6px"><b>Payment receipt</b></p><table style="border-collapse:collapse;font-size:14px">`
+    + row('Merchant', 'Mint Media LLC (Mint 35)')
+    + row('For', esc(item))
+    + row('Reference', esc(ref))
+    + row('Date', formatDate(new Date()))
+    + row('Amount charged', formatMoney(cents))
+    + row('Card', `${esc(brand || 'Card')} ending in ${esc(last4 || '••••')}`)
+    + row('Transaction ID', esc(chargeId))
+    + '</table>'
+}
 import {chargeCard, paymentsReady, disconnect as qbDisconnect} from '@/lib/qb'
 import {currentOwner} from '@/lib/owner'
 
@@ -103,7 +117,7 @@ export async function moveStatus(formData) {
     delivered: [`Your commercial is delivered (${projectRef(p.number)})`, `<p>Your final files are ready to download on your project page.</p>`],
   }
   if (patch.status === 'card_saved') notices.card_saved = [notices.quoted[0], notices.quoted[1]]
-  if (patch.charge_id) notices.in_progress = [`Your project is in our production queue (${projectRef(p.number)})`, `<p>Your project has entered our production queue and we've started work. Your ${esc(p.card_brand || 'card')} ending in ${esc(p.card_last4 || '••••')} was charged <b>${formatMoney(patch.charged_cents)}</b>.</p>`]
+  if (patch.charge_id) notices.in_progress = [`Your project is in our production queue (${projectRef(p.number)})`, `<p>Your project has entered our production queue and we've started work. Your ${esc(p.card_brand || 'card')} ending in ${esc(p.card_last4 || '••••')} was charged <b>${formatMoney(patch.charged_cents)}</b>.</p>` + receipt({cents: patch.charged_cents, brand: p.card_brand, last4: p.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Mint 35 ${p.package || 'project'}`})]
   const notice = notices[patch.status]
   if (notice) await sendEmail({to: p.email, subject: notice[0], html: hi + notice[1] + sign})
 
@@ -250,6 +264,7 @@ export async function decideAddon(formData) {
     subject: `${a.label}: ${decision === 'accepted' ? 'confirmed' : 'update'} (${projectRef(p.number)})`,
     html: `<p>Hi ${esc(p.name.split(' ')[0])},</p>` + (decision === 'accepted'
       ? `<p>We've confirmed your request for <b>${esc(a.label)}</b>${a.details ? ` (${esc(a.details)})` : ''} at <b>${formatMoney(a.price_cents)}</b>.${charged ? ` Your ${esc(job.card_brand || 'card')} ending in ${esc(job.card_last4 || '••••')} was charged.` : ''}</p>`
+      + (charged ? receipt({cents: a.price_cents, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) : '')
       : `<p>We're not able to add <b>${esc(a.label)}</b> to this project. We'll be in touch if there's another option.</p>`)
       + `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`,
   })
