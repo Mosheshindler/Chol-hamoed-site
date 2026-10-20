@@ -56,7 +56,7 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
           <section aria-labelledby="choose-title" className="order-choose">
             <h1 id="choose-title">Build your order</h1>
             <p className="lead">Add one or more packages. You can add the same package more than once.</p>
-            <p className="intro-pricing"><span aria-hidden="true">🔥</span> <span><b>Introductory pricing.</b> Grab it while it lasts.</span></p>
+            <p className="intro-pricing"><b>Introductory pricing</b></p>
             <div className="mini-packages">
               {PACKAGES.map(p => {
                 const n = items.filter(i => i.slug === p.slug).length

@@ -35,6 +35,8 @@ function answers(p) {
     ['One thing to remember', p.key_message],
     ['Call to action', p.desired_action],
     ['Tagline / hashtag', b.tagline],
+    ['The stories', b.stories && (b.stories === 'ideas' ? 'Customer gave ideas (below); plan any left blank' : 'General direction only: we plan each story')],
+    ...(b.video_ideas || []).map((v, n) => [`Video ${n + 1} idea`, v]),
     [momentum ? 'Names / sponsors' : 'Must appear', p.must_appear],
     ['Changes per video', b.per_video],
     ['Orientation', p.orientation],

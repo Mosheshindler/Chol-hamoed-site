@@ -10,7 +10,7 @@ import Icon from './Icon'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 import {loadFiles, saveFiles, clearFiles} from '@/lib/fileStash'
 import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
-import {TITLES, STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
+import {STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
 
 const SAVE_KEY = 'mint35-intake'
 const TURNSTILE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
@@ -189,7 +189,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         const orientation = fd.get(`i${i}_orientation`)
         const xf = formats.filter(f => fd.get(xfName(`i${i}_orientation`, f)) === 'on' && !orientation?.startsWith(f.ratio + ' ')).map(f => `${f.ratio} ${f.name}`)
         const extras = CHECKOUT_EXTRAS.filter(a => fd.get(`i${i}_x_${a.key}`) === 'on').map(a => a.key)
-        return {style: fd.get(`i${i}_style`), story: fd.get(`i${i}_story`), orientation, xf, extras}
+        return {style: fd.get(`i${i}_style`), story: fd.get(`i${i}_story`), stories: fd.get(`i${i}_stories`), orientation, xf, extras}
       }),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -428,6 +428,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         ideal_date: g(i, 'ideal_date'), latest_date: g(i, 'latest_date'),
         campaign_link: g(i, 'campaign_link'), goal: g(i, 'goal'), match: g(i, 'match'),
         launch_at: g(i, 'launch_at'), tagline: g(i, 'tagline'), per_video: g(i, 'per_video'),
+        stories: g(i, 'stories'), video_ideas: [1, 2, 3].map(n => g(i, `video_${n}`)),
       })),
       files: files.map(f => ({name: f.file.name, size: f.file.size, kind: f.kind, item: f.item})),
       acceptedDisclaimer: DISCLAIMER_VERSION,
@@ -502,14 +503,12 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
 
       {/* Step 1 · You */}
       <fieldset className="wizard-step" data-step={0} hidden={step !== 0}>
+        <div className="have-ready">
+          <b>Have these handy</b>
+          <span>Your logo, a few lines about what you&rsquo;re promoting, and any photos or videos you&rsquo;d like us to use.</span>
+        </div>
         <p className="step-intro">For the most efficient process, we work with one point of contact per order.</p>
-        <div className="form-row name-row">
-          <label><span>Title<Opt /></span>
-            <select name="title" defaultValue="">
-              <option value="">—</option>
-              {TITLES.map(t => <option key={t}>{t}</option>)}
-            </select>
-          </label>
+        <div className="form-row">
           <label>First name<input name="first_name" required autoComplete="given-name" /></label>
           <label>Last name<input name="last_name" required autoComplete="family-name" /></label>
         </div>
@@ -558,12 +557,13 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       {lines.map((l, i) => {
         const n = 2 + i
         const momentum = !!l.pkg.orgOnly
+        const multi = !momentum && l.pkg.videos > 1 ? l.pkg.videos : 0
         const w = watch.items?.[i] || {}
         const p = k => `i${i}_${k}`
         return (
           <fieldset key={l.id} className="wizard-step" data-step={n} hidden={step !== n}>
             <p className="step-intro">
-              {momentum ? 'Tell us about your fundraising campaign. All 5 milestone videos will be ready before launch.' : 'Now tell us about the video you’re ordering.'}
+              {momentum ? 'Tell us about your fundraising campaign. All 5 milestone videos will be ready before launch.' : multi ? `Now tell us about your campaign. These answers apply to all ${multi} videos.` : 'Now tell us about the video you’re ordering.'}
             </p>
 
             {momentum ? (
@@ -597,6 +597,22 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 <label><span>The one thing viewers should remember <Tip>If viewers forget everything else, what should stick? For example: &ldquo;Same-day delivery anywhere in town.&rdquo;</Tip></span><textarea name={p('key_message')} rows={2} required /></label>
                 <label><span>Call to action: what should viewers do after watching? <Tip>For example: &ldquo;Call 732-555-1234&rdquo;, &ldquo;Shop at yoursite.com&rdquo;, &ldquo;Register by May 1&rdquo;, &ldquo;Donate today&rdquo;.</Tip></span><input name={p('desired_action')} required /></label>
                 <label><span>Info that must appear<Opt /></span><span className="hint">Price, offer, dates, phone, address.</span><textarea name={p('must_appear')} rows={2} /></label>
+                {multi && (
+                  <>
+                    <h3 className="q-group">The {multi} videos</h3>
+                    <fieldset>
+                      <legend>How should we plan the {multi} stories?</legend>
+                      <Choices name={p('stories')} options={[
+                        {value: 'general', label: 'General direction only', hint: `We plan ${multi} different stories from your answers above.`},
+                        {value: 'ideas', label: 'I have an idea for each video', hint: 'Give us a line or two for each one.'},
+                      ]} />
+                    </fieldset>
+                    {w.stories === 'ideas' && Array.from({length: multi}, (_, n) => (
+                      <label key={n}><span>Video {n + 1} idea<Opt /></span><textarea name={p(`video_${n + 1}`)} rows={2} placeholder={n === 0 ? 'e.g. Show the new menu items' : undefined} /></label>
+                    ))}
+                    {w.stories === 'ideas' && <p className="hint">Leave one blank and we&rsquo;ll plan that video for you.</p>}
+                  </>
+                )}
               </>
             )}
 

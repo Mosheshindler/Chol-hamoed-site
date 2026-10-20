@@ -6,7 +6,7 @@ export default function FormatsModal() {
     <Modal id="formats-dialog" titleId="formats-title">
       <p className="eyebrow">Orientation</p>
       <h2 id="formats-title">Which shape is right for you?</h2>
-      <p className="modal-lead">Every package includes one export. Pick the shape that matches where your video will run most.</p>
+      <p className="modal-lead">Every package includes one video format. Pick the shape that matches where your video will run most.</p>
       <div className="format-cards">
         {formats.map(f => (
           <div key={f.ratio} className="format-card">

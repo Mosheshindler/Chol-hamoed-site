@@ -578,7 +578,6 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 /* Introductory pricing callout (packages section and order builder) */
 .intro-pricing { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 10px; margin: 0 0 26px; padding: 12px 22px; border-radius: 999px; background: var(--lime); color: #0a0c0a; font-size: 1.05rem; font-weight: 600; box-shadow: 0 0 0 4px rgba(136,192,64,.2), 0 10px 30px rgba(136,192,64,.3); }
 .intro-pricing b { font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
-.intro-pricing > span:first-child { font-size: 1.25rem; }
 .intro-pricing::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.45) 50%, transparent 70%); transform: translateX(-100%); animation: intro-shine 3.5s ease-in-out infinite; }
 @keyframes intro-shine { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .intro-pricing::after { animation: none; display: none; } }
@@ -814,6 +813,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .addons-price small { color: var(--muted); font-weight: 500; }
 
 /* Hero line under the headline */
+.hero-what { margin: -6px 0 0; color: var(--muted); font-size: 1.05rem; }
 .hero-sub { text-wrap: balance; font-family: var(--display); font-weight: 700; font-size: clamp(1.3rem, 2.4vw, 1.75rem); letter-spacing: -0.02em; color: var(--text); margin: 6px 0 10px; }
 
 /* "Your video. Your format." box under the package cards */
@@ -879,3 +879,9 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .uses ul { gap: 6px; }
   .uses li { padding: 7px 12px; font-size: .88rem; }
 }
+
+/* Order form step 1: what to have ready */
+.have-ready { display: grid; gap: 4px; margin: 0 0 18px; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(136,192,64,.35); background: rgba(136,192,64,.08); }
+.have-ready b { font-family: var(--display); font-size: 1.02rem; }
+.have-ready span { color: var(--muted); font-size: .95rem; }
+@media (max-width: 560px) { .hero-what { font-size: .95rem; } }

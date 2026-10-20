@@ -15,6 +15,7 @@ export default function Hero() {
         <div className="hero-copy">
           <h1>Powerful video.<br /><span className="accent">Simplified.</span></h1>
           <p className="hero-sub">Mint Media creativity. AI-powered.</p>
+          <p className="hero-what">Short promo videos for businesses and organizations.</p>
           <ul className="nots-big">
             <li><Icon name="camera-off" />No film shoots</li>
             <li><Icon name="calendar-off" />No meetings</li>

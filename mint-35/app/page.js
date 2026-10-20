@@ -34,7 +34,7 @@ const uses = [
 
 const included = [
   'Concept and script',
-  'Script approval',
+  'Script approval (sample video for Momentum)',
   'AI visuals, voice and music',
   'Pro edit and finish',
   'Your logo and brand',
@@ -55,6 +55,7 @@ const faqs = [
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
   {q: 'How fast is it?', a: 'First cut in 3 business days, counted from when your order enters production. Plan on about 6 business days to have your final video in hand, including one revision round. Weekends and holidays aren’t counted, and start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
+  {q: 'What counts as a revision?', a: 'Your revision round covers changes to what we’ve made: wording and on-screen text, timing and pacing, music, voice, and swapping in different photos or footage. A new concept or story, or rebuilding characters or scenes once they’re set, isn’t part of a revision. Send all your notes together and we’ll make them in one round.'},
   {q: 'Can you create a custom character or make someone look like a real person?', a: 'No. We don’t build characters to your specifications, we don’t match anyone’s likeness, and we never use celebrities or copyrighted characters. Reference photos guide the general style only.'},
   {q: 'Will my product look exactly right?', a: 'AI gets close, not exact. If your product needs to look exact, upload real photos or video of it and we’ll build around those.'},
   {q: 'Will the AI get every detail perfect?', a: 'Not always. AI is guided by prompts, not frame-by-frame control, so small imperfections can happen. Some requests aren’t possible, and once characters or scenes are set, some changes can’t be made. Revisions are limited to what your package includes. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
@@ -139,9 +140,9 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">Packages</p>
             <h2>Simple pricing. No surprises.</h2>
-            <p className="intro-pricing"><span aria-hidden="true">🔥</span> <span><b>Introductory pricing.</b> Grab it while it lasts.</span></p>
+            <p className="intro-pricing"><b>Introductory pricing</b></p>
             <PackageCards />
-            <p className="packages-note">First cut in 3 business days once your project enters production.</p>
+            <p className="packages-note">First cut in 3 business days once production starts. Final video in about 6.</p>
             <div className="formats-band">
               <div>
                 <h3>Your video. Your format.</h3>
