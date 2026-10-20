@@ -43,7 +43,6 @@ export default function Hero() {
             </div>
           </div>
           <div className="float-card fc-1"><b>Script</b><span>Approved ✓</span></div>
-          <div className="float-card fc-2"><b>9:16 · 1:1 · 16:9</b><span>Exported</span></div>
         </div>
       </div>
     </section>

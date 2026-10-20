@@ -3,10 +3,10 @@ import CartLink from './CartLink'
 import MobileMenu from './MobileMenu'
 
 const LINKS = [
-  ['/#how', 'How It Works'],
-  ['/#included', 'What’s Included'],
-  ['/#packages', 'Packages'],
   ['/#work', 'Work'],
+  ['/#why', 'Why Mint 35'],
+  ['/#how', 'How It Works'],
+  ['/#packages', 'Packages'],
   ['/#faq', 'FAQ'],
 ]
 

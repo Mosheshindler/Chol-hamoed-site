@@ -65,7 +65,7 @@ for (const d of DEVICES) {
   await shot('00-homepage-full', true)
   const home = await text()
   const has = t => home.toLowerCase().includes(t.toLowerCase()) // some labels are shown in capitals
-  for (const t of ['Powerful video.', 'Simplified.', 'Mint Media creativity. AI-powered.', 'No film shoots', 'No meetings', 'No hassle', 'Introductory pricing']) {
+  for (const t of ['Powerful video.', 'Simplified.', 'Mint Media creativity. AI-powered.', 'No film shoots', 'No meetings', 'No hassle', 'See what’s possible', 'The creative team you trust', 'Introductory pricing']) {
     expect(d.name, `Homepage shows "${t}"`, has(t))
   }
   for (const p of PACKAGES) {
@@ -75,7 +75,7 @@ for (const d of DEVICES) {
   expect(d.name, 'How it works has 5 steps', steps === 5, `found ${steps}`)
   const logoOk = await page.$$eval('img[src*="mint35-logo"]', imgs => imgs.length > 0 && imgs.every(i => i.naturalWidth > 0))
   expect(d.name, 'Logo shows', logoOk)
-  for (const id of ['how', 'packages', 'work', 'faq']) {
+  for (const id of ['work', 'why', 'mint-media', 'how', 'included', 'packages', 'faq']) {
     const el = page.locator(`#${id}`)
     if (await el.count()) { await el.scrollIntoViewIfNeeded(); await shot(`02-section-${id}`) } else fail(d.name, `Section #${id} exists`)
   }
