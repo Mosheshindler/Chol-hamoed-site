@@ -13,7 +13,7 @@ export default function PackageCards() {
           <h3>{p.name}</h3>
           <p className="price"><b>{formatPrice(p.price)}</b>{p.priceNote && <span>{p.priceNote}</span>}</p>
           <p className="package-blurb">{p.blurb}</p>
-          {p.why && <p className="package-why">{p.why}</p>}
+          {p.why && <p className="package-why"><b>Why it costs less</b>{p.why}</p>}
           {p.milestones && (
             <ol className="milestones" aria-label="The five videos">
               {p.milestones.map(m => <li key={m}><span aria-hidden="true" />{m}</li>)}

@@ -45,7 +45,6 @@ const notIncluded = [
   'Filming or photo shoots',
   'Strategy meetings',
   'Multiple concepts (we focus on one)',
-  'Extra revision rounds (available as an extra)',
   'Characters built to your specs',
   'Look-alikes of real people',
   'Celebrities or copyrighted characters',
@@ -106,13 +105,12 @@ export default function Home() {
 
         <section id="mint-media" className="section">
           <div className="container mm-band">
-            <img src="/brand/mint-media-logo.png" alt="Mint Media" className="mm-logo" width="1201" height="190" />
-            <div>
-              <p className="eyebrow">Powered by Mint Media</p>
-              <h2>The creativity you expect. <span className="accent">The process you don&rsquo;t.</span></h2>
-              <p className="mm-note">Not a DIY generator. Every video is written and finished by the Mint Media team.</p>
-              <a href="https://mintmediallc.com" className="btn btn-ghost" target="_blank" rel="noopener noreferrer">Visit Mint Media <span className="arrow">→</span></a>
-            </div>
+            <a href="https://mintmediallc.com" className="mm-powered" target="_blank" rel="noopener noreferrer" aria-label="Powered by Mint Media (opens mintmediallc.com)">
+              <span>Powered by</span>
+              <img src="/brand/mint-media-logo.png" alt="Mint Media" width="1201" height="190" />
+            </a>
+            <h2>The creative team you trust. <span className="accent">A new way to work.</span></h2>
+            <p className="mm-note">Not a DIY generator. Every video is written and finished by the Mint Media team.</p>
           </div>
         </section>
 
