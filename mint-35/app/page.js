@@ -47,6 +47,7 @@ const faqs = [
   {q: 'Will the AI get every detail perfect?', a: 'Not always. AI isn’t an exact science, so small imperfections or variations can happen. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
   {q: 'Can I cancel or get a refund?', a: 'Cancel free anytime before we start your project. Nothing is charged until then. Once we start, your card is charged in full, and because Mint 35 is a fixed-scope service, all sales are final. Need full customization and control? That’s a Mint Media production.', href: 'https://mintmediallc.com'},
   {q: 'Who owns the video? Can I run it as a paid ad?', a: 'Yes. Once your order is paid, you can use your videos to market your business, product or campaign, including paid ads on social media and YouTube.', terms: true},
+  {q: 'Can I add extras?', a: 'Yes. When you order, you can add extra formats, subtitles, a 15-second cutdown, an extra revision round or rush delivery. You can also add them later from your project page.'},
   {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
   {q: 'Why the name Mint 35?', a: 'Many of our videos land around 35 seconds, a sweet spot for social. Every package runs 30 to 60 seconds, and we fit the length to your message.'},
 ]
@@ -89,7 +90,7 @@ export default function Home() {
             <div className="formats-band">
               <div>
                 <h3>Your video. Your format.</h3>
-                <p className="muted">One format included with every package. Need more? Add extra formats, subtitles or a 15-second cutdown when you order.</p>
+                <p className="muted">One format included with every package.</p>
               </div>
               <div className="format-list">
                 {formats.map(f => (
@@ -99,6 +100,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+              <p className="formats-more"><b>Need more?</b> Extra formats are available as an add-on when you order, or anytime later.</p>
             </div>
           </div>
         </section>

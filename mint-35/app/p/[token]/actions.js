@@ -81,7 +81,7 @@ export async function requestAddon(formData) {
   const {token, order, job} = r
   const addon = addonByKey(String(formData.get('addon')))
   if (!addon) return {error: 'Choose an add-on.'}
-  if (!ADDON_STATUSES.includes(job.status)) return {error: 'Add-ons open once your video is approved.'}
+  if (!ADDON_STATUSES.includes(job.status)) return {error: 'Extras can’t be added to this project.'}
   const details = clean(formData.get('details'), 1000) || null
   if (addon.askOrientation && !details) return {error: 'Choose the orientation you need.'}
 

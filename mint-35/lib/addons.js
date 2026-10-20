@@ -1,4 +1,4 @@
-// Extras customers can request from their project page once a video is approved.
+// Extras customers can request from their project page at any stage, from ordering to delivery.
 // Set `price` (dollars) to show a price; null shows "Custom quote" and the team prices it when confirming.
 export const ADDONS = [
   {key: 'orientation', label: 'Extra orientation', desc: 'The same video in another shape, like 1:1 or 16:9.', price: 450, perVideo: true, askOrientation: true},
@@ -8,6 +8,6 @@ export const ADDONS = [
   {key: 'rush', label: 'Rush delivery', desc: 'Move your project up in our queue. We quote based on the current queue.', price: null},
 ]
 
-export const ADDON_STATUSES = ['approved', 'delivered']
+export const ADDON_STATUSES = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent', 'in_production', 'first_cut_sent', 'approved', 'revising', 'delivered']
 
 export const addonByKey = key => ADDONS.find(a => a.key === key) || null
