@@ -16,6 +16,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Anything touching files outside `mint-35/` (the Mint Media video site): ask first.
 - mint35.com is connected, so merges go live to customers: ask before merging larger changes.
 - Schema changes need the SQL run in Supabase's SQL Editor; tell the owner before merging code that depends on it.
+- From Oct 30 2026 Supabase no longer auto-grants API access to NEW tables in `public` (existing tables keep theirs).
+  Any new table's SQL must add grants, e.g. `grant select, insert, update, delete on public.x to authenticated, service_role;`
+  (service_role for the server/order API, authenticated for the admin, which still goes through RLS). Never grant to anon.
 
 ## Brand
 - Official logo: `public/brand/mint35-logo-v2.png` (wordmark), `mint35-logo-full-v2.png` (with "Powered by mintmedia").
