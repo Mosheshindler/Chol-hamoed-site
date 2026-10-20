@@ -100,7 +100,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <p className="formats-more"><b>Need more?</b> Extra formats are available as an add-on when you order, or anytime later.</p>
+              <p className="formats-more"><b>Need more?</b> Add extra formats anytime.</p>
             </div>
           </div>
         </section>
