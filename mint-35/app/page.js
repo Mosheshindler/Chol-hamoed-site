@@ -109,7 +109,7 @@ export default function Home() {
               <span>Powered by</span>
               <img src="/brand/mint-media-logo.png" alt="Mint Media" width="1201" height="190" />
             </a>
-            <h2>The creative team you trust. <span className="accent">A new way to work.</span></h2>
+            <h2>The creative team you trust. <span className="accent">A different way to work.</span></h2>
             <p className="mm-note">Not a DIY generator. Every video is written and finished by the Mint Media team.</p>
           </div>
         </section>
