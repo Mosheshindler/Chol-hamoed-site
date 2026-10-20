@@ -4,6 +4,8 @@ import PackageCards from '@/components/PackageCards'
 import Yes from '@/components/Yes'
 import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
+import {addonByKey} from '@/lib/addons'
+import {formatPrice} from '@/lib/packages'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
 import HowItWorks from '@/components/HowItWorks'
@@ -37,6 +39,8 @@ const notIncluded = [
   'Celebrities or copyrighted characters',
 ]
 
+const addonPrice = key => formatPrice(addonByKey(key).price)
+
 const faqs = [
   {q: 'Do I need a meeting?', a: 'No. It all starts with one form.'},
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
@@ -47,6 +51,7 @@ const faqs = [
   {q: 'Will the AI get every detail perfect?', a: 'Not always. AI isn’t an exact science, so small imperfections or variations can happen. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
   {q: 'Can I cancel or get a refund?', a: 'Cancel free anytime before we start your project. Nothing is charged until then. Once we start, your card is charged in full, and because Mint 35 is a fixed-scope service, all sales are final. Need full customization and control? That’s a Mint Media production.', href: 'https://mintmediallc.com'},
   {q: 'Who owns the video? Can I run it as a paid ad?', a: 'Yes. Once your order is paid, you can use your videos to market your business, product or campaign, including paid ads on social media and YouTube.', terms: true},
+  {q: 'Can I add extras?', a: `Yes, when you order or anytime later from your project page, so there’s no need to decide up front. Extra formats are ${addonPrice('orientation')} per video, subtitles ${addonPrice('captions')} per video and a 15-second cutdown ${addonPrice('cutdown')} per video. Extra revision rounds and rush delivery are quoted. Extras you add later are confirmed with you before they’re charged.`},
   {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
   {q: 'Why the name Mint 35?', a: 'Many of our videos land around 35 seconds, a sweet spot for social. Every package runs 30 to 60 seconds, and we fit the length to your message.'},
 ]
@@ -99,7 +104,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <p className="formats-more"><b>Need more?</b> Extra formats, subtitles and a 15-second cutdown can be added at any stage, when you order or later from your project page. No need to decide now.</p>
+              <p className="formats-more"><b>Need more?</b> Extra formats are available as an add-on when you order, or anytime later. No need to decide now.</p>
             </div>
           </div>
         </section>
