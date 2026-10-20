@@ -841,3 +841,4 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .hero-ctas .btn { flex: 1 1 0; padding: 14px 10px; font-size: .95rem; white-space: nowrap; }
 }
 .checkout-extras .addons-list label > span { display: grid; gap: 2px; }
+@media (max-width: 380px) { .formats-band .formats-more { font-size: .85rem; } }
