@@ -83,6 +83,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
   order. It never submits an order. A weekly Routine (Mondays 8:56am ET) runs it against the live site and also reviews the screenshots
   by eye. Update the script's expectations when content changes on purpose.
 
+- Homepage order (owner, Oct 20): hero, Work ("See what's possible", style captions), Why Mint 35 (3 icon benefits +
+  "Perfect for" chips), Powered by Mint Media (real logo + link), How it works, What's included ("Fixed scope. Focused results."),
+  Packages (+ formats box), FAQ, final CTA repeats "Powerful video. Simplified." Mint 35 vs Mint Media stays a pop-up
+  (CompareModal), opened from How it works, What's included and Packages. Footer: Mint 35 logo + real Mint Media logo.
+
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).

@@ -5,7 +5,11 @@ export default function Footer() {
     <footer className="footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Logo variant="full" />
+          <Logo />
+          <a href="https://mintmediallc.com" className="footer-powered" target="_blank" rel="noopener noreferrer">
+            <span>Powered by</span>
+            <img src="/brand/mint-media-logo.png" alt="Mint Media" width="1201" height="190" />
+          </a>
           <p className="footer-tag">Short-form video. Simplified.</p>
         </div>
         <div className="footer-col">
