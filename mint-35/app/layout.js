@@ -5,8 +5,8 @@ import {Bricolage_Grotesque, Onest} from 'next/font/google'
 const display = Bricolage_Grotesque({subsets: ['latin'], axes: ['opsz'], variable: '--font-display', display: 'swap'})
 const body = Onest({subsets: ['latin'], variable: '--font-body', display: 'swap'})
 
-const title = 'Mint 35 — Short Videos by Mint Media'
-const description = 'A streamlined, fixed-scope way to create short videos, promos and ads. Submit your project details and brand assets, and Mint 35 turns them into a finished 30–60 second video.'
+const title = 'Mint 35 — Powerful video. Simplified.'
+const description = 'Mint Media creativity. AI-powered. Short videos, promos and ads with no film shoots, no meetings and no hassle.'
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mint35.com'),
