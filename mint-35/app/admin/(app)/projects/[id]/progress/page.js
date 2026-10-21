@@ -7,13 +7,13 @@ import UpdateForm from '../UpdateForm'
 import FileUpload from '../FileUpload'
 import {DueForm} from '../JobForm'
 import {loadOrder} from '../_lib/order'
-import {describe, KIND_LABEL, DELIVERY_KINDS, DELIVERS} from '../_lib/text'
+import {describe, DELIVERY_KINDS, DELIVERS, deliverables, neededBy, countdown} from '../_lib/text'
 
 const STAGE_OF = {submitted: 0, quoted: 1, card_saved: 1, in_progress: 2, script_sent: 3, in_production: 4, first_cut_sent: 5, approved: 5, revising: 5, delivered: 6}
 
 export default async function Progress({params}) {
   const {id} = await params
-  const {jobs, multi, files, events, names, custUrl} = await loadOrder(id)
+  const {jobs, multi, files, events, names, custUrl, addons} = await loadOrder(id)
 
   return (
     <div className="stack">
@@ -22,7 +22,19 @@ export default async function Progress({params}) {
         const stages = ['Received', 'Accepted', 'Started', w === 'script' ? 'Script' : 'Sample video', 'Production', 'First cut', 'Final']
         const at = STAGE_OF[j.status] ?? -1
         const shared = Object.fromEntries(DELIVERY_KINDS.map(k => [k, files.filter(f => f.project_id === j.id && f.kind === k)]))
-        const delivered = files.filter(f => f.project_id === j.id && DELIVERY_KINDS.includes(f.kind))
+        const mine = files.filter(f => f.project_id === j.id)
+        const extras = deliverables(j, addons, files)
+        const rows = [
+          {key: 'script', label: w === 'script' ? 'Script' : 'Sample video', kind: 'script', shared: mine.filter(f => f.kind === 'script')},
+          {key: 'first_cut', label: 'First cut', kind: 'first_cut', shared: mine.filter(f => f.kind === 'first_cut')},
+          ...extras,
+        ]
+        const teamOnly = mine.filter(f => f.kind === 'other')
+        const finalBy = neededBy(j)
+        const dates = [
+          {label: 'First cut by', date: j.due_date, empty: 'Set when production starts (3 business days)', live: at <= 4},
+          {label: j.brief?.launch_at ? 'Final by (launch)' : 'Final by', date: finalBy, empty: 'Not set', live: at < 6},
+        ]
         const sendLabels = {quoted: 'Accept & email client', script_sent: `Send ${w} to client`, first_cut_sent: 'Send first cut to client', delivered: 'Send final to client'}
         const steps = (TRANSITIONS[j.status] || []).map(s => {
           const charging = j.status === 'card_saved' && s.to === 'in_progress' && !s.skipCharge
@@ -45,33 +57,64 @@ export default async function Progress({params}) {
             )}
             <p className="muted">
               {STATUSES[j.status]?.waitingOn === 'customer' ? 'Waiting on the client.' : STATUSES[j.status]?.waitingOn === 'team' ? 'Waiting on us.' : ''}
-              {j.due_date ? ` First cut due ${formatDate(j.due_date)}.` : ''}
             </p>
 
+            <div className="key-dates">
+              {dates.map(d => {
+                const c = d.live && d.date ? countdown(d.date) : null
+                return (
+                  <div key={d.label} className="key-date">
+                    <span className="muted">{d.label}</span>
+                    <b>{d.date ? formatDate(d.date) : <span className="muted small">{d.empty}</span>}</b>
+                    {c && <span className={`countdown cd-${c.tone}`}>{c.text}</span>}
+                  </div>
+                )
+              })}
+            </div>
+
             <StatusActions id={j.id} status={j.status} steps={steps} price={j.price_cents}
-              card={j.card_last4 ? `${j.card_brand || 'card'} ending ${j.card_last4}` : null} shared={shared} scriptWord={w} />
+              card={j.card_last4 ? `${j.card_brand || 'card'} ending ${j.card_last4}` : null} shared={shared} scriptWord={w}
+              alsoDue={extras.filter(r => r.kind && r.kind !== 'final').map(r => ({label: r.label, done: r.shared.length > 0}))} />
 
             <div className="two-col">
               <div>
-                <h3 className="sub-head">Shared with the client</h3>
-                {delivered.length ? (
-                  <ul className="files">
-                    {delivered.map(f => (
-                      <li key={f.id}>
-                        <span className="file-kind">{f.kind === 'script' ? (w === 'script' ? 'Script' : 'Sample') : KIND_LABEL[f.kind]}</span>
-                        {f.body
-                          ? <details className="shared-text"><summary>Pasted text</summary><div className="shared-body">{f.body}</div></details>
-                          : <a href={f.href} target="_blank" rel="noopener noreferrer">{f.url ? `${f.name} →` : f.name}</a>}
-                        <small className="muted">{formatDate(f.created_at)}</small>
-                      </li>
-                    ))}
-                  </ul>
-                ) : <p className="muted">Nothing shared yet.</p>}
-                <FileUpload projectId={j.id} />
+                <h3 className="sub-head">Deliverables</h3>
+                <ul className="deliverables">
+                  {rows.map(r => (
+                    <li key={r.key} className={r.note ? 'is-note' : r.shared.length ? 'is-done' : undefined}>
+                      <span className="dl-check" aria-hidden="true">{r.note ? '•' : r.shared.length ? '✓' : ''}</span>
+                      <div className="dl-body">
+                        <b>{r.label}</b>
+                        {r.note && <span className="muted small">{r.note}</span>}
+                        {r.shared?.map(f => (
+                          <span key={f.id} className="dl-file">
+                            {f.body
+                              ? <details className="shared-text"><summary>Pasted text · {formatDate(f.created_at)}</summary><div className="shared-body">{f.body}</div></details>
+                              : <><a href={f.href} target="_blank" rel="noopener noreferrer">{f.url ? `${f.name} →` : f.name}</a> <small className="muted">{formatDate(f.created_at)}</small></>}
+                          </span>
+                        ))}
+                        {r.kind && (
+                          <details className="dl-share">
+                            <summary>{r.shared.length ? 'Share another' : 'Share'}</summary>
+                            <FileUpload projectId={j.id} kind={r.kind} label={r.fileLabel} compact />
+                          </details>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <p className="hint">Shared items show on the client&rsquo;s project page right away. The client is emailed when you take the matching step above.</p>
+                {teamOnly.length > 0 && (
+                  <>
+                    <h3 className="sub-head">Team-only files</h3>
+                    <ul className="files">{teamOnly.map(f => <li key={f.id}><a href={f.href} target="_blank" rel="noopener noreferrer">{f.name}</a></li>)}</ul>
+                  </>
+                )}
               </div>
               <div>
-                <h3 className="sub-head">Due date</h3>
+                <h3 className="sub-head">First cut due date</h3>
                 <DueForm id={j.id} dueDate={j.due_date} />
+                <p className="hint">Set automatically when production starts. Change it here if needed.</p>
               </div>
             </div>
 

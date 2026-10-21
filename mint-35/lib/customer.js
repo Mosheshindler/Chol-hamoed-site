@@ -3,7 +3,7 @@ import {createAdminClient} from './supabase/admin'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const JOB_FIELDS = 'id, number, status, package, price_cents, due_date, name, email, company, promoting, orientation, order_id, order_item, order_size, customer_token, created_at'
-export const CUSTOMER_FILE_KINDS = ['script', 'first_cut', 'final']
+export const CUSTOMER_FILE_KINDS = ['script', 'first_cut', 'final', 'cutdown', 'extra_format']
 
 // Everything a customer may see for the order their private link belongs to.
 // Uses the service role, so callers must only pass data from this function to that customer.

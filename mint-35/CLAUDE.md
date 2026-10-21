@@ -113,6 +113,10 @@ separate from the Mint Media video site at the repo root (don't touch root files
   the client show the exact email (`customerNotice` in lib/notices.js, same function moveStatus sends) plus an optional personal
   line (also saved as a team message); delivery steps (script/first cut/final) include the share box (link, text or file).
   updateJob only changes the fields a form sends (price on Billing, assignee on Communications, due date on Progress).
+  Progress shows "First cut by" (due_date) and "Final by" (latest in-hand / launch) with business-day countdowns
+  (`businessDaysUntil` in lib/dates.js), and a Deliverables checklist (`deliverables()` in _lib/text.js): script, first cut,
+  final, plus extra formats (kind `extra_format`, labeled by shape) and the 15-sec cutdown (kind `cutdown`) as separate files;
+  subtitles are noted as part of the video. Kinds added in migration 20261022000000_more_deliverables.sql.
 
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);

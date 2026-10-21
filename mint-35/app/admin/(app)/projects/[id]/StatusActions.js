@@ -8,7 +8,7 @@ const KIND_NAME = {script: 'script', first_cut: 'first cut', final: 'final video
 
 // Next-step buttons for one job. Steps that email the client open a panel showing that exact email,
 // with room for a personal line; steps that deliver something also hold the box to share it.
-export default function StatusActions({id, status, steps, price, card, shared = {}, scriptWord = 'script'}) {
+export default function StatusActions({id, status, steps, price, card, shared = {}, scriptWord = 'script', alsoDue = []}) {
   const [open, setOpen] = useState(null)
   const [error, setError] = useState('')
   const [pending, start] = useTransition()
@@ -53,6 +53,12 @@ export default function StatusActions({id, status, steps, price, card, shared = 
                 ? <ul className="files">{items.map(f => <li key={f.id}><span className="file-kind">Shared</span>{f.body ? <span>Pasted text</span> : <a href={f.href} target="_blank" rel="noopener noreferrer">{f.name}</a>}</li>)}</ul>
                 : <p className="warn small">Nothing shared yet. Add a Google Doc link, paste text or upload a file, so the client has something to open.</p>}
               <FileUpload projectId={id} kind={deliverable} compact />
+              {deliverable === 'final' && alsoDue.length > 0 && (
+                <div className="also-due">
+                  <p className="deliver-title">Also due with the final</p>
+                  <ul>{alsoDue.map(d => <li key={d.label} className={d.done ? 'is-done' : 'warn'}>{d.done ? '✓ ' : '○ '}{d.label}{d.done ? '' : ': not shared yet (use Deliverables below)'}</li>)}</ul>
+                </div>
+              )}
             </div>
           )}
           <form className="step-form" action={fd => run(open, fd)}>
