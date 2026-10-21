@@ -3,7 +3,7 @@ import LegalPage from '@/components/LegalPage'
 export const metadata = {title: 'Privacy Policy · Mint 35'}
 
 const COLLECT = [
-  ['Contact details', 'Name, title, email, cell phone, company, website', 'To run your order and reach you'],
+  ['Contact details', 'Name, email, cell phone, company, website', 'To run your order and reach you'],
   ['Project answers', 'What you promote, audience, messages, dates, style choices', 'To produce your video'],
   ['Files you upload', 'Logos, brand materials, photos, video, design files', 'To produce your video'],
   ['Payment details', 'Card brand and last 4 digits, charge records', 'To charge your order and add-ons'],

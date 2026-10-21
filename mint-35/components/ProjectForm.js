@@ -623,7 +623,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               required={!!watch.override} optional={!watch.override}>
               <span className="upload-warn">⚠️ Anything you upload here may appear in your video.</span>
             </UploadCard>
-            <Orientation name={p('orientation')} label={momentum ? 'Orientation (one for all 5 videos)' : 'Orientation'} pkg={l.pkg} chosen={watch.items?.[i]?.orientation} />
+            <Orientation name={p('orientation')} label={momentum ? 'Video format (one for all 5 videos)' : multi ? `Video format (one for all ${multi} videos)` : 'Video format'} pkg={l.pkg} chosen={watch.items?.[i]?.orientation} />
             <fieldset>
               <legend>What style do you want? <Tip>This sets the overall look. Not sure? Let us pick what fits your message best.</Tip></legend>
               <Choices name={p('style')} options={STYLES} onSample={setSample} />
@@ -730,8 +730,8 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <ul className="ticks">
             <li>Double-check names, prices, dates and phone numbers.</li>
             {lines.some(l => !l.pkg.orgOnly) && <li>Each video includes one approval step and one revision round.</li>}
-            {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes one sample to approve and one revision round for all 5 videos.</li>}
-            <li>Your card is saved now and charged in full when we start your project. Cancel free before then.</li>
+            {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes one sample video to approve and one revision round on the first video. The other 4 follow the approved look.</li>}
+            <li>Your card is saved now and charged in full when we start your project. Cancel free anytime before then.</li>
           </ul>
         </div>
 

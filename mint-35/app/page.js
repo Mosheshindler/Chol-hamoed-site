@@ -10,6 +10,7 @@ import HowItWorks from '@/components/HowItWorks'
 import DisclaimerModal from '@/components/DisclaimerModal'
 import FormatsModal from '@/components/FormatsModal'
 import DialogController from '@/components/DialogController'
+import ScrollReveal from '@/components/ScrollReveal'
 import Icon from '@/components/Icon'
 
 const formats = [
@@ -33,7 +34,7 @@ const uses = [
 ]
 
 const included = [
-  'Concept and script',
+  'Concept and script (or sample video)',
   'Script approval (sample video for Momentum)',
   'AI visuals, voice and music',
   'Pro edit and finish',
@@ -53,7 +54,7 @@ const notIncluded = [
 const faqs = [
   {q: 'Do I need a meeting?', a: 'Nope. It all starts with one form.'},
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
-  {q: 'How fast is it?', a: 'First cut in 3 business days, counted from when your order enters production. Plan on about 6 business days to have your final video in hand, including one revision round. Weekends and holidays aren’t counted, and start dates depend on our queue.'},
+  {q: 'How fast is it?', a: 'First cut in 3 business days, counted from when your order enters production. Plan on about 6 business days to have your final video in hand, including one revision round. Weekends and holidays aren’t counted, orders after 5pm ET count from the next business day, and start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
   {q: 'What counts as a revision?', a: 'Your revision round covers changes to what we’ve made: wording and on-screen text, timing and pacing, music, voice, and swapping in different photos or footage. A new concept or story, or rebuilding characters or scenes once they’re set, isn’t part of a revision. Send all your notes together and we’ll make them in one round.'},
   {q: 'Can you create a custom character or make someone look like a real person?', a: 'That’s outside what we offer. We don’t build characters to your specifications, we don’t match anyone’s likeness, and we never use celebrities or copyrighted characters. Reference photos guide the general style only.'},
@@ -188,6 +189,7 @@ export default function Home() {
       <FormatsModal />
       <DisclaimerModal />
       <DialogController />
+      <ScrollReveal />
     </>
   )
 }

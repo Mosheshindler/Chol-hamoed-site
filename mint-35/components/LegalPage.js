@@ -1,7 +1,7 @@
 import Header from './Header'
 import Footer from './Footer'
 
-export const LEGAL_EFFECTIVE = 'October 19, 2026'
+export const LEGAL_EFFECTIVE = 'October 21, 2026'
 
 // Shared layout for the Terms and Privacy pages.
 export default function LegalPage({eyebrow, title, children}) {

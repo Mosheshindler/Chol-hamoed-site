@@ -44,7 +44,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Customer project page `/p/[customer_token]` (no login; token per job, page shows the whole order):
   progress, files (script/first_cut/final), approve/request changes, messages, add-on requests at any stage (order to delivery; homepage says extras can be added anytime).
-  Add-on list in `lib/addons.js`: extra orientation $450/video, 15-sec cutdown $175/video, subtitles $150/video;
+  Add-on list in `lib/addons.js`: extra format $450/video, 15-sec cutdown $175/video, subtitles $150/video;
   extra revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
 
 - AI Production Disclaimer (owner's wording) lives in `lib/disclaimer.js`: page /ai-disclaimer, footer link, FAQ,
@@ -91,6 +91,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
   "Perfect for" chips), Powered by Mint Media (real logo + link), How it works, What's included ("Fixed scope. Focused results."),
   Packages (+ formats box, "First cut in 3 business days once production starts. Final video in about 6."), FAQ (incl. "What counts as a revision?"), final CTA repeats "Powerful video. Simplified." Mint 35 vs Mint Media stays a pop-up
   (CompareModal), opened from How it works, What's included and Packages. Footer: Mint 35 logo + real Mint Media logo.
+  Blocks fade up as they scroll in (`components/ScrollReveal.js`, homepage only, off for reduced motion); the site check scrolls
+  through before its full-page shot.
+- Scope wording (owner, Oct 21): Single 35 and Campaign 3 list "Script approval" (Campaign 3: one per video); Momentum Pack:
+  1 sample video to approve, "1 revision round on the first video" (the other 4 follow the approved look; matches Terms §4).
+  Customer word is "video format" (not orientation/export). Admin labels say "sample video" for Momentum (`forPackage` in lib/status.js).
 
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);

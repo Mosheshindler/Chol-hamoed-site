@@ -8,7 +8,7 @@ export default function TermsPage() {
       <p>By placing an order with Mint 35, you agree to these Terms, the <a href="/ai-disclaimer">AI Production Disclaimer</a> and our <a href="/privacy">Privacy Policy</a>. Mint 35 is a service of Mint Media LLC (&ldquo;Mint Media&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;).</p>
 
       <h2>1. The service</h2>
-      <p>Mint 35 produces short videos using AI tools, finished by the Mint Media team. Each package has a fixed scope, shown on the package page at the time you order: the number of videos, their length, one export orientation, one approval step and one round of revisions. Anything outside that scope is not included unless we agree to it in writing, usually as a paid add-on.</p>
+      <p>Mint 35 produces short videos using AI tools, finished by the Mint Media team. Each package has a fixed scope, shown on the package page at the time you order: the number of videos, their length, one video format, one approval step and one round of revisions. Anything outside that scope is not included unless we agree to it in writing, usually as a paid add-on.</p>
 
       <h2>2. Your order</h2>
       <p>You place an order by completing the online form. One contact person handles each order, and all communication goes to that person. An order is accepted only when we confirm it. We may decline any order, for example if the request falls outside what Mint 35 offers.</p>
@@ -24,10 +24,10 @@ export default function TermsPage() {
       <p>For custom productions with full control, contact <a href="https://mintmediallc.com" target="_blank" rel="noopener noreferrer">Mint Media</a> directly.</p>
 
       <h2>4. Approval and revisions</h2>
-      <p>We send a script (or, for the Momentum Pack, a sample video) for your approval before full production. Each video includes one round of revisions covering basic changes. Mint Media decides what counts as a basic change and which changes can reasonably be made. For the Momentum Pack, the revision round applies to the first video; the remaining videos follow the approved look. Extra revision rounds are a paid add-on, quoted separately.</p>
+      <p>We send a script (or, for the Momentum Pack, a sample video) for your approval before full production. Each video includes one round of revisions covering basic changes: wording and on-screen text, timing and pacing, music, voice, and swapping in different photos or footage. A new concept or story, or rebuilding characters or scenes once they are set, is not a revision. Mint Media decides what counts as a basic change and which changes can reasonably be made. For the Momentum Pack, the revision round applies to the first video; the remaining videos follow the approved look. Extra revision rounds are a paid add-on, quoted separately.</p>
 
       <h2>5. Timing</h2>
-      <p>The first cut is delivered within 3 business days after your order enters production, not including weekends and holidays (including US federal holidays and Jewish holidays such as Yom Tov and Chol Hamoed). Orders placed after 5pm Eastern count from the next business day. Start dates depend on our production queue. Delivery dates you request are goals, not guarantees, unless we confirm them in writing.</p>
+      <p>The first cut is delivered within 3 business days after your order enters production, not including weekends and holidays (including US federal holidays and Jewish holidays such as Yom Tov and Chol Hamoed). Plan on about 6 business days for the final video, including your revision round; the earliest in-hand date you can request is 6 business days out. Orders placed after 5pm Eastern count from the next business day. Start dates depend on our production queue. Delivery dates you request are goals, not guarantees, unless we confirm them in writing.</p>
 
       <h2>6. Prices and payment</h2>
       <p>Prices are shown at checkout in US dollars. When you place an order, your card is saved securely with our payment processor. The payment service is provided by Intuit Payments Inc. (QuickBooks Payments). Your card is charged in full when we start your project. Add-ons you request later are charged when we confirm them. We never see or store your full card number.</p>

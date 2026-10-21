@@ -885,3 +885,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .have-ready b { font-family: var(--display); font-size: 1.02rem; }
 .have-ready span { color: var(--muted); font-size: .95rem; }
 @media (max-width: 560px) { .hero-what { font-size: .95rem; } }
+
+/* Scroll reveal (components/ScrollReveal.js) */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; transition-delay: var(--reveal-delay, 0ms); }
+.reveal.in { opacity: 1; transform: none; }
