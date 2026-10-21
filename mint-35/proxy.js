@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server'
 import {createServerClient} from '@supabase/ssr'
 
-const PUBLIC_ADMIN = ['/admin/login', '/admin/setup']
+const PUBLIC_ADMIN = ['/admin/login', '/admin/setup', '/admin/forgot', '/admin/set-password']
 
 // Keeps the Supabase session cookie fresh and sends signed-out visitors to the login page.
 // Pages still check membership on the server; this is only the first gate.

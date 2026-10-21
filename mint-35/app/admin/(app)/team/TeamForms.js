@@ -1,7 +1,7 @@
 'use client'
 
 import {useActionState, useRef, useState, useTransition} from 'react'
-import {addMember, changePassword, removeMember} from '../../actions'
+import {addMember, changePassword, removeMember, resendInvite} from '../../actions'
 
 export default function TeamForms({isOwner}) {
   const addRef = useRef(null)
@@ -20,7 +20,6 @@ export default function TeamForms({isOwner}) {
           <form ref={addRef} className="admin-form compact" action={addAction}>
             <label>Name<input id="member-name" name="name" required /></label>
             <label>Email<input id="member-email" name="email" type="email" required /></label>
-            <label>Temporary password <span className="hint">Share it with them; they can change it after signing in.</span><input id="member-password" name="password" minLength={10} required /></label>
             <label>Role
               <select id="member-role" name="role" defaultValue="member">
                 <option value="member">Team (handles jobs)</option>
@@ -29,7 +28,8 @@ export default function TeamForms({isOwner}) {
             </label>
             {added?.error && <p className="form-error" role="alert">{added.error}</p>}
             {added?.ok && <p className="form-ok">{added.message}</p>}
-            <button className="btn btn-primary btn-sm" disabled={adding}>{adding ? 'Adding…' : 'Add teammate'}</button>
+            <p className="hint">They&rsquo;ll get an email with a link to choose their own password.</p>
+            <button className="btn btn-primary btn-sm" disabled={adding}>{adding ? 'Adding…' : 'Add and send invite'}</button>
           </form>
         </section>
       )}
@@ -42,6 +42,20 @@ export default function TeamForms({isOwner}) {
           <button className="btn btn-ghost btn-sm" disabled={saving}>{saving ? 'Saving…' : 'Change password'}</button>
         </form>
       </section>
+    </>
+  )
+}
+
+export function ResendButton({id}) {
+  const [state, setState] = useState(null)
+  const [pending, start] = useTransition()
+  if (state?.ok) return <small className="form-ok">Link sent</small>
+  return (
+    <>
+      <button type="button" className="link-btn" disabled={pending} onClick={() => start(async () => {
+        const fd = new FormData(); fd.set('id', id); setState(await resendInvite(fd))
+      })}>{pending ? 'Sending…' : 'Send set-password link'}</button>
+      {state?.error && <small className="form-error">{state.error}</small>}
     </>
   )
 }

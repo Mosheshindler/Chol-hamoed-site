@@ -160,3 +160,8 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .share-hint { flex-basis: 100%; margin: 0; }
 .shared-text summary { cursor: pointer; color: var(--lime); }
 .shared-body { white-space: pre-wrap; margin-top: 8px; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); max-height: 320px; overflow: auto; }
+
+/* Forgot / set password */
+.auth-lead { margin: -6px 0 18px; }
+.auth-foot { margin: 18px 0 0; font-size: .9rem; }
+.auth-foot a, .auth-card .form-error a { color: var(--lime); }

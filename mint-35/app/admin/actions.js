@@ -26,6 +26,7 @@ function receipt({cents, brand, last4, chargeId, ref, item}) {
 }
 import {chargeCard, paymentsReady, disconnect as qbDisconnect} from '@/lib/qb'
 import {currentOwner} from '@/lib/owner'
+import {sendPasswordLink} from '@/lib/passwordLink'
 
 async function requireMember() {
   const supabase = await createClient()
@@ -207,17 +208,53 @@ export async function addMember(formData) {
   if (me.role !== 'owner') return {error: 'Only the owner can add people.'}
   const name = String(formData.get('name') || '').trim()
   const email = String(formData.get('email') || '').trim().toLowerCase()
-  const password = String(formData.get('password') || '')
   const role = formData.get('role') === 'owner' ? 'owner' : 'member'
-  if (!name || !email || password.length < 10) return {error: 'Fill in every field. The temporary password needs at least 10 characters.'}
+  if (!name || !email) return {error: 'Fill in their name and email.'}
 
   const db = createAdminClient()
-  const {data, error} = await db.auth.admin.createUser({email, password, email_confirm: true})
+  const {data, error} = await db.auth.admin.createUser({email, email_confirm: true})
   if (error) return {error: error.message}
   const {error: insErr} = await db.from('team_members').insert({id: data.user.id, name, email, role})
   if (insErr) return {error: 'Account created but not added to the team. Try again.'}
   revalidatePath('/admin/team')
-  return {ok: true, message: `${name} can now sign in with ${email} and the temporary password.`}
+  const sent = await sendPasswordLink({email, name, invite: true})
+  if (sent.error) return {error: `${name} was added, but the invite email didn’t send. Use “Send link” next to their name.`}
+  return {ok: true, message: `Invite sent. ${name} will get an email to set their password.`}
+}
+
+// Owner re-sends the set-password email (expired invite, or someone who was added with a temporary password).
+export async function resendInvite(formData) {
+  const {me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can do that.'}
+  const {data: m} = await createAdminClient().from('team_members').select('name, email').eq('id', String(formData.get('id'))).maybeSingle()
+  if (!m) return {error: 'That person isn’t on the team.'}
+  const sent = await sendPasswordLink({email: m.email, name: m.name, invite: true})
+  return sent.error ? sent : {ok: true}
+}
+
+// "Forgot password?" on the sign-in page. Same answer whether or not the email is on the team.
+export async function requestPasswordReset(_, formData) {
+  const email = String(formData.get('email') || '').trim().toLowerCase()
+  if (!email) return {error: 'Enter your email.'}
+  const {data: m} = await createAdminClient().from('team_members').select('name, email').eq('email', email).maybeSingle()
+  if (m) await sendPasswordLink({email: m.email, name: m.name})
+  return {ok: true, message: 'If that email is on the Mint 35 team, a link to choose a new password is on its way.'}
+}
+
+// The set-password page: the one-time token signs them in, then their new password is saved.
+export async function setPasswordWithToken(_, formData) {
+  const token = String(formData.get('token') || '')
+  const password = String(formData.get('password') || '')
+  if (password.length < 10) return {error: 'Use at least 10 characters.'}
+  if (password !== String(formData.get('confirm') || '')) return {error: 'The two passwords don’t match.'}
+  const supabase = await createClient()
+  const {data, error} = await supabase.auth.verifyOtp({token_hash: token, type: 'recovery'})
+  if (error || !data?.user) return {error: 'This link has expired or was already used. Use “Forgot password?” on the sign-in page to get a new one.'}
+  const {data: m} = await createAdminClient().from('team_members').select('id').eq('id', data.user.id).maybeSingle()
+  if (!m) { await supabase.auth.signOut(); return {error: 'This account isn’t on the Mint 35 team.'} }
+  const {error: upErr} = await supabase.auth.updateUser({password})
+  if (upErr) return {error: upErr.message}
+  redirect('/admin')
 }
 
 export async function removeMember(formData) {
