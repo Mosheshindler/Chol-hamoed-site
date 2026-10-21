@@ -5,27 +5,13 @@ import {revalidatePath} from 'next/cache'
 import {createClient} from '@/lib/supabase/server'
 import {createAdminClient} from '@/lib/supabase/admin'
 import {TRANSITIONS, STATUSES, projectRef, formatMoney} from '@/lib/status'
-import {addBusinessDays, formatDate} from '@/lib/dates'
+import {addBusinessDays} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
 import {siteOrigin, customerLink} from '@/lib/site'
-import {scriptWord} from '@/lib/status'
-
-// Payment receipt added to every email that follows a charge.
-function receipt({cents, brand, last4, chargeId, ref, item}) {
-  const row = (k, v) => `<tr><td style="padding:3px 16px 3px 0;color:#666">${k}</td><td style="padding:3px 0"><b>${v}</b></td></tr>`
-  return `<p style="margin:18px 0 6px"><b>Payment receipt</b></p><table style="border-collapse:collapse;font-size:14px">`
-    + row('Merchant', 'Mint Media LLC (Mint 35)')
-    + row('For', esc(item))
-    + row('Reference', esc(ref))
-    + row('Date', formatDate(new Date()))
-    + row('Amount charged', formatMoney(cents))
-    + row('Card', `${esc(brand || 'Card')} ending in ${esc(last4 || '••••')}`)
-    + row('Transaction ID', esc(chargeId))
-    + '</table>'
-}
 import {chargeCard, paymentsReady, disconnect as qbDisconnect} from '@/lib/qb'
 import {currentOwner} from '@/lib/owner'
+import {customerNotice, receipt} from '@/lib/notices'
 import {sendPasswordLink} from '@/lib/passwordLink'
 
 async function requireMember() {
@@ -68,6 +54,7 @@ export async function moveStatus(formData) {
   const to = String(formData.get('to'))
 
   const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents, package, customer_token, qb_card_id, card_last4, card_brand').eq('id', id).single()
+  if (!p) return {error: 'Job not found. Refresh the page.'}
   const skipCharge = formData.get('skipCharge') === '1'
   const step = (TRANSITIONS[p.status] || []).find(t => t.to === to && !!t.skipCharge === skipCharge)
   if (!step) return {error: 'That step isn’t available any more. Refresh the page.'}
@@ -94,7 +81,7 @@ export async function moveStatus(formData) {
       event.charged_cents = p.price_cents
     } catch (e) {
       await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'charge_failed', data: {message: e.message, intuit_tid: e.intuitTid || null}})
-      revalidatePath(`/admin/projects/${id}`)
+      revalidatePath('/admin/projects/[id]', 'layout')
       return {error: `Charge failed: ${e.message} The job was not started.`}
     }
   }
@@ -108,21 +95,15 @@ export async function moveStatus(formData) {
   await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'status', data: event})
 
   const link = customerLink(await siteOrigin(), p.customer_token)
-  const hi = `<p>Hi ${esc(p.name.split(' ')[0])},</p>`
-  const sign = `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`
-  const w = scriptWord(p.package)
-  const notices = {
-    quoted: [`Your Mint 35 project is accepted (${projectRef(p.number)})`, `<p>Good news: we've accepted your project. The price is <b>${formatMoney(patch.price_cents)}</b>.</p>` + (patch.status === 'card_saved' ? `<p>Your card will be charged in full when we start your project.</p>` : `<p>We'll be in touch about payment before we start.</p>`)],
-    script_sent: [`Your ${w} is ready to review (${projectRef(p.number)})`, `<p>Your ${w} is ready. Please review it on your project page and approve it or request changes.</p>`],
-    first_cut_sent: [`Your first cut is ready (${projectRef(p.number)})`, `<p>Your first cut is ready. Please watch it on your project page and approve it or send your revision notes.</p>`],
-    delivered: [`Your final video is ready (${projectRef(p.number)})`, `<p>Your final files are ready to download on your project page.</p>`],
+  // An optional personal line from the team goes in the email and on the customer's message thread.
+  const note = String(formData.get('note') || '').trim().slice(0, 2000)
+  const notice = customerNotice({status: patch.status, p, link, priceCents: patch.price_cents, charge: patch.charge_id ? {cents: patch.charged_cents, id: patch.charge_id} : null, note})
+  if (notice) {
+    await sendEmail({to: p.email, subject: notice.subject, html: notice.html})
+    if (note) await supabase.from('project_messages').insert({project_id: id, author: 'team', member_id: me.id, body: note})
   }
-  if (patch.status === 'card_saved') notices.card_saved = [notices.quoted[0], notices.quoted[1]]
-  if (patch.charge_id) notices.in_progress = [`We've started your project (${projectRef(p.number)})`, `<p>We've started work on your project. Your ${esc(p.card_brand || 'card')} ending in ${esc(p.card_last4 || '••••')} was charged <b>${formatMoney(patch.charged_cents)}</b>.</p>` + receipt({cents: patch.charged_cents, brand: p.card_brand, last4: p.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Mint 35 ${p.package || 'project'}`})]
-  const notice = notices[patch.status]
-  if (notice) await sendEmail({to: p.email, subject: notice[0], html: hi + notice[1] + sign})
 
-  revalidatePath(`/admin/projects/${id}`)
+  revalidatePath('/admin/projects/[id]', 'layout')
   revalidatePath('/admin')
   return {ok: true, label: STATUSES[patch.status].label}
 }
@@ -139,19 +120,20 @@ export async function updateJob(formData) {
     if (!(dollars >= 0)) return {error: 'Price must be a number.'}
     patch.price_cents = Math.round(dollars * 100)
   }
-  patch.assigned_to = formData.get('assigned_to') || null
-  patch.due_date = formData.get('due_date') || null
+  // Each form sends only its own fields (Billing: price, Communications: assignee, Progress: due date).
+  if (formData.has('assigned_to')) patch.assigned_to = formData.get('assigned_to') || null
+  if (formData.has('due_date')) patch.due_date = formData.get('due_date') || null
 
   const {error} = await supabase.from('projects').update(patch).eq('id', id)
   if (error) return {error: 'Couldn’t save. Try again.'}
 
   const events = []
   if (patch.price_cents !== undefined && patch.price_cents !== before.price_cents) events.push({type: 'price', data: {price_cents: patch.price_cents}})
-  if (patch.assigned_to !== before.assigned_to) events.push({type: 'assigned', data: {to: patch.assigned_to}})
-  if (patch.due_date !== before.due_date) events.push({type: 'due', data: {due_date: patch.due_date}})
+  if ('assigned_to' in patch && patch.assigned_to !== before.assigned_to) events.push({type: 'assigned', data: {to: patch.assigned_to}})
+  if ('due_date' in patch && patch.due_date !== before.due_date) events.push({type: 'due', data: {due_date: patch.due_date}})
   if (events.length) await supabase.from('project_events').insert(events.map(e => ({...e, project_id: id, actor: me.id})))
 
-  revalidatePath(`/admin/projects/${id}`)
+  revalidatePath('/admin/projects/[id]', 'layout')
   revalidatePath('/admin')
   return {ok: true}
 }
@@ -162,7 +144,7 @@ export async function addNote(formData) {
   const text = String(formData.get('note') || '').trim().slice(0, 5000)
   if (!text) return {error: 'Write a note first.'}
   await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'note', data: {text}})
-  revalidatePath(`/admin/projects/${id}`)
+  revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
 }
 
@@ -172,7 +154,7 @@ export async function recordFile({projectId, path, name, size, kind}) {
   const {error} = await supabase.from('project_files').insert({project_id: projectId, path, name, size, kind, uploaded_by: me.id})
   if (error) return {error: 'Couldn’t save the file record.'}
   await supabase.from('project_events').insert({project_id: projectId, actor: me.id, type: 'file', data: {name, kind}})
-  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
 }
 
@@ -199,7 +181,7 @@ export async function recordShared({projectId, kind, url, body}) {
   const {error} = await supabase.from('project_files').insert({project_id: projectId, path, name, kind, url, body, uploaded_by: me.id})
   if (error) return {error: 'Couldn’t save it. Has the database update for links been run?'}
   await supabase.from('project_events').insert({project_id: projectId, actor: me.id, type: 'file', data: {name, kind}})
-  revalidatePath(`/admin/projects/${projectId}`)
+  revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
 }
 
@@ -290,7 +272,7 @@ export async function replyToCustomer(formData) {
     subject: `New message about your Mint 35 project (${projectRef(p.number)})`,
     html: `<p>Hi ${esc(p.name.split(' ')[0])},</p><blockquote>${esc(body).replace(/\n/g, '<br>')}</blockquote><p><a href="${link}">Reply on your project page</a></p><p>— ${esc(me.name)}, Mint 35</p>`,
   })
-  revalidatePath(`/admin/projects/${id}`)
+  revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
 }
 
@@ -332,7 +314,7 @@ export async function decideAddon(formData) {
       : `<p>We're not able to add <b>${esc(a.label)}</b> to this project. We'll be in touch if there's another option.</p>`)
       + `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`,
   })
-  revalidatePath(`/admin/projects/${a.project_id}`)
+  revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
 }
 

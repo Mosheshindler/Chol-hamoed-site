@@ -17,7 +17,8 @@ export function CustomerLink({url}) {
   )
 }
 
-export function ReplyForm({id}) {
+// `jobs` (several videos in one order) adds a picker for which video the message is about.
+export function ReplyForm({id, jobs}) {
   const ref = useRef(null)
   const [state, action, pending] = useActionState(async (_, fd) => {
     const res = await replyToCustomer(fd)
@@ -26,8 +27,10 @@ export function ReplyForm({id}) {
   }, null)
   return (
     <form ref={ref} action={action} className="admin-form compact">
-      <input type="hidden" name="id" value={id} />
-      <textarea name="body" rows={3} placeholder="Reply to the customer (they get it by email)" required />
+      {jobs?.length > 1
+        ? <label>About<select name="id" defaultValue={id}>{jobs.map(j => <option key={j.id} value={j.id}>{j.label}</option>)}</select></label>
+        : <input type="hidden" name="id" value={id} />}
+      <textarea name="body" rows={3} placeholder="Message the client (they get it by email and on their project page)" required />
       {state?.error && <p className="form-error" role="alert">{state.error}</p>}
       {state?.ok && !pending && <p className="form-ok">Sent.</p>}
       <button className="btn btn-primary btn-sm" disabled={pending}>{pending ? 'Sending…' : 'Send reply'}</button>
