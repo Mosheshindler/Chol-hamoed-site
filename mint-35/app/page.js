@@ -13,6 +13,9 @@ import DialogController from '@/components/DialogController'
 import ScrollReveal from '@/components/ScrollReveal'
 import Icon from '@/components/Icon'
 
+// The official address for search engines (the site also answers on the vercel.app link).
+export const metadata = {alternates: {canonical: '/'}}
+
 const formats = [
   {ratio: '9:16', label: 'Vertical'},
   {ratio: '1:1', label: 'Square'},

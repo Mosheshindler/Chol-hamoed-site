@@ -1,6 +1,6 @@
 import LegalPage from '@/components/LegalPage'
 
-export const metadata = {title: 'Terms of Service · Mint 35'}
+export const metadata = {title: 'Terms of Service · Mint 35', alternates: {canonical: '/terms'}}
 
 export default function TermsPage() {
   return (
