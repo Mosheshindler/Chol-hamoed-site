@@ -107,6 +107,13 @@ separate from the Mint Media video site at the repo root (don't touch root files
   auth.admin.generateLink (recovery) as ?token=hashed_token; the token is only verified (verifyOtp) when the form is
   submitted, so email link scanners can't use it up. Team page has "Send set-password link" per teammate.
 
+- Admin job pages (Oct 21): /admin/projects/[id] is an order hub with 4 tiles (Project overview, Billing & payment, Progress,
+  Communications), each opening its own tab page (project/, billing/, progress/, communications/; tab bar in layout.js).
+  All load the whole order via `_lib/order.js` (loadOrder, React cache). Progress holds the next-step buttons: steps that email
+  the client show the exact email (`customerNotice` in lib/notices.js, same function moveStatus sends) plus an optional personal
+  line (also saved as a team message); delivery steps (script/first cut/final) include the share box (link, text or file).
+  updateJob only changes the fields a form sends (price on Billing, assignee on Communications, due date on Progress).
+
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).

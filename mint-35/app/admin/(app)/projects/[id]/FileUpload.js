@@ -7,17 +7,17 @@ import {recordFile, recordShared} from '../../../actions'
 
 const MODES = [['file', 'Upload a file'], ['link', 'Google Doc / link'], ['text', 'Paste text']]
 
-export default function FileUpload({projectId}) {
+export default function FileUpload({projectId, kind: fixedKind, compact}) {
   const router = useRouter()
   const [msg, setMsg] = useState(null)
   const [busy, setBusy] = useState(false)
-  const [mode, setMode] = useState('file')
+  const [mode, setMode] = useState(fixedKind ? 'link' : 'file')
 
   async function onSubmit(e) {
     e.preventDefault()
     const form = e.currentTarget
     const fd = new FormData(form)
-    const kind = fd.get('kind')
+    const kind = fixedKind || fd.get('kind')
     setMsg(null)
     let res
     if (mode === 'file') {
@@ -43,18 +43,20 @@ export default function FileUpload({projectId}) {
   }
 
   return (
-    <form className="upload-row" onSubmit={onSubmit}>
+    <form className={`upload-row${compact ? ' compact' : ''}`} onSubmit={onSubmit}>
       <div className="share-modes" role="radiogroup" aria-label="How to share">
         {MODES.map(([v, label]) => (
           <button key={v} type="button" role="radio" aria-checked={mode === v} className={`share-mode${mode === v ? ' on' : ''}`} onClick={() => { setMode(v); setMsg(null) }}>{label}</button>
         ))}
       </div>
-      <select id="upload-kind" name="kind" defaultValue="script" aria-label="What is it">
-        <option value="script">Script</option>
-        <option value="first_cut">First cut</option>
-        <option value="final">Final</option>
-        <option value="other">Other</option>
-      </select>
+      {!fixedKind && (
+        <select id="upload-kind" name="kind" defaultValue="script" aria-label="What is it">
+          <option value="script">Script</option>
+          <option value="first_cut">First cut</option>
+          <option value="final">Final</option>
+          <option value="other">Other</option>
+        </select>
+      )}
       {mode === 'file' && <input id="upload-file" type="file" name="file" aria-label="File" />}
       {mode === 'link' && <input id="share-url" name="url" type="url" inputMode="url" placeholder="https://docs.google.com/…" aria-label="Link" className="share-url" />}
       {mode === 'text' && <textarea id="share-body" name="body" rows={8} placeholder="Paste the script here" aria-label="Text" className="share-body" />}

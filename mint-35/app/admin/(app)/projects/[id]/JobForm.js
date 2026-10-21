@@ -3,37 +3,34 @@
 import {useActionState, useEffect, useState} from 'react'
 import {updateJob} from '../../../actions'
 
-// Controlled fields: React resets uncontrolled inputs after a form action, which would
-// flash the old values back until the page refreshes.
-export default function JobForm({id, price, assignedTo, dueDate, team}) {
-  const [values, setValues] = useState({
-    price: price != null ? String(price / 100) : '',
-    assigned_to: assignedTo || '',
-    due_date: dueDate || '',
-  })
-  // Pick up changes made elsewhere on the page, like a due date set by a status move.
-  useEffect(() => {
-    setValues({price: price != null ? String(price / 100) : '', assigned_to: assignedTo || '', due_date: dueDate || ''})
-  }, [price, assignedTo, dueDate])
+// One small form per field, each on its own page (price on Billing, assignee on Communications,
+// due date on Progress). Controlled so values don't flash back after saving.
+function FieldForm({id, name, initial, label, render, button = 'Save'}) {
+  const [value, setValue] = useState(initial)
+  useEffect(() => { setValue(initial) }, [initial])
   const [state, action, pending] = useActionState(async (_, fd) => updateJob(fd), null)
-  const set = k => e => setValues(v => ({...v, [k]: e.target.value}))
-
   return (
-    <form className="admin-form compact" action={action}>
+    <form className="admin-form compact inline-form" action={action}>
       <input type="hidden" name="id" value={id} />
-      <label>Price
-        <span className="money-input"><span>$</span><input id="job-price" name="price" inputMode="decimal" value={values.price} onChange={set('price')} placeholder="Not set" /></span>
-      </label>
-      <label>Assigned to
-        <select id="job-assignee" name="assigned_to" value={values.assigned_to} onChange={set('assigned_to')}>
-          <option value="">Unassigned</option>
-          {team.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
-      </label>
-      <label>Due date<input id="job-due" type="date" name="due_date" value={values.due_date} onChange={set('due_date')} /></label>
+      <label>{label}{render({name, value, onChange: e => setValue(e.target.value)})}</label>
+      <button className="btn btn-ghost btn-sm" disabled={pending}>{pending ? 'Saving…' : button}</button>
       {state?.error && <p className="form-error" role="alert">{state.error}</p>}
       {state?.ok && !pending && <p className="form-ok">Saved.</p>}
-      <button className="btn btn-ghost btn-sm" disabled={pending}>{pending ? 'Saving…' : 'Save'}</button>
     </form>
   )
+}
+
+export function PriceForm({id, price}) {
+  return <FieldForm id={id} name="price" label="Job price" initial={price != null ? String(price / 100) : ''}
+    render={f => <span className="money-input"><span>$</span><input {...f} inputMode="decimal" placeholder="Not set" /></span>} />
+}
+
+export function AssignForm({id, assignedTo, team}) {
+  return <FieldForm id={id} name="assigned_to" label="Assigned to" initial={assignedTo || ''}
+    render={f => <select {...f}><option value="">Unassigned</option>{team.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}</select>} />
+}
+
+export function DueForm({id, dueDate}) {
+  return <FieldForm id={id} name="due_date" label="Due date" initial={dueDate || ''}
+    render={f => <input {...f} type="date" />} />
 }
