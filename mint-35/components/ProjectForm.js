@@ -643,7 +643,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               </Tip></legend>
               <Choices name={p('story')} options={STORY} chips />
             </fieldset>
-            {w.story !== 'text' && (
+            {w.story?.startsWith('narration') && (
               <>
                 <fieldset><legend>Voice</legend><Choices name={p('voice')} options={VOICES} chips /></fieldset>
                 <fieldset><legend>Voice tone</legend><Choices name={p('tone')} options={TONES} chips /></fieldset>
@@ -737,16 +737,16 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
 
         <fieldset className="disclaimer-accept">
           <legend>AI Production Disclaimer</legend>
-          <div className="checks-col">
-            {DISCLAIMER_POINTS.map((t, n) => (
-              <label key={n} className="check check-block"><input type="checkbox" name={`dp${n}`} required data-label={`Disclaimer point ${n + 1}`} /><span>{t}</span></label>
-            ))}
-          </div>
           <div className="disclaimer-box" tabIndex={0} ref={el => { if (el && !read && el.scrollHeight <= el.clientHeight + 8 && step === last) setRead(true) }}
             onScroll={e => { const el = e.currentTarget; if (el.scrollTop + el.clientHeight >= el.scrollHeight - 8) { setRead(true); if (el.classList.contains('is-missing')) { el.classList.remove('is-missing'); setMissing(m => { const items = (m?.items || []).filter(i => i.key !== 'disclaimer-read'); return items.length ? {...m, items} : null }) } } }}>
             <DisclaimerText />
           </div>
           {!read && <p className="hint">Scroll to the end of the disclaimer to continue.</p>}
+          <div className="checks-col disclaimer-points">
+            {DISCLAIMER_POINTS.map((t, n) => (
+              <label key={n} className="check check-block"><input type="checkbox" name={`dp${n}`} required data-label={`Disclaimer point ${n + 1}`} /><span>{t}</span></label>
+            ))}
+          </div>
           <label className={`check accept${read ? '' : ' is-locked'}`}>
             <input type="checkbox" name="accept_disclaimer" disabled={!read} required data-label="Accept the disclaimer" />
             <span>I&rsquo;ve read and accept the AI Production Disclaimer.</span>
