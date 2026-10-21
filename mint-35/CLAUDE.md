@@ -59,7 +59,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Order form v2 (`components/ProjectForm.js`): steps 1 You, 2 Your brand, 3 one page per video (classic vs
   Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (name,
   email, cell, company always required; no title field since Oct 21; alerts by email only for now). Step 1 opens with a "Have these handy" note.
-  Campaign 3 asks "General direction only" vs "I have an idea for each video" (3 optional boxes) -> brief.stories / brief.video_ideas. Logo required unless "I only have a
+  Campaign 3 ("3 different videos, one look"; owner: avoid "stories") asks "General direction only" vs "I have an idea for each video" (3 optional boxes) -> brief.stories / brief.video_ideas. Logo required unless "I only have a
   logo for what I'm promoting" (then each video's media upload is required). Per-video answers beyond the old
   columns live in `projects.brief` (jsonb); `latest_date` is the in-hand deadline (Momentum: launch date).
   Chosen files are also kept in the browser (IndexedDB, `lib/fileStash.js`) so a reload keeps them; cleared on submit or after 14 days.

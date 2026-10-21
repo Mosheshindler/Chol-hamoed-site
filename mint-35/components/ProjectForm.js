@@ -601,9 +601,9 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                   <>
                     <h3 className="q-group">The {multi} videos</h3>
                     <fieldset>
-                      <legend>How should we plan the {multi} stories?</legend>
+                      <legend>How should we plan the {multi} videos?</legend>
                       <Choices name={p('stories')} options={[
-                        {value: 'general', label: 'General direction only', hint: `We plan ${multi} different stories from your answers above.`},
+                        {value: 'general', label: 'General direction only', hint: `We plan ${multi} different videos with one look, from your answers above.`},
                         {value: 'ideas', label: 'I have an idea for each video', hint: 'Give us a line or two for each one.'},
                       ]} />
                     </fieldset>
