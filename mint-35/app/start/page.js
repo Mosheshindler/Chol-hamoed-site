@@ -7,7 +7,7 @@ import StartFlow from './StartFlow'
 import {paymentsReady, tokenizeUrl} from '@/lib/qb'
 import {upcomingClosedDays} from '@/lib/holidays'
 
-export const metadata = {title: 'Start a project · Mint 35'}
+export const metadata = {title: 'Start a project · Mint 35', alternates: {canonical: '/start'}}
 export const dynamic = 'force-dynamic'
 
 // Step 1: build the order. Step 2 (?step=details): one form covering every package in it.

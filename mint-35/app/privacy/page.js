@@ -1,6 +1,6 @@
 import LegalPage from '@/components/LegalPage'
 
-export const metadata = {title: 'Privacy Policy · Mint 35'}
+export const metadata = {title: 'Privacy Policy · Mint 35', alternates: {canonical: '/privacy'}}
 
 const COLLECT = [
   ['Contact details', 'Name, email, cell phone, company, website', 'To run your order and reach you'],
