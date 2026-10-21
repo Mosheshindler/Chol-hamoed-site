@@ -51,18 +51,18 @@ const notIncluded = [
 ]
 
 const faqs = [
-  {q: 'Do I need a meeting?', a: 'No. It all starts with one form.'},
+  {q: 'Do I need a meeting?', a: 'Nope. It all starts with one form.'},
   {q: 'Can I share my ideas?', a: 'Yes. Add ideas and links in the form. We make the final creative call.'},
   {q: 'How fast is it?', a: 'First cut in 3 business days, counted from when your order enters production. Plan on about 6 business days to have your final video in hand, including one revision round. Weekends and holidays aren’t counted, and start dates depend on our queue.'},
   {q: 'What if something’s wrong?', a: 'Our mistake? Fixed free. That covers any fact you gave us, like a price, link or phone number. Creative changes use your revision round.'},
   {q: 'What counts as a revision?', a: 'Your revision round covers changes to what we’ve made: wording and on-screen text, timing and pacing, music, voice, and swapping in different photos or footage. A new concept or story, or rebuilding characters or scenes once they’re set, isn’t part of a revision. Send all your notes together and we’ll make them in one round.'},
-  {q: 'Can you create a custom character or make someone look like a real person?', a: 'No. We don’t build characters to your specifications, we don’t match anyone’s likeness, and we never use celebrities or copyrighted characters. Reference photos guide the general style only.'},
+  {q: 'Can you create a custom character or make someone look like a real person?', a: 'That’s outside what we offer. We don’t build characters to your specifications, we don’t match anyone’s likeness, and we never use celebrities or copyrighted characters. Reference photos guide the general style only.'},
   {q: 'Will my product look exactly right?', a: 'AI gets close, not exact. If your product needs to look exact, upload real photos or video of it and we’ll build around those.'},
   {q: 'Will the AI get every detail perfect?', a: 'Not always. AI is guided by prompts, not frame-by-frame control, so small imperfections can happen. Some requests aren’t possible, and once characters or scenes are set, some changes can’t be made. Revisions are limited to what your package includes. See our AI Production Disclaimer.', dialog: 'disclaimer-dialog'},
   {q: 'Can I cancel or get a refund?', a: 'Cancel free anytime before we start your project. Nothing is charged until then. Once we start, your card is charged in full, and because Mint 35 is a fixed-scope service, all sales are final. Need full customization and control? That’s a Mint Media production.', href: 'https://mintmediallc.com'},
   {q: 'Who owns the video? Can I run it as a paid ad?', a: 'Yes. Once your order is paid, you can use your videos to market your business, product or campaign, including paid ads on social media and YouTube.', terms: true},
   {q: 'Can I add extras?', a: 'Yes. When you order, you can add extra formats, subtitles, a 15-second cutdown, an extra revision round or rush delivery. You can also add them later from your project page.'},
-  {q: 'Is it fully automated?', a: 'No. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
+  {q: 'Is it fully automated?', a: 'Not at all. AI does the heavy lifting. Real Mint Media creatives write, build and finish every video.'},
   {q: 'Why the name Mint 35?', a: 'Many of our videos land around 35 seconds, a sweet spot for social. Every package runs 30 to 60 seconds, and we fit the length to your message.'},
 ]
 
