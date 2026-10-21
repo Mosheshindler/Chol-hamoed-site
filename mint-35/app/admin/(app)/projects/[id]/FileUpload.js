@@ -52,7 +52,7 @@ export default function FileUpload({projectId, kind: fixedKind, label, compact})
   return (
     <form className={`upload-row${compact ? ' compact' : ''}`} onSubmit={onSubmit}>
       <div className="share-modes" role="radiogroup" aria-label="How to share">
-        {MODES.map(([v, label]) => (
+        {MODES.map(([v, label]) => [v, v === 'link' && VIDEO_KINDS.includes(fixedKind) ? 'Link' : label]).map(([v, label]) => (
           <button key={v} type="button" role="radio" aria-checked={mode === v} className={`share-mode${mode === v ? ' on' : ''}`} onClick={() => { setMode(v); setMsg(null) }}>{label}</button>
         ))}
       </div>

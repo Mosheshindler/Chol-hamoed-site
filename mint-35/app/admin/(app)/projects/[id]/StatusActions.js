@@ -51,7 +51,7 @@ export default function StatusActions({id, status, steps, price, card, shared = 
               <p className="deliver-title">1. Share the {kindName}</p>
               {items.length
                 ? <ul className="files">{items.map(f => <li key={f.id}><span className="file-kind">Shared</span>{f.body ? <span>Pasted text</span> : <a href={f.href} target="_blank" rel="noopener noreferrer">{f.name}</a>}</li>)}</ul>
-                : <p className="warn small">Nothing shared yet. Add a Google Doc link, paste text or upload a file, so the client has something to open.</p>}
+                : <p className="warn small">Nothing shared yet. {deliverable === 'script' ? 'Add a Google Doc link, paste the text or upload a file' : 'Add a link or upload the file'} so the client has something to open.</p>}
               <FileUpload projectId={id} kind={deliverable} compact />
               {deliverable === 'final' && alsoDue.length > 0 && (
                 <div className="also-due">
