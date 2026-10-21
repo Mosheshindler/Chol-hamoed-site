@@ -76,7 +76,7 @@ export default async function JobsPage({searchParams}) {
               <Link key={p.id} href={`/admin/projects/${p.id}`} className="job-row" role="row">
                 <span className="mono" role="cell">{projectRef(p.number)}{p.order_size > 1 && <small className="order-tag">{p.order_item}/{p.order_size} in order</small>}</span>
                 <span role="cell"><b>{p.company || p.name}</b>{p.company && <small>{p.name}</small>}</span>
-                <span role="cell"><StatusPill status={p.status} />{lastAuthor[p.id] === 'customer' && <small className="flag">New message</small>}{addonCount[p.id] > 0 && <small className="flag">Add-on request</small>}</span>
+                <span role="cell"><StatusPill status={p.status} pkg={p.package} />{lastAuthor[p.id] === 'customer' && <small className="flag">New message</small>}{addonCount[p.id] > 0 && <small className="flag">Add-on request</small>}</span>
                 <span role="cell" data-label="Package">{p.package || '—'}</span>
                 <span role="cell" className="num" data-label="Price">{formatMoney(p.price_cents)}</span>
                 <span role="cell" data-label="Assigned">{names[p.assigned_to] || <i className="muted">Unassigned</i>}</span>

@@ -10,6 +10,7 @@ import HowItWorks from '@/components/HowItWorks'
 import DisclaimerModal from '@/components/DisclaimerModal'
 import FormatsModal from '@/components/FormatsModal'
 import DialogController from '@/components/DialogController'
+import ScrollReveal from '@/components/ScrollReveal'
 import Icon from '@/components/Icon'
 
 const formats = [
@@ -188,6 +189,7 @@ export default function Home() {
       <FormatsModal />
       <DisclaimerModal />
       <DialogController />
+      <ScrollReveal />
     </>
   )
 }

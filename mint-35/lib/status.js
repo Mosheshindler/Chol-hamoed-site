@@ -47,6 +47,11 @@ export const customerStage = status => STAGE_OF[status] ?? -1
 // Momentum Pack approves a sample video instead of a script.
 export const scriptWord = pkg => (pkg === 'Momentum Pack' ? 'sample video' : 'script')
 
+// Admin labels say "script"; Momentum jobs approve a sample video instead.
+export const forPackage = (label, pkg) => (pkg === 'Momentum Pack' && label
+  ? label.replace('Writing script', 'Making sample video').replace(/Script/g, 'Sample video').replace(/script/g, 'sample video')
+  : label)
+
 export function customerStatus(p) {
   const w = scriptWord(p.package)
   switch (p.status) {

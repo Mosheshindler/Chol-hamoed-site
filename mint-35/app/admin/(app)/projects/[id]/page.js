@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import {notFound} from 'next/navigation'
 import {createClient} from '@/lib/supabase/server'
-import {STATUSES, TRANSITIONS, projectRef, formatMoney} from '@/lib/status'
+import {STATUSES, TRANSITIONS, projectRef, formatMoney, forPackage} from '@/lib/status'
 import {addonByKey} from '@/lib/addons'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import StatusPill from '../../StatusPill'
@@ -63,19 +63,19 @@ function answers(p) {
 const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', script: 'Script', first_cut: 'First cut', final: 'Final', other: 'Other'}
 const ALERT_LABEL = {sms: 'Text', whatsapp: 'WhatsApp', email: 'Email only'}
 
-function describe(e, names) {
+function describe(e, names, pkg) {
   const who = names[e.actor] || 'Website'
   switch (e.type) {
     case 'submitted': return 'Submitted from the website'
     case 'disclaimer_accepted': return `Customer accepted the AI Production Disclaimer (version ${e.data.version})${e.data.points ? `, ticking each key point: ${e.data.points.join(' / ')}` : ''}`
-    case 'status': return `${who} moved it to “${STATUSES[e.data.to]?.label}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}`
+    case 'status': return `${who} moved it to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}`
     case 'price': return `${who} set the price to ${formatMoney(e.data.price_cents)}`
     case 'assigned': return e.data.to ? `${who} assigned it to ${names[e.data.to] || 'someone'}` : `${who} unassigned it`
     case 'due': return e.data.due_date ? `${who} set the due date to ${formatDate(e.data.due_date)}` : `${who} cleared the due date`
     case 'file': return `${who} uploaded ${KIND_LABEL[e.data.kind]?.toLowerCase() || 'a file'}: ${e.data.name}`
     case 'note': return null
     case 'charge_failed': return `Charge failed: ${e.data.message}`
-    case 'customer': return `Customer ${e.data.decision === 'approve' ? 'approved' : 'requested changes'}, moved to “${STATUSES[e.data.to]?.label}”`
+    case 'customer': return `Customer ${e.data.decision === 'approve' ? 'approved' : 'requested changes'}, moved to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”`
     case 'addon': return `Customer requested add-on: ${e.data.label}${e.data.details ? ` (${e.data.details})` : ''}`
     case 'addon_accepted': return `${who} confirmed add-on ${e.data.label} at ${formatMoney(e.data.price_cents)}`
     case 'addon_declined': return `${who} declined add-on ${e.data.label}`
@@ -115,7 +115,7 @@ export default async function ProjectPage({params}) {
           <h1>{p.company || p.name}</h1>
           <p className="muted">{p.package || 'No package chosen'} · {formatMoney(p.price_cents)}{p.due_date ? ` · due ${formatDate(p.due_date)}` : ''}</p>
         </div>
-        <StatusPill status={p.status} />
+        <StatusPill status={p.status} pkg={p.package} />
       </div>
 
       {siblings?.length > 1 && (
@@ -129,7 +129,7 @@ export default async function ProjectPage({params}) {
                   : <Link href={`/admin/projects/${o.id}`}>{projectRef(o.number)}</Link>}
                 <span>{o.package || 'No package'}</span>
                 <span className="num">{formatMoney(o.price_cents)}</span>
-                <StatusPill status={o.status} />
+                <StatusPill status={o.status} pkg={o.package} />
               </li>
             ))}
           </ul>
@@ -137,7 +137,7 @@ export default async function ProjectPage({params}) {
         </section>
       )}
 
-      <StatusActions id={p.id} status={p.status} steps={TRANSITIONS[p.status] || []} price={p.price_cents} card={p.card_last4 ? `${p.card_brand || 'card'} ending ${p.card_last4}` : null} />
+      <StatusActions id={p.id} status={p.status} steps={(TRANSITIONS[p.status] || []).map(s => ({...s, label: forPackage(s.label, p.package)}))} price={p.price_cents} card={p.card_last4 ? `${p.card_brand || 'card'} ending ${p.card_last4}` : null} />
 
       <div className="project-grid">
         <div className="col-main">
@@ -237,7 +237,7 @@ export default async function ProjectPage({params}) {
                 <li key={e.id} className={e.type === 'note' ? 'is-note' : undefined}>
                   {e.type === 'note'
                     ? <><b>{names[e.actor] || 'Someone'}</b><p>{e.data.text}</p></>
-                    : <p>{describe(e, names)}</p>}
+                    : <p>{describe(e, names, p.package)}</p>}
                   <time>{formatDateTime(e.created_at)}</time>
                 </li>
               ))}

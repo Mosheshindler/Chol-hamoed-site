@@ -62,6 +62,9 @@ for (const d of DEVICES) {
   // Homepage
   await health('/', 'Homepage')
   await shot('01-homepage-top')
+  // Scroll through once so scroll-in animations have played before the full-page shot.
+  await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += innerHeight / 2) { scrollTo(0, y); await new Promise(r => setTimeout(r, 120)) } scrollTo(0, 0) })
+  await page.waitForTimeout(1300)
   await shot('00-homepage-full', true)
   const home = await text()
   const has = t => home.toLowerCase().includes(t.toLowerCase()) // some labels are shown in capitals
