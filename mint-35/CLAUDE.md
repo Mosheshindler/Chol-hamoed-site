@@ -102,6 +102,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
   1 sample video to approve, "1 revision round on the first video" (the other 4 follow the approved look; matches Terms §4).
   Customer word is "video format" (not orientation/export). Admin labels say "sample video" for Momentum (`forPackage` in lib/status.js).
 
+- Team sign-in (Oct 21): owner adds a teammate with name + email only; they get an invite email (Resend, `lib/passwordLink.js`)
+  with a one-time link to /admin/set-password. Login has "Forgot password?" (/admin/forgot). Links come from
+  auth.admin.generateLink (recovery) as ?token=hashed_token; the token is only verified (verifyOtp) when the form is
+  submitted, so email link scanners can't use it up. Team page has "Send set-password link" per teammate.
+
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).

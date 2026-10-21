@@ -1,6 +1,6 @@
 import {createClient} from '@/lib/supabase/server'
 import {formatDate} from '@/lib/dates'
-import TeamForms, {RemoveButton} from './TeamForms'
+import TeamForms, {RemoveButton, ResendButton} from './TeamForms'
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -23,7 +23,7 @@ export default async function TeamPage() {
                   <span><b>{t.name}</b>{t.id === me?.id && <span className="muted"> (you)</span>}<small>{t.email}</small></span>
                   <span className={`pill ${t.role === 'owner' ? 'pill-go' : 'pill-off'}`}>{t.role === 'owner' ? 'Owner' : 'Team'}</span>
                   <small className="muted">Added {formatDate(t.created_at)}</small>
-                  {isOwner && t.id !== me.id && <RemoveButton id={t.id} name={t.name} />}
+                  {isOwner && t.id !== me.id && <><ResendButton id={t.id} /><RemoveButton id={t.id} name={t.name} /></>}
                 </li>
               ))}
             </ul>

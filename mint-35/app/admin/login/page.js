@@ -11,6 +11,7 @@ export default function LoginPage() {
         <p className="logo-row"><Logo /> <span className="auth-tag">Admin</span></p>
         <h1>Sign in</h1>
         <LoginForm />
+        <p className="auth-foot"><a href="/admin/forgot">Forgot password?</a></p>
       </div>
     </main>
   )
