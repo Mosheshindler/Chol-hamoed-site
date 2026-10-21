@@ -893,3 +893,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 /* Scroll reveal (components/ScrollReveal.js) */
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; transition-delay: var(--reveal-delay, 0ms); }
 .reveal.in { opacity: 1; transform: none; }
+
+/* Customer page: a script shared as pasted text */
+.cp-files .cp-text-label { color: var(--muted); }
+.cp-text { flex-basis: 100%; white-space: pre-wrap; padding: 14px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); line-height: 1.55; max-height: 460px; overflow: auto; }

@@ -19,16 +19,17 @@ export async function loadOrderByToken(token, {withFiles = true} = {}) {
   const ids = jobs.map(j => j.id)
 
   const [{data: files}, {data: messages}, {data: addons}] = await Promise.all([
-    withFiles ? db.from('project_files').select('id, project_id, kind, path, name, size, created_at').in('project_id', ids).in('kind', CUSTOMER_FILE_KINDS).order('created_at') : {data: []},
+    withFiles ? db.from('project_files').select('id, project_id, kind, path, name, size, url, body, created_at').in('project_id', ids).in('kind', CUSTOMER_FILE_KINDS).order('created_at') : {data: []},
     db.from('project_messages').select('id, project_id, author, body, created_at').in('project_id', ids).order('created_at'),
     db.from('project_addons').select('id, project_id, addon, label, details, price_cents, status, created_at').in('project_id', ids).order('created_at'),
   ])
 
   let urls = {}
-  if (files?.length) {
-    const {data: signed} = await db.storage.from('project-files').createSignedUrls(files.map(f => f.path), 3600, {download: true})
+  const stored = (files || []).filter(f => !f.url && !f.body)
+  if (stored.length) {
+    const {data: signed} = await db.storage.from('project-files').createSignedUrls(stored.map(f => f.path), 3600, {download: true})
     urls = Object.fromEntries((signed || []).map(s => [s.path, s.signedUrl]))
   }
 
-  return {db, jobs, files: (files || []).map(f => ({...f, url: urls[f.path]})), messages: messages || [], addons: addons || []}
+  return {db, jobs, files: (files || []).map(f => ({...f, url: f.url || urls[f.path], shared: !!(f.url || f.body)})), messages: messages || [], addons: addons || []}
 }

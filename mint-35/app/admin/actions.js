@@ -175,6 +175,33 @@ export async function recordFile({projectId, path, name, size, kind}) {
   return {ok: true}
 }
 
+// A deliverable shared as a link (Google Doc, Drive…) or as pasted text, with no file in storage.
+export async function recordShared({projectId, kind, url, body}) {
+  const {supabase, me} = await requireMember()
+  if (!['script', 'first_cut', 'final', 'other'].includes(kind)) return {error: 'Choose what this is.'}
+  let name
+  if (url != null) {
+    url = String(url).trim()
+    let host
+    try { host = new URL(url).hostname } catch {}
+    if (!host || !/^https?:/i.test(url)) return {error: 'Paste the full link, starting with https://'}
+    name = host.endsWith('docs.google.com') ? 'Google Doc' : host.replace(/^www\./, '')
+    body = null
+  } else {
+    body = String(body || '').trim()
+    if (!body) return {error: 'Paste the text first.'}
+    if (body.length > 20000) return {error: 'That text is too long. Use a Google Doc link instead.'}
+    name = 'Text'
+    url = null
+  }
+  const path = `${projectId}/${kind}/shared-${Date.now()}`
+  const {error} = await supabase.from('project_files').insert({project_id: projectId, path, name, kind, url, body, uploaded_by: me.id})
+  if (error) return {error: 'Couldn’t save it. Has the database update for links been run?'}
+  await supabase.from('project_events').insert({project_id: projectId, actor: me.id, type: 'file', data: {name, kind}})
+  revalidatePath(`/admin/projects/${projectId}`)
+  return {ok: true}
+}
+
 export async function addMember(formData) {
   const {me} = await requireMember()
   if (me.role !== 'owner') return {error: 'Only the owner can add people.'}

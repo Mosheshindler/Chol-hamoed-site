@@ -76,10 +76,15 @@ export default async function CustomerPage({params}) {
               {jobFiles.length > 0 && (
                 <ul className="cp-files">
                   {jobFiles.map(f => (
-                    <li key={f.id}>
+                    <li key={f.id} className={f.body ? 'cp-file-text' : undefined}>
                       <span className="file-kind">{KIND[f.kind]}</span>
-                      <a href={f.url} download>{f.name}</a>
+                      {f.body
+                        ? <span className="cp-text-label">Read it below</span>
+                        : f.shared
+                          ? <a href={f.url} target="_blank" rel="noopener noreferrer">Open {f.name === 'Google Doc' ? 'the Google Doc' : f.name} →</a>
+                          : <a href={f.url} download>{f.name}</a>}
                       <span className="muted">{formatDate(f.created_at)}</span>
+                      {f.body && <div className="cp-text">{f.body}</div>}
                     </li>
                   ))}
                 </ul>

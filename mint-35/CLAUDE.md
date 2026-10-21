@@ -48,6 +48,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   progress, files (script/first_cut/final), approve/request changes, messages, add-on requests at any stage (order to delivery; homepage says extras can be added anytime).
   Add-on list in `lib/addons.js`: extra format $450/video, 15-sec cutdown $175/video, subtitles $150/video;
   extra revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
+  Admin Files can share a deliverable as an upload, a link (e.g. Google Doc) or pasted text (`recordShared`; project_files.url /
+  .body, migration 20261021000000_shared_links.sql, placeholder path with no storage object). The customer page opens links in a
+  new tab and shows pasted text inline.
 
 - AI Production Disclaimer (owner's wording) lives in `lib/disclaimer.js`: page /ai-disclaimer, footer link, FAQ,
   and a required checkbox at checkout. The API refuses orders without the current DISCLAIMER_VERSION and logs a

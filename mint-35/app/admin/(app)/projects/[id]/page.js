@@ -101,8 +101,9 @@ export default async function ProjectPage({params}) {
   ])
   const custUrl = customerLink(await siteOrigin(), p.customer_token)
   const names = Object.fromEntries((team || []).map(t => [t.id, t.name]))
-  const {data: signed} = files?.length
-    ? await supabase.storage.from('project-files').createSignedUrls(files.map(f => f.path), 3600)
+  const stored = (files || []).filter(f => !f.url && !f.body)
+  const {data: signed} = stored.length
+    ? await supabase.storage.from('project-files').createSignedUrls(stored.map(f => f.path), 3600)
     : {data: []}
   const urls = Object.fromEntries((signed || []).map(s => [s.path, s.signedUrl]))
 
@@ -205,7 +206,9 @@ export default async function ProjectPage({params}) {
                 {files.map(f => (
                   <li key={f.id}>
                     <span className="file-kind">{KIND_LABEL[f.kind]}</span>
-                    <a href={urls[f.path]} target="_blank" rel="noopener noreferrer">{f.name}</a>
+                    {f.body
+                      ? <details className="shared-text"><summary>Pasted text</summary><div className="shared-body">{f.body}</div></details>
+                      : <a href={f.url || urls[f.path]} target="_blank" rel="noopener noreferrer">{f.url ? `${f.name} →` : f.name}</a>}
                     <small className="muted">{f.size ? (f.size < 1048576 ? `${Math.max(1, Math.round(f.size / 1024))} KB` : `${(f.size / 1048576).toFixed(1)} MB`) : ''}</small>
                   </li>
                 ))}
