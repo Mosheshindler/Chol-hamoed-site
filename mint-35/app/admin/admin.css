@@ -248,3 +248,29 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .admin .sent-list summary b { font-weight: 700; }
 .admin .log-details[open] { padding-bottom: 12px; }
 .admin .sent-list .email-preview { margin: 0 0 12px; }
+
+/* Key dates, countdowns and deliverables (Progress page) */
+.key-dates { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+.key-date { display: grid; gap: 2px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); min-width: 200px; }
+.key-date .muted { font-size: .8rem; }
+.countdown { display: inline-block; margin-left: 8px; padding: 2px 9px; border-radius: 999px; font-size: .76rem; font-weight: 700; white-space: nowrap; }
+.key-date .countdown { margin: 4px 0 0; justify-self: start; }
+.cd-ok { color: var(--lime); background: rgba(136,192,64,.12); }
+.cd-soon { color: #f0c46a; background: rgba(240,196,106,.14); }
+.cd-late { color: var(--red); background: rgba(224,122,107,.14); }
+.tile-dates { display: grid; gap: 4px; font-size: .86rem; color: var(--muted); }
+.tile-dates b { color: var(--text); font-weight: 600; }
+.deliverables { list-style: none; padding: 0; margin: 0 0 10px; display: grid; gap: 8px; }
+.deliverables li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); }
+.deliverables li.is-done { border-color: rgba(136,192,64,.35); }
+.dl-check { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line); color: var(--lime); font-weight: 800; font-size: .8rem; }
+.deliverables li.is-done .dl-check { border-color: var(--lime); background: rgba(136,192,64,.15); }
+.deliverables li.is-note .dl-check { border-color: transparent; color: var(--muted); }
+.dl-body { display: grid; gap: 4px; min-width: 0; }
+.dl-file a { color: var(--lime); overflow-wrap: anywhere; }
+.admin .dl-share { padding: 0; border: 0; background: none; }
+.admin .dl-share summary { font-size: .85rem; padding: 2px 0; color: var(--lime); justify-content: flex-start; }
+.admin .dl-share summary::after { display: none; }
+.admin .dl-share[open] summary { margin-bottom: 8px; }
+.also-due ul { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 4px; font-size: .9rem; }
+.also-due .is-done { color: var(--lime); }

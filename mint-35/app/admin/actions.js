@@ -159,9 +159,9 @@ export async function recordFile({projectId, path, name, size, kind}) {
 }
 
 // A deliverable shared as a link (Google Doc, Drive…) or as pasted text, with no file in storage.
-export async function recordShared({projectId, kind, url, body}) {
+export async function recordShared({projectId, kind, url, body, label}) {
   const {supabase, me} = await requireMember()
-  if (!['script', 'first_cut', 'final', 'other'].includes(kind)) return {error: 'Choose what this is.'}
+  if (!['script', 'first_cut', 'final', 'cutdown', 'extra_format', 'other'].includes(kind)) return {error: 'Choose what this is.'}
   let name
   if (url != null) {
     url = String(url).trim()
@@ -177,9 +177,11 @@ export async function recordShared({projectId, kind, url, body}) {
     name = 'Text'
     url = null
   }
+  // A label (e.g. the extra format's shape) leads the name, so the team and client see which version it is.
+  if (label) name = String(label).slice(0, 80)
   const path = `${projectId}/${kind}/shared-${Date.now()}`
   const {error} = await supabase.from('project_files').insert({project_id: projectId, path, name, kind, url, body, uploaded_by: me.id})
-  if (error) return {error: 'Couldn’t save it. Has the database update for links been run?'}
+  if (error) return {error: 'Couldn’t save it. Has the latest database update been run?'}
   await supabase.from('project_events').insert({project_id: projectId, actor: me.id, type: 'file', data: {name, kind}})
   revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}

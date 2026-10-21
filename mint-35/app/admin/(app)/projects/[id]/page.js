@@ -3,7 +3,12 @@ import {STATUSES, TRANSITIONS, projectRef, formatMoney, forPackage} from '@/lib/
 import {formatDate, formatDateTime} from '@/lib/dates'
 import StatusPill from '../../StatusPill'
 import {loadOrder} from './_lib/order'
-import {billing, checkoutExtras, neededBy} from './_lib/text'
+import {billing, checkoutExtras, neededBy, countdown} from './_lib/text'
+
+function Due({label, date}) {
+  const c = countdown(date)
+  return <span>{label} by <b>{formatDate(date)}</b>{c && <span className={`countdown cd-${c.tone}`}>{c.text}</span>}</span>
+}
 
 function Tile({href, title, more, children}) {
   return (
@@ -61,8 +66,13 @@ export default async function JobOverview({params}) {
                 <span className="tile-row"><b>{multi ? `${projectRef(j.number)} · ${j.package}` : j.package || 'This video'}</b><StatusPill status={j.status} pkg={j.package} /></span>
                 <span className="muted">
                   {STATUSES[j.status]?.waitingOn === 'customer' ? 'Waiting on the client' : next ? `Next: ${forPackage(next.label, j.package)}` : 'Nothing left to do'}
-                  {j.due_date ? ` · due ${formatDate(j.due_date)}` : ''}
                 </span>
+                {j.status !== 'delivered' && !['declined', 'cancelled'].includes(j.status) && (
+                  <span className="tile-dates">
+                    {j.due_date && ['in_production', 'in_progress', 'script_sent', 'card_saved', 'quoted', 'submitted'].includes(j.status) && <Due label="First cut" date={j.due_date} />}
+                    {neededBy(j) && <Due label="Final" date={neededBy(j)} />}
+                  </span>
+                )}
               </li>
             )
           })}

@@ -1,13 +1,14 @@
 import {STATUSES, formatMoney, forPackage} from '@/lib/status'
 import {addonByKey} from '@/lib/addons'
 import {packageByName, EXTRA_FORMAT_PRICE, CHECKOUT_EXTRAS} from '@/lib/packages'
-import {formatDate} from '@/lib/dates'
+import {formatDate, businessDaysUntil} from '@/lib/dates'
+import {upcomingClosedDays} from '@/lib/holidays'
 import {STYLES, STORY, VOICES, TONES, MUSIC, labelOf} from '@/lib/intake'
 
-export const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', script: 'Script', first_cut: 'First cut', final: 'Final', other: 'Other'}
+export const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', script: 'Script', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format', other: 'Other'}
 // Files the customer sent with the order, and the ones we deliver.
 export const INTAKE_KINDS = ['logo', 'brand_image', 'brand_material', 'design_file', 'media', 'reference']
-export const DELIVERY_KINDS = ['script', 'first_cut', 'final', 'other']
+export const DELIVERY_KINDS = ['script', 'first_cut', 'final', 'cutdown', 'extra_format', 'other']
 // The step that sends each deliverable, and what that deliverable is.
 export const DELIVERS = {script_sent: 'script', first_cut_sent: 'first_cut', delivered: 'final'}
 
@@ -62,11 +63,41 @@ export function answers(p) {
 // The date the customer needs it: launch for Momentum, otherwise the latest in-hand date.
 export const neededBy = j => j.brief?.launch_at?.slice(0, 10) || j.latest_date || null
 
-// Extras chosen at checkout, by label (quoted ones marked).
+// What each extra means for the team: a separate file to deliver, or a change to the video itself.
+const EXTRA_NOTE = {orientation: 'separate file', cutdown: 'separate file', captions: 'on the video', revision: 'extra round', rush: 'faster schedule'}
+// Extras chosen at checkout, labeled so it's clear what each one adds.
 export const checkoutExtras = j => [
-  ...(j.brief?.extra_formats || []).map(f => `Extra format: ${f}`),
-  ...(j.brief?.extras || []).map(k => addonByKey(k)?.label + (addonByKey(k)?.price == null ? ' (quote)' : '')),
+  ...(j.brief?.extra_formats || []).map(f => `Extra: ${f} version (separate file)`),
+  ...(j.brief?.extras || []).map(k => `Extra: ${addonByKey(k)?.label} (${addonByKey(k)?.price == null ? 'quote' : EXTRA_NOTE[k]})`),
 ]
+
+// Everything we hand over for one job, from the order and from add-ons confirmed later.
+// `kind` + `label` say where each one is shared; `note` covers extras that change the video itself.
+export function deliverables(j, addons, files) {
+  const pkg = packageByName(j.package)
+  const videos = pkg?.videos || 1
+  const x = videos > 1 ? ` × ${videos}` : ''
+  const mine = files.filter(f => f.project_id === j.id)
+  const has = (kind, label) => mine.filter(f => f.kind === kind && (!label || (f.name || '').startsWith(label)))
+  const later = addons.filter(a => a.project_id === j.id && a.status === 'accepted')
+  const formats = [...(j.brief?.extra_formats || []), ...later.filter(a => a.addon === 'orientation').map(a => a.details).filter(Boolean)]
+  const cutdown = (j.brief?.extras || []).includes('cutdown') || later.some(a => a.addon === 'cutdown')
+  const subtitles = (j.brief?.extras || []).includes('captions') || later.some(a => a.addon === 'captions')
+  const list = [{key: 'final', label: `Final video${j.orientation ? `, ${j.orientation}` : ''}${x}`, kind: 'final', shared: has('final')}]
+  for (const f of [...new Set(formats)]) list.push({key: 'xf-' + f, label: `Extra format: ${f}${x}`, kind: 'extra_format', fileLabel: f, shared: has('extra_format', f)})
+  if (cutdown) list.push({key: 'cutdown', label: `15-second cutdown${x}`, kind: 'cutdown', shared: has('cutdown')})
+  if (subtitles) list.push({key: 'subs', label: 'Subtitles', note: 'Burned into the final video. No separate file.'})
+  return list
+}
+
+// Countdown to a date in business days, e.g. "3 business days left", "Today", "2 business days late".
+export function countdown(date) {
+  const n = businessDaysUntil(date, upcomingClosedDays())
+  if (n == null) return null
+  if (n === 0) return {text: 'Today', tone: 'soon'}
+  if (n < 0) return {text: `${-n} business day${n === -1 ? '' : 's'} late`, tone: 'late'}
+  return {text: `${n} business day${n === 1 ? '' : 's'} left`, tone: n <= 2 ? 'soon' : 'ok'}
+}
 
 // Price breakdown for one job: what the order form charged for, plus add-ons confirmed later.
 export function billing(j, addons) {
@@ -74,13 +105,15 @@ export function billing(j, addons) {
   const videos = pkg?.videos || 1
   const lines = []
   if (pkg) lines.push({label: `${pkg.name} package`, cents: pkg.price * 100})
-  for (const f of j.brief?.extra_formats || []) lines.push({label: `Extra format: ${f}`, detail: videos > 1 ? `${formatMoney(EXTRA_FORMAT_PRICE * 100)} × ${videos} videos` : null, cents: EXTRA_FORMAT_PRICE * videos * 100})
+  const per = cents => (videos > 1 ? ` · ${formatMoney(cents)} × ${videos} videos` : '')
+  for (const f of j.brief?.extra_formats || []) lines.push({label: `Extra: ${f} version`, detail: 'Separate file to deliver' + per(EXTRA_FORMAT_PRICE * 100), cents: EXTRA_FORMAT_PRICE * videos * 100})
   for (const k of j.brief?.extras || []) {
     const a = CHECKOUT_EXTRAS.find(x => x.key === k)
     if (!a) continue
+    const what = {cutdown: 'Separate file to deliver', captions: 'Added to the video'}[a.key] || ''
     lines.push(a.price != null
-      ? {label: a.label, detail: videos > 1 ? `${formatMoney(a.price * 100)} × ${videos} videos` : null, cents: a.price * videos * 100}
-      : {label: a.label, detail: 'Quoted separately', cents: null})
+      ? {label: `Extra: ${a.label}`, detail: what + per(a.price * 100), cents: a.price * videos * 100}
+      : {label: `Extra: ${a.label}`, detail: 'Quoted separately', cents: null})
   }
   const listed = lines.reduce((s, l) => s + (l.cents || 0), 0)
   const price = j.price_cents ?? (listed || null)

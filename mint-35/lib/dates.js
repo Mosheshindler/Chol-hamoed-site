@@ -63,3 +63,18 @@ export function formatDate(value) {
 export function formatDateTime(value) {
   return new Date(value).toLocaleString('en-US', {month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: TZ})
 }
+
+// Business days from today (Eastern) to `target` (YYYY-MM-DD): 0 = today, negative = that many business days late.
+export function businessDaysUntil(target, closed, now = new Date()) {
+  if (!target) return null
+  const set = asSet(closed)
+  const today = iso(eastern(now).day)
+  if (target === today) return 0
+  const [from, to, sign] = target > today ? [today, target, 1] : [target, today, -1]
+  let n = 0
+  for (const d = new Date(from + 'T00:00:00Z'); iso(d) < to;) {
+    d.setUTCDate(d.getUTCDate() + 1)
+    if (!isClosedDay(iso(d), set)) n++
+  }
+  return sign * n
+}

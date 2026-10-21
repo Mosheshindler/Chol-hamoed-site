@@ -10,7 +10,11 @@ import {Decision, MessageForm, AddonForm} from './CustomerForms'
 export const metadata = {title: 'Your project · Mint 35', robots: {index: false, follow: false}}
 export const dynamic = 'force-dynamic'
 
-const KIND = {script: 'Script', first_cut: 'First cut', final: 'Final'}
+const KIND = {script: 'Script', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format'}
+// What a shared link opens, in plain words.
+const OPEN = {first_cut: 'Watch the first cut', final: 'Open your final video', cutdown: 'Open the 15-second cutdown'}
+const openLabel = (f, w) => f.kind === 'script' ? (w !== 'script' ? 'Watch the sample video' : f.name === 'Google Doc' ? 'Open the Google Doc' : 'Open the script')
+  : f.kind === 'extra_format' ? `Open the ${f.name} version` : OPEN[f.kind] || `Open ${f.name}`
 
 export default async function CustomerPage({params}) {
   const {token} = await params
@@ -77,11 +81,11 @@ export default async function CustomerPage({params}) {
                 <ul className="cp-files">
                   {jobFiles.map(f => (
                     <li key={f.id} className={f.body ? 'cp-file-text' : undefined}>
-                      <span className="file-kind">{KIND[f.kind]}</span>
+                      <span className="file-kind">{f.kind === 'script' && w !== 'script' ? 'Sample video' : KIND[f.kind]}</span>
                       {f.body
                         ? <span className="cp-text-label">Read it below</span>
                         : f.shared
-                          ? <a href={f.url} target="_blank" rel="noopener noreferrer">Open {f.name === 'Google Doc' ? 'the Google Doc' : f.name} →</a>
+                          ? <a href={f.url} target="_blank" rel="noopener noreferrer">{openLabel(f, w)} →</a>
                           : <a href={f.url} download>{f.name}</a>}
                       <span className="muted">{formatDate(f.created_at)}</span>
                       {f.body && <div className="cp-text">{f.body}</div>}
