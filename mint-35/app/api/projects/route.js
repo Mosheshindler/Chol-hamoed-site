@@ -49,7 +49,7 @@ export async function POST(request) {
   if (!contact.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) return bad('Please enter a valid email address.')
   if (!contact.phone || contact.phone.replace(/\D/g, '').length < 10) return bad('Please enter your cell phone number.')
   if (!contact.company) return bad('Please enter your company or organization name.', 400)
-  if (!contact.alert_channel) return bad('Please choose how we should alert you.')
+  if (!contact.alert_channel) return bad('Something went wrong with the form. Please refresh and try again.')
   const name = [contact.first_name, contact.last_name].join(' ')
 
   // Step 2: brand details shared by every video in the order.
@@ -123,7 +123,7 @@ export async function POST(request) {
       if (!row.audience || !row.key_message) return bad(`Please fill in every required question${which}.`)
       if (!row.latest_date) return bad(`Please add the latest date you need the video in hand${which}.`)
       for (const d of [row.ideal_date, row.latest_date].filter(Boolean)) {
-        if (d < earliest) return bad(`Please pick dates at least 6 business days from today${which}.`)
+        if (d < earliest) return bad(`Please pick dates at least 6 business days out${which} (orders after 5pm ET count from the next business day).`)
         if (isClosedDay(d, closed)) return bad(`Please pick dates on business days (not weekends or holidays)${which}.`)
       }
       if (row.ideal_date && row.ideal_date > row.latest_date) return bad(`The ideal date can’t be after the latest date${which}.`)

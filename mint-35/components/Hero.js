@@ -2,7 +2,7 @@ import Icon from './Icon'
 
 // Hero phone plays real frames from Mint 35 work (see /public/hero), ending on a CTA card.
 const scenes = [
-  {tag: 'Hook', line: 'Stop scrolling.', img: '/hero/allfit.jpg'},
+  {tag: 'Hook', line: 'Meet what’s new.', img: '/hero/allfit.jpg'},
   {tag: 'Story', line: 'Show what’s new.', img: '/hero/due5.jpg'},
   {tag: 'Call to action', line: 'Learn more →', end: true},
 ]

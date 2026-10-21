@@ -83,7 +83,7 @@ export async function requestAddon(formData) {
   if (!addon) return {error: 'Choose an add-on.'}
   if (!ADDON_STATUSES.includes(job.status)) return {error: 'Extras can’t be added to this project.'}
   const details = clean(formData.get('details'), 1000) || null
-  if (addon.askOrientation && !details) return {error: 'Choose the orientation you need.'}
+  if (addon.askOrientation && !details) return {error: 'Choose the format you need.'}
 
   await order.db.from('project_addons').insert({
     project_id: job.id, addon: addon.key, label: addon.label, details,

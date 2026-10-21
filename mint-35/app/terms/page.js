@@ -8,7 +8,7 @@ export default function TermsPage() {
       <p>By placing an order with Mint 35, you agree to these Terms, the <a href="/ai-disclaimer">AI Production Disclaimer</a> and our <a href="/privacy">Privacy Policy</a>. Mint 35 is a service of Mint Media LLC (&ldquo;Mint Media&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;).</p>
 
       <h2>1. The service</h2>
-      <p>Mint 35 produces short videos using AI tools, finished by the Mint Media team. Each package has a fixed scope, shown on the package page at the time you order: the number of videos, their length, one export orientation, one approval step and one round of revisions. Anything outside that scope is not included unless we agree to it in writing, usually as a paid add-on.</p>
+      <p>Mint 35 produces short videos using AI tools, finished by the Mint Media team. Each package has a fixed scope, shown on the package page at the time you order: the number of videos, their length, one video format, one approval step and one round of revisions. Anything outside that scope is not included unless we agree to it in writing, usually as a paid add-on.</p>
 
       <h2>2. Your order</h2>
       <p>You place an order by completing the online form. One contact person handles each order, and all communication goes to that person. An order is accepted only when we confirm it. We may decline any order, for example if the request falls outside what Mint 35 offers.</p>

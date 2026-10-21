@@ -4,7 +4,7 @@ import {formats} from './formats'
 export default function FormatsModal() {
   return (
     <Modal id="formats-dialog" titleId="formats-title">
-      <p className="eyebrow">Orientation</p>
+      <p className="eyebrow">Video format</p>
       <h2 id="formats-title">Which shape is right for you?</h2>
       <p className="modal-lead">Every package includes one video format. Pick the shape that matches where your video will run most.</p>
       <div className="format-cards">

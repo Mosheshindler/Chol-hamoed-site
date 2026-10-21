@@ -111,10 +111,10 @@ export async function moveStatus(formData) {
   const sign = `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`
   const w = scriptWord(p.package)
   const notices = {
-    quoted: [`Your Mint 35 project is accepted (${projectRef(p.number)})`, `<p>Good news: we've accepted your project. The price is <b>${formatMoney(patch.price_cents)}</b>.</p><p>Your card on file will be charged when we start your project. We'll let you know when that happens.</p>`],
+    quoted: [`Your Mint 35 project is accepted (${projectRef(p.number)})`, `<p>Good news: we've accepted your project. The price is <b>${formatMoney(patch.price_cents)}</b>.</p>` + (patch.status === 'card_saved' ? `<p>Your card will be charged in full when we start your project.</p>` : `<p>We'll be in touch about payment before we start.</p>`)],
     script_sent: [`Your ${w} is ready to review (${projectRef(p.number)})`, `<p>Your ${w} is ready. Please review it on your project page and approve it or request changes.</p>`],
     first_cut_sent: [`Your first cut is ready (${projectRef(p.number)})`, `<p>Your first cut is ready. Please watch it on your project page and approve it or send your revision notes.</p>`],
-    delivered: [`Your commercial is delivered (${projectRef(p.number)})`, `<p>Your final files are ready to download on your project page.</p>`],
+    delivered: [`Your final video is ready (${projectRef(p.number)})`, `<p>Your final files are ready to download on your project page.</p>`],
   }
   if (patch.status === 'card_saved') notices.card_saved = [notices.quoted[0], notices.quoted[1]]
   if (patch.charge_id) notices.in_progress = [`We've started your project (${projectRef(p.number)})`, `<p>We've started work on your project. Your ${esc(p.card_brand || 'card')} ending in ${esc(p.card_last4 || '••••')} was charged <b>${formatMoney(patch.charged_cents)}</b>.</p>` + receipt({cents: patch.charged_cents, brand: p.card_brand, last4: p.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Mint 35 ${p.package || 'project'}`})]

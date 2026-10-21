@@ -91,7 +91,7 @@ export function AddonForm({token, job, addons, orientation}) {
           <input type="hidden" name="job" value={job} />
           <input type="hidden" name="addon" value={chosen.key} />
           {chosen.askOrientation ? (
-            <label>Which orientation?
+            <label>Which format?
               <select name="details" required defaultValue="">
                 <option value="" disabled>Choose one</option>
                 {otherShapes.map(o => <option key={o}>{o}</option>)}

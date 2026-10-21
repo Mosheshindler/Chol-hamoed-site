@@ -52,7 +52,7 @@ export function customerStatus(p) {
   switch (p.status) {
     case 'submitted': return 'We’re reviewing your project.'
     case 'quoted':
-    case 'card_saved': return 'Accepted. Your project will start soon, and we’ll email you when it does.'
+    case 'card_saved': return 'Accepted. Your project will start soon.'
     case 'in_progress': return `We’re working on your ${w}.`
     case 'script_sent': return `Your ${w} is ready for your review.`
     case 'in_production': return 'In production.'
