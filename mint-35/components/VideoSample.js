@@ -21,7 +21,10 @@ export default function VideoSample({id, title, kind}) {
         )}
         {!loaded && (
           <button type="button" className={`work-poster${playing ? ' is-loading' : ''}`} onClick={() => setPlaying(true)} aria-label={`Play ${title}`} disabled={playing}>
-            <img src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`} alt={`${title} video`} loading="lazy" />
+            <picture>
+              <source srcSet={`https://i.ytimg.com/vi_webp/${id}/maxresdefault.webp`} type="image/webp" />
+              <img src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`} alt={`${title} video`} loading="lazy" />
+            </picture>
             <span className="play" aria-hidden="true" />
           </button>
         )}
