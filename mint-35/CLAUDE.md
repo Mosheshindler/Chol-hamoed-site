@@ -22,7 +22,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 ## Brand
 - Official logo: `public/brand/mint35-logo-v2.png` (wordmark), `mint35-logo-full-v2.png` (with "Powered by mintmedia").
-  When replacing a logo, use a new file name (v3...) so phones do not keep showing a cached old copy.
+  When replacing a logo, use a new file name (v3...) so phones do not keep showing a cached old copy. /brand and /hero files are
+  cached for a week (next.config.js headers), so always use a new file name when one changes.
+- Page weight (Oct 21): ~450 KB per homepage visit. Video posters use YouTube's WebP thumbnails; hero frames are WebP; icon.png is 192px.
   Current logo is "mint:35" (colon version, supplied Oct 2026). Made transparent from the supplied artwork; never recolor or redraw.
 - Colors: lime `#88C040`, deep green `#107838`, near-black background.
 - Hidden from search until `NEXT_PUBLIC_ALLOW_INDEXING=true`.
