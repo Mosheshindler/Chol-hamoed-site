@@ -12,7 +12,7 @@ const STEPS = [
   {icon: 'approve', title: 'Approve the direction.', text: 'We send a script or a sample video. You sign off.'},
   {icon: 'produce', title: 'We make it.', text: 'AI production with a Mint Media finish. First cut in 3 business days.*'},
   {icon: 'notes', title: 'Send your notes.', text: 'Watch the first cut and send one round of notes.'},
-  {icon: 'deliver', title: 'Get your final.', text: 'We make the changes and deliver your finished video, ready to post.'},
+  {icon: 'deliver', title: 'Get your final.', text: 'We make your revisions and deliver your finished video, ready to post.'},
 ]
 
 export default function HowItWorks() {

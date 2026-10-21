@@ -16,6 +16,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Anything touching files outside `mint-35/` (the Mint Media video site): ask first.
 - mint35.com is connected, so merges go live to customers: ask before merging larger changes.
 - Schema changes need the SQL run in Supabase's SQL Editor; tell the owner before merging code that depends on it.
+- From Oct 30 2026 Supabase no longer auto-grants API access to NEW tables in `public` (existing tables keep theirs).
+  Any new table's SQL must add grants, e.g. `grant select, insert, update, delete on public.x to authenticated, service_role;`
+  (service_role for the server/order API, authenticated for the admin, which still goes through RLS). Never grant to anon.
 
 ## Brand
 - Official logo: `public/brand/mint35-logo-v2.png` (wordmark), `mint35-logo-full-v2.png` (with "Powered by mintmedia").
@@ -54,8 +57,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   from the next business day; earliest in-hand date = 6 business days after that (`earliestDelivery`, FINAL_LEAD_BUSINESS_DAYS in lib/dates.js; first cut is 3).
 
 - Order form v2 (`components/ProjectForm.js`): steps 1 You, 2 Your brand, 3 one page per video (classic vs
-  Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (title, name,
-  email, cell, company always required, alerts by email only for now). Logo required unless "I only have a
+  Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (name,
+  email, cell, company always required; no title field since Oct 21; alerts by email only for now). Step 1 opens with a "Have these handy" note.
+  Campaign 3 ("3 different videos, one look"; owner: avoid "stories") asks "General direction only" vs "I have an idea for each video" (3 optional boxes) -> brief.stories / brief.video_ideas. Logo required unless "I only have a
   logo for what I'm promoting" (then each video's media upload is required). Per-video answers beyond the old
   columns live in `projects.brief` (jsonb); `latest_date` is the in-hand deadline (Momentum: launch date).
   Chosen files are also kept in the browser (IndexedDB, `lib/fileStash.js`) so a reload keeps them; cleared on submit or after 14 days.
@@ -85,7 +89,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Homepage order (owner, Oct 20): hero, Work ("See what's possible", style captions), Why Mint 35 (3 icon benefits +
   "Perfect for" chips), Powered by Mint Media (real logo + link), How it works, What's included ("Fixed scope. Focused results."),
-  Packages (+ formats box), FAQ, final CTA repeats "Powerful video. Simplified." Mint 35 vs Mint Media stays a pop-up
+  Packages (+ formats box, "First cut in 3 business days once production starts. Final video in about 6."), FAQ (incl. "What counts as a revision?"), final CTA repeats "Powerful video. Simplified." Mint 35 vs Mint Media stays a pop-up
   (CompareModal), opened from How it works, What's included and Packages. Footer: Mint 35 logo + real Mint Media logo.
 
 ## Planned (owner asked)

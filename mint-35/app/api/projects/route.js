@@ -110,6 +110,16 @@ export async function POST(request) {
         latest_date: isDate(it?.latest_date) ? it.latest_date : null,
       })
       brief.item_website = str(it?.item_website, 500)
+      // Multi-video packages (Campaign 3): general direction, or an idea per video.
+      const videos = packageByName(pkg)?.videos || 1
+      if (videos > 1) {
+        brief.stories = it?.stories === 'ideas' ? 'ideas' : 'general'
+        if (brief.stories === 'ideas') {
+          const ideas = Array.from({length: videos}, (_, n) => str(it?.video_ideas?.[n], 1000))
+          if (ideas.some(Boolean)) brief.video_ideas = ideas
+          else brief.stories = 'general'
+        }
+      }
       if (!row.audience || !row.key_message) return bad(`Please fill in every required question${which}.`)
       if (!row.latest_date) return bad(`Please add the latest date you need the video in hand${which}.`)
       for (const d of [row.ideal_date, row.latest_date].filter(Boolean)) {
