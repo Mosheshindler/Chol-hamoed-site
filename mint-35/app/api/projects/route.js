@@ -73,7 +73,8 @@ export async function POST(request) {
       voice: pick(VOICES, it?.voice), tone: pick(TONES, it?.tone), music: pick(MUSIC, it?.music),
       ...brand,
     }
-    if (brief.story === 'text') { delete brief.voice; delete brief.tone }
+    // Voice and tone are only asked when narration is chosen.
+    if (!brief.story?.startsWith('narration')) { delete brief.voice; delete brief.tone }
     const row = {
       package: pkg,
       promoting: str(it?.promoting),

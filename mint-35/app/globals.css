@@ -405,6 +405,9 @@ details[open] summary::after { transform: rotate(45deg); }
 .form input[type=file] { padding: 10px; font-size: .9rem; }
 .form input[type=file]::file-selector-button { background: var(--lime); color: #0a0c0a; border: 0; border-radius: 999px; padding: 6px 14px; font-weight: 700; margin-right: 10px; cursor: pointer; font-family: inherit; }
 .form input:focus, .form select:focus, .form textarea:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 4px rgba(136,192,64,.15); }
+/* Browser autofill paints fields yellow; keep them dark. */
+.form input:-webkit-autofill, .form input:-webkit-autofill:hover, .form select:-webkit-autofill, .form textarea:-webkit-autofill { -webkit-text-fill-color: var(--text); caret-color: var(--text); -webkit-box-shadow: 0 0 0 1000px var(--bg) inset; box-shadow: 0 0 0 1000px var(--bg) inset; transition: background-color 9999s ease-out 0s; }
+.form input:-webkit-autofill:focus { -webkit-box-shadow: 0 0 0 1000px var(--bg) inset, 0 0 0 4px rgba(136,192,64,.15); box-shadow: 0 0 0 1000px var(--bg) inset, 0 0 0 4px rgba(136,192,64,.15); }
 fieldset { border: 0; padding: 0; margin: 0; }
 legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .checks { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -643,7 +646,8 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .upload-warn { font-size: .82rem; font-weight: 500; color: #e9c46a; }
 .form .check-inline { justify-self: start; border-radius: 12px; }
 .form .check-block { border-radius: 12px; align-items: flex-start; line-height: 1.45; }
-.form .check-block input { margin-top: 3px; flex: none; }
+.form .check-block input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
+.disclaimer-points { margin: 14px 0 10px; }
 .checks-col { display: grid; gap: 8px; }
 .step-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
 .step-nav .btn-primary { margin-left: auto; }
