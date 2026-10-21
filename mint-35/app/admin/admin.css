@@ -150,3 +150,13 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .addon-decide .money-input { width: 130px; }
 .addon-decide .money-input input { width: 100%; background: transparent; border: 0; color: var(--text); padding: 7px 8px; font: inherit; }
 .addon-decide .form-error { flex-basis: 100%; }
+
+/* Share a deliverable as a file, a link or pasted text */
+.share-modes { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; }
+.share-mode { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; color: var(--muted); padding: 6px 12px; font: inherit; font-size: .85rem; cursor: pointer; }
+.share-mode.on { border-color: var(--lime); color: var(--text); background: rgba(136,192,64,.1); }
+.upload-row .share-url, .upload-row .share-body { flex: 1 1 280px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 8px 10px; font: inherit; font-size: .9rem; min-width: 0; }
+.upload-row .share-body { flex-basis: 100%; resize: vertical; }
+.share-hint { flex-basis: 100%; margin: 0; }
+.shared-text summary { cursor: pointer; color: var(--lime); }
+.shared-body { white-space: pre-wrap; margin-top: 8px; padding: 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); max-height: 320px; overflow: auto; }
