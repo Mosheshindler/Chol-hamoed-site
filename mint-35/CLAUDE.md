@@ -124,12 +124,14 @@ separate from the Mint Media video site at the repo root (don't touch root files
   price_cents (math in lib/discounts.js, shared). Saved as brief.discount {code, label, cents}; Billing shows a discount line.
   Discount covers package + checkout extras, not later add-ons.
 
-- Sales tax (owner, Oct 22): NJ 6.625% on every order (`lib/tax.js`, SALES_TAX_RATE) unless the client ticks "My organization is
+- Sales tax (owner, Oct 22): NJ 6.625% only on orders with a New Jersey billing address (`lib/tax.js`, SALES_TAX_RATE,
+  TAX_STATE). Step 1 asks for a billing address (saved per job as brief.billing {line1, line2, city, state, zip}); other states
+  get brief.tax {exempt:false, rate:0, outside:true} and no exempt box. NJ orders are taxed unless the client ticks "My organization is
   tax-exempt" at checkout, picks a reason (EXEMPT_REASONS) and optionally uploads a certificate (file kind `tax_exempt`,
   migration 20261022020000_tax_exempt_files.sql). Saved per job as brief.tax {exempt, reason, rate}; price_cents stays pre-tax.
   Charges (job and later add-ons) add tax via withTax/jobTaxRate; jobs without brief.tax (ordered before Oct 22) stay untaxed.
-  Shown at checkout, in emails/receipts, on the client's page (incl. tax) and on admin Billing/Project. Owner should confirm
-  out-of-state handling with their tax advisor.
+  Shown at checkout, in emails/receipts, on the client's page (incl. tax) and on admin Billing/Project. The certificate upload has no
+  "Optional" tag (owner's call) but is still not required.
 
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);

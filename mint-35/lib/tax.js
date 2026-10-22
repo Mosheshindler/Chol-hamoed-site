@@ -1,7 +1,9 @@
-// Sales tax (owner, Oct 2026): New Jersey sales tax on every order, unless the client marks their
-// organization tax-exempt at checkout. Orders placed before tax was added have no brief.tax and stay untaxed.
+// Sales tax (owner, Oct 2026): New Jersey sales tax on orders with a New Jersey billing address, unless the
+// client marks their organization tax-exempt at checkout. Other states: no tax. Orders placed before tax was
+// added have no brief.tax and stay untaxed.
 export const SALES_TAX_RATE = 0.06625
 export const SALES_TAX_LABEL = 'NJ sales tax (6.625%)'
+export const TAX_STATE = 'NJ'
 
 export const EXEMPT_REASONS = [
   {value: 'nonprofit', label: 'Nonprofit organization (501(c)(3))'},

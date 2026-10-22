@@ -127,7 +127,7 @@ export function billing(j, addons) {
   const rate = jobTaxRate(j)
   const laterCents = later.reduce((s, a) => s + (a.price_cents || 0), 0)
   const tax = taxCents(price, rate) + later.reduce((s, a) => s + taxCents(a.price_cents, rate), 0)
-  const taxInfo = j.brief?.tax?.exempt ? `Exempt: ${exemptLabel(j.brief.tax.reason)}` : rate ? SALES_TAX_LABEL : 'No sales tax (ordered before tax was added)'
+  const taxInfo = j.brief?.tax?.exempt ? `Exempt: ${exemptLabel(j.brief.tax.reason)}` : rate ? SALES_TAX_LABEL : j.brief?.tax?.outside ? 'No sales tax (billed outside NJ)' : 'No sales tax (ordered before tax was added)'
   const total = (price || 0) + laterCents + tax
   const paid = (j.charged_cents || 0) + later.filter(a => a.charge_id).reduce((s, a) => s + (a.price_cents || 0) + taxCents(a.price_cents, rate), 0)
   return {lines, listed, price, adjust, later, pending, tax, taxInfo, total, paid}
