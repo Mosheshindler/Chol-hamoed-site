@@ -1,6 +1,7 @@
 import {notFound} from 'next/navigation'
 import Logo from '@/components/Logo'
 import {loadOrderByToken} from '@/lib/customer'
+import {withTax, jobTaxRate} from '@/lib/tax'
 import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus, scriptWord, STATUSES} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {ADDONS, ADDON_STATUSES} from '@/lib/addons'
@@ -22,7 +23,8 @@ export default async function CustomerPage({params}) {
   if (!order) notFound()
   const {jobs, files, messages, addons} = order
   const first = jobs[0]
-  const total = jobs.reduce((s, j) => s + (j.price_cents || 0), 0)
+  // Prices shown with sales tax, as charged.
+  const total = jobs.reduce((s, j) => s + withTax(j, j.price_cents), 0)
 
   return (
     <div className="cp">
@@ -59,7 +61,7 @@ export default async function CustomerPage({params}) {
                   <h2>{job.package || 'Mint 35 project'}</h2>
                   <p className="muted">{job.promoting}</p>
                 </div>
-                {job.price_cents ? <b className="cp-price">{formatMoney(job.price_cents)}</b> : null}
+                {job.price_cents ? <b className="cp-price">{formatMoney(withTax(job, job.price_cents))}{jobTaxRate(job) > 0 && <small className="cp-tax">incl. sales tax</small>}</b> : null}
               </div>
 
               {!closed && (

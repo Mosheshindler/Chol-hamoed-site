@@ -2,6 +2,7 @@ import Link from 'next/link'
 import {TRANSITIONS, projectRef, forPackage} from '@/lib/status'
 import {formatDateTime} from '@/lib/dates'
 import {customerNotice} from '@/lib/notices'
+import {withTax} from '@/lib/tax'
 import {ReplyForm, CustomerLink} from '../CustomerPanel'
 import {AssignForm} from '../JobForm'
 import {loadOrder} from '../_lib/order'
@@ -27,7 +28,7 @@ export default async function Communications({params}) {
     if (!step) return null
     const to = step.to === 'quoted' && j.qb_card_id ? 'card_saved' : step.to
     const charging = j.status === 'card_saved' && step.to === 'in_progress'
-    const n = customerNotice({status: to, p: j, link: custUrl, priceCents: j.price_cents, charge: charging ? {cents: j.price_cents, id: '(shown after charging)'} : null})
+    const n = customerNotice({status: to, p: j, link: custUrl, priceCents: j.price_cents, charge: charging ? {cents: withTax(j, j.price_cents), id: '(shown after charging)'} : null})
     return n && {j, step: forPackage(step.label, j.package), ...n}
   }).filter(Boolean)
 

@@ -12,6 +12,7 @@ import {loadFiles, saveFiles, clearFiles} from '@/lib/fileStash'
 import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
 import {STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
 import {discountLines, describeDiscount} from '@/lib/discounts'
+import {SALES_TAX_RATE, SALES_TAX_LABEL, EXEMPT_REASONS, taxCents} from '@/lib/tax'
 
 const SAVE_KEY = 'mint35-intake'
 const TURNSTILE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
@@ -164,6 +165,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   const [sample, setSample] = useState(null)
   const [missing, setMissing] = useState(null) // {step, items: [{key, label}]}
   const [discount, setDiscount] = useState({rule: null, error: '', busy: false})
+  const [exempt, setExempt] = useState(false)
   const pendingFiles = useRef({})
   const humanBox = useRef(null)
   const humanWidget = useRef(null)
@@ -409,6 +411,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
     addFiles('logo', 'logo')
     addFiles('brand_materials', 'brand_material')
     addFiles('design_files', 'design_file')
+    if (exempt) addFiles('tax_doc', 'tax_exempt')
     lines.forEach((_, i) => { addFiles(`i${i}_media`, 'media', i); addFiles(`i${i}_refs`, 'reference', i) })
 
     const payload = {
@@ -436,6 +439,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       acceptedDisclaimer: DISCLAIMER_VERSION,
       acceptedPoints: DISCLAIMER_POINTS.filter((_, n) => fd.get(`dp${n}`)).length,
       discountCode: discount.rule?.code || null,
+      tax: {exempt, reason: exempt ? fd.get('tax_reason') : null},
     }
 
     try {
@@ -480,7 +484,11 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   // Discount preview (the order API applies the real one). Cents, per video.
   const off = discount.rule ? discountLines(discount.rule, lines.map((l, i) => ({package: l.pkg.name, cents: lineTotal(i) * 100}))) : lines.map(() => 0)
   const offTotal = off.reduce((s, c) => s + c, 0) / 100
-  const total = lines.reduce((s, l, i) => s + lineTotal(i), 0) - offTotal
+  // Sales tax per video on its price after any discount, the same way the server works it out.
+  const taxTotal = exempt ? 0 : lines.reduce((s, l, i) => s + taxCents(lineTotal(i) * 100 - off[i], SALES_TAX_RATE), 0) / 100
+  const subtotal = lines.reduce((s, l, i) => s + lineTotal(i), 0) - offTotal
+  const total = subtotal + taxTotal
+  const money = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2})
 
   async function applyCode() {
     const code = formRef.current?.elements.discount_code?.value || ''
@@ -713,13 +721,14 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               </li>
             )
           })}
-          {offTotal > 0 && <li className="review-discount"><span>Discount <span className="muted">{discount.rule.code} · {describeDiscount(discount.rule)}</span></span><b>−{formatPrice(offTotal)}</b></li>}
-          <li className="review-total"><span>Total <span className="intro-tag">Introductory pricing</span></span><b>{formatPrice(total)}</b></li>
+          {offTotal > 0 && <li className="review-discount"><span>Discount <span className="muted">{discount.rule.code} · {describeDiscount(discount.rule)}</span></span><b>−{money(offTotal)}</b></li>}
+          <li className="review-tax"><span>{exempt ? 'Sales tax' : SALES_TAX_LABEL}</span><b>{exempt ? 'Exempt' : money(taxTotal)}</b></li>
+          <li className="review-total"><span>Total <span className="intro-tag">Introductory pricing</span></span><b>{money(total)}</b></li>
         </ul>
         <div className="discount-box">
           {discount.rule ? (
             <p className="discount-on">
-              <span><b>{discount.rule.code}</b> applied{offTotal > 0 ? `: −${formatPrice(offTotal)}` : ', but it doesn’t apply to what’s in this order'}</span>
+              <span><b>{discount.rule.code}</b> applied{offTotal > 0 ? `: −${money(offTotal)}` : ', but it doesn’t apply to what’s in this order'}</span>
               <button type="button" className="link-btn" onClick={() => setDiscount({rule: null, error: '', busy: false})}>Remove</button>
             </p>
           ) : (
@@ -732,6 +741,21 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               </div>
               {discount.error && <p className="form-error" role="alert">{discount.error}</p>}
             </>
+          )}
+        </div>
+        <div className="exempt-box">
+          <label className="check"><input type="checkbox" name="tax_exempt" checked={exempt} onChange={e => setExempt(e.target.checked)} /><span>My organization is tax-exempt (for example, a nonprofit)</span></label>
+          {exempt && (
+            <div className="exempt-fields">
+              <label>Why are you exempt?
+                <select id="tax-reason" name="tax_reason" required defaultValue="" data-label="Tax exemption reason">
+                  <option value="" disabled>Choose one</option>
+                  {EXEMPT_REASONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </label>
+              <UploadCard name="tax_doc" icon="form" title="Exemption certificate" optional accept="image/*,.pdf"
+                hint="Your exempt organization certificate (for example, NJ form ST-5) or other proof." />
+            </div>
           )}
         </div>
         <p className="review-edit"><button type="button" className="link-btn" onClick={() => go(0)}>Edit contact details</button> · <button type="button" className="link-btn" onClick={() => go(1)}>Edit brand</button></p>

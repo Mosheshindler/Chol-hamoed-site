@@ -10,6 +10,7 @@ import {earliestDelivery, isClosedDay} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {findDiscount, claimDiscount} from '@/lib/discountCodes'
 import {discountLines, describeDiscount} from '@/lib/discounts'
+import {SALES_TAX_RATE, EXEMPT_REASONS} from '@/lib/tax'
 import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, UPLOAD_KINDS, DISCLAIMER_POINTS} from '@/lib/intake'
 
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -162,6 +163,14 @@ export async function POST(request) {
     if (!(await claimDiscount(rule.id))) return bad('That code has just been fully used. Remove it to continue.')
     items.forEach((it, i) => { if (off[i]) it.brief.discount = {code: rule.code, label: describeDiscount(rule), cents: off[i]} })
   }
+
+  // Sales tax: charged on every job unless the client says their organization is exempt (and why).
+  const t = body.tax || {}
+  const exemptReason = t.exempt ? EXEMPT_REASONS.find(r => r.value === t.reason)?.value : null
+  if (t.exempt && !exemptReason) return bad('Please choose why your organization is tax-exempt.')
+  const tax = exemptReason ? {exempt: true, reason: exemptReason, rate: 0} : {exempt: false, rate: SALES_TAX_RATE}
+  items.forEach(it => { it.brief.tax = tax })
+  if (!exemptReason && files.some(f => f.kind === 'tax_exempt')) return bad('Remove the exemption certificate, or mark your organization as tax-exempt.')
 
   const orderId = randomUUID()
 

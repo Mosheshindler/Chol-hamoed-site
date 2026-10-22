@@ -48,6 +48,7 @@ export const UPLOAD_KINDS = {
   design_file: {label: 'Open design file', shared: true},
   media: {label: 'Photo / video / graphic to use', shared: false},
   reference: {label: 'Character reference photo', shared: false},
+  tax_exempt: {label: 'Tax-exempt certificate', shared: true},
 }
 
 export const labelOf = (list, value) => list.find(o => o.value === value)?.label || value || ''

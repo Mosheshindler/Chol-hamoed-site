@@ -124,6 +124,13 @@ separate from the Mint Media video site at the repo root (don't touch root files
   price_cents (math in lib/discounts.js, shared). Saved as brief.discount {code, label, cents}; Billing shows a discount line.
   Discount covers package + checkout extras, not later add-ons.
 
+- Sales tax (owner, Oct 22): NJ 6.625% on every order (`lib/tax.js`, SALES_TAX_RATE) unless the client ticks "My organization is
+  tax-exempt" at checkout, picks a reason (EXEMPT_REASONS) and optionally uploads a certificate (file kind `tax_exempt`,
+  migration 20261022020000_tax_exempt_files.sql). Saved per job as brief.tax {exempt, reason, rate}; price_cents stays pre-tax.
+  Charges (job and later add-ons) add tax via withTax/jobTaxRate; jobs without brief.tax (ordered before Oct 22) stay untaxed.
+  Shown at checkout, in emails/receipts, on the client's page (incl. tax) and on admin Billing/Project. Owner should confirm
+  out-of-state handling with their tax advisor.
+
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).

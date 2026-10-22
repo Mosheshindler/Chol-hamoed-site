@@ -3,6 +3,7 @@ import {formatDate} from '@/lib/dates'
 import {CustomerLink} from '../CustomerPanel'
 import {loadOrder} from '../_lib/order'
 import {answers, checkoutExtras, neededBy, KIND_LABEL, INTAKE_KINDS} from '../_lib/text'
+import {exemptLabel, SALES_TAX_LABEL} from '@/lib/tax'
 
 const ALERT_LABEL = {sms: 'Text', whatsapp: 'WhatsApp', email: 'Email only'}
 const site = w => (w.startsWith('http') ? w : `https://${w}`)
@@ -23,6 +24,7 @@ export default async function ProjectDetails({params}) {
                 {checkoutExtras(j).length > 0 && <><dt>Extras</dt><dd>{checkoutExtras(j).join(', ')}</dd></>}
                 {neededBy(j) && <><dt>{j.brief?.launch_at ? 'Launch' : 'Needed by'}</dt><dd>{formatDate(neededBy(j))}</dd></>}
                 {j.due_date && <><dt>First cut due</dt><dd>{formatDate(j.due_date)}</dd></>}
+                {j.brief?.tax && <><dt>Sales tax</dt><dd>{j.brief.tax.exempt ? `Tax-exempt: ${exemptLabel(j.brief.tax.reason)}` : SALES_TAX_LABEL}</dd></>}
               </dl>
               <h3 className="sub-head">Their answers</h3>
               <dl className="answers">

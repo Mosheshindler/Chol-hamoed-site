@@ -12,6 +12,7 @@ import {siteOrigin, customerLink} from '@/lib/site'
 import {chargeCard, paymentsReady, disconnect as qbDisconnect} from '@/lib/qb'
 import {currentOwner} from '@/lib/owner'
 import {customerNotice, receipt} from '@/lib/notices'
+import {withTax, jobTaxRate, taxCents} from '@/lib/tax'
 import {sendPasswordLink} from '@/lib/passwordLink'
 import {normalizeCode} from '@/lib/discounts'
 import {PACKAGES} from '@/lib/packages'
@@ -55,7 +56,7 @@ export async function moveStatus(formData) {
   const id = String(formData.get('id'))
   const to = String(formData.get('to'))
 
-  const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents, package, customer_token, qb_card_id, card_last4, card_brand').eq('id', id).single()
+  const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents, package, customer_token, qb_card_id, card_last4, card_brand, brief').eq('id', id).single()
   if (!p) return {error: 'Job not found. Refresh the page.'}
   const skipCharge = formData.get('skipCharge') === '1'
   const step = (TRANSITIONS[p.status] || []).find(t => t.to === to && !!t.skipCharge === skipCharge)
@@ -77,10 +78,12 @@ export async function moveStatus(formData) {
     if (!(p.price_cents > 0)) return {error: 'Set the job’s price before charging.'}
     if (!(await paymentsReady())) return {error: 'QuickBooks isn’t connected. Connect it in Settings, or use “Start job (paid another way)”.'}
     try {
-      const charge = await chargeCard({cardId: p.qb_card_id, amountCents: p.price_cents, description: `Mint 35 ${projectRef(p.number)} · ${p.package || 'project'}`})
-      Object.assign(patch, {charge_id: charge.id, charge_status: charge.status, charged_cents: p.price_cents, charged_at: new Date().toISOString()})
+      // The job price plus sales tax (none when the client is exempt or ordered before tax was added).
+      const amount = withTax(p, p.price_cents)
+      const charge = await chargeCard({cardId: p.qb_card_id, amountCents: amount, description: `Mint 35 ${projectRef(p.number)} · ${p.package || 'project'}`})
+      Object.assign(patch, {charge_id: charge.id, charge_status: charge.status, charged_cents: amount, charged_at: new Date().toISOString()})
       event.charge_id = charge.id
-      event.charged_cents = p.price_cents
+      event.charged_cents = amount
     } catch (e) {
       await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'charge_failed', data: {message: e.message, intuit_tid: e.intuitTid || null}})
       revalidatePath('/admin/projects/[id]', 'layout')
@@ -292,11 +295,13 @@ export async function decideAddon(formData) {
   }
   const {data: pending} = await supabase.from('project_addons').select('project_id, label, status').eq('id', addonId).single()
   if (!pending || pending.status !== 'requested') return {error: 'That request was already handled. Refresh the page.'}
-  const {data: job} = await supabase.from('projects').select('number, qb_card_id, card_last4, card_brand').eq('id', pending.project_id).single()
+  const {data: job} = await supabase.from('projects').select('number, qb_card_id, card_last4, card_brand, brief').eq('id', pending.project_id).single()
   let charged = false
+  // Add-ons carry the job's sales tax too (none for exempt clients).
+  const tax = decision === 'accepted' ? taxCents(patch.price_cents, jobTaxRate(job)) : 0
   if (decision === 'accepted' && patch.price_cents > 0 && job.qb_card_id && (await paymentsReady())) {
     try {
-      const charge = await chargeCard({cardId: job.qb_card_id, amountCents: patch.price_cents, description: `Mint 35 ${projectRef(job.number)} · add-on: ${pending.label}`})
+      const charge = await chargeCard({cardId: job.qb_card_id, amountCents: patch.price_cents + tax, description: `Mint 35 ${projectRef(job.number)} · add-on: ${pending.label}`})
       Object.assign(patch, {charge_id: charge.id, charged_at: new Date().toISOString()})
       charged = true
     } catch (e) {
@@ -313,8 +318,8 @@ export async function decideAddon(formData) {
     to: p.email,
     subject: `${a.label}: ${decision === 'accepted' ? 'confirmed' : 'update'} (${projectRef(p.number)})`,
     html: `<p>Hi ${esc(p.name.split(' ')[0])},</p>` + (decision === 'accepted'
-      ? `<p>We've confirmed your request for <b>${esc(a.label)}</b>${a.details ? ` (${esc(a.details)})` : ''} at <b>${formatMoney(a.price_cents)}</b>.${charged ? ` Your ${esc(job.card_brand || 'card')} ending in ${esc(job.card_last4 || '••••')} was charged.` : ''}</p>`
-      + (charged ? receipt({cents: a.price_cents, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) : '')
+      ? `<p>We've confirmed your request for <b>${esc(a.label)}</b>${a.details ? ` (${esc(a.details)})` : ''} at <b>${formatMoney(a.price_cents)}</b>${tax ? ` plus ${formatMoney(tax)} sales tax` : ''}.${charged ? ` Your ${esc(job.card_brand || 'card')} ending in ${esc(job.card_last4 || '••••')} was charged.` : ''}</p>`
+      + (charged ? receipt({cents: a.price_cents + tax, taxCents: tax, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) : '')
       : `<p>We're not able to add <b>${esc(a.label)}</b> to this project. We'll be in touch if there's another option.</p>`)
       + `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`,
   })

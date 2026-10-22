@@ -1,6 +1,7 @@
 import {STATUSES, TRANSITIONS, projectRef, forPackage, scriptWord} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {customerNotice} from '@/lib/notices'
+import {withTax} from '@/lib/tax'
 import StatusPill from '../../../StatusPill'
 import StatusActions from '../StatusActions'
 import UpdateForm from '../UpdateForm'
@@ -39,7 +40,7 @@ export default async function Progress({params}) {
         const steps = (TRANSITIONS[j.status] || []).map(s => {
           const charging = j.status === 'card_saved' && s.to === 'in_progress' && !s.skipCharge
           const to = s.to === 'quoted' && j.qb_card_id ? 'card_saved' : s.to
-          const preview = customerNotice({status: to, p: j, link: custUrl, priceCents: j.price_cents, charge: charging ? {cents: j.price_cents, id: '(shown after charging)'} : null})
+          const preview = customerNotice({status: to, p: j, link: custUrl, priceCents: j.price_cents, charge: charging ? {cents: withTax(j, j.price_cents), id: '(shown after charging)'} : null})
           return {...s, label: forPackage(s.label, j.package), preview, delivers: DELIVERS[s.to] || null,
             sendLabel: charging ? 'Charge card, start & email client' : sendLabels[s.to] || (preview ? `${forPackage(s.label, j.package)} & email client` : null)}
         })
@@ -72,7 +73,7 @@ export default async function Progress({params}) {
               })}
             </div>
 
-            <StatusActions id={j.id} status={j.status} steps={steps} price={j.price_cents}
+            <StatusActions id={j.id} status={j.status} steps={steps} price={j.price_cents} chargeTotal={withTax(j, j.price_cents)}
               card={j.card_last4 ? `${j.card_brand || 'card'} ending ${j.card_last4}` : null} shared={shared} scriptWord={w}
               alsoDue={extras.filter(r => r.kind && r.kind !== 'final').map(r => ({label: r.label, done: r.shared.length > 0}))} />
 
