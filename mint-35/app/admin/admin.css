@@ -277,7 +277,11 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 
 /* Discounts */
 .codes { list-style: none; padding: 0; margin: 0; display: grid; }
-.codes li { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.codes li { padding: 12px 0; border-top: 1px solid var(--line); }
+.code-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.code-actions { display: flex; gap: 14px; flex-shrink: 0; }
+.code-edit { margin-top: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; }
+.code-edit-actions { display: flex; align-items: center; gap: 16px; }
 .codes li:first-child { border-top: 0; }
 .codes p { margin: 4px 0 0; }
 .check-group { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
