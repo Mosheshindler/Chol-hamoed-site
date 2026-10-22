@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 
-const links = [{href: '/admin', label: 'Jobs'}, {href: '/admin/team', label: 'Team'}, {href: '/admin/settings', label: 'Settings'}]
+const links = [{href: '/admin', label: 'Jobs'}, {href: '/admin/discounts', label: 'Discounts'}, {href: '/admin/team', label: 'Team'}, {href: '/admin/settings', label: 'Settings'}]
 
 export default function AdminNav() {
   const path = usePathname()

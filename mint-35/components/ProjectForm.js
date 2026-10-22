@@ -11,6 +11,7 @@ import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 import {loadFiles, saveFiles, clearFiles} from '@/lib/fileStash'
 import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
 import {STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, labelOf} from '@/lib/intake'
+import {discountLines, describeDiscount} from '@/lib/discounts'
 
 const SAVE_KEY = 'mint35-intake'
 const TURNSTILE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
@@ -162,6 +163,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   const [read, setRead] = useState(false)
   const [sample, setSample] = useState(null)
   const [missing, setMissing] = useState(null) // {step, items: [{key, label}]}
+  const [discount, setDiscount] = useState({rule: null, error: '', busy: false})
   const pendingFiles = useRef({})
   const humanBox = useRef(null)
   const humanWidget = useRef(null)
@@ -433,6 +435,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       files: files.map(f => ({name: f.file.name, size: f.file.size, kind: f.kind, item: f.item})),
       acceptedDisclaimer: DISCLAIMER_VERSION,
       acceptedPoints: DISCLAIMER_POINTS.filter((_, n) => fd.get(`dp${n}`)).length,
+      discountCode: discount.rule?.code || null,
     }
 
     try {
@@ -473,7 +476,24 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
   const busy = state.phase === 'card' || state.phase === 'saving' || state.phase === 'uploading'
   const xfCost = i => extraFormatsCost(lines[i].pkg, watch.items?.[i]?.xf?.length || 0)
   const exCost = i => checkoutExtrasCost(lines[i].pkg, watch.items?.[i]?.extras)
-  const total = lines.reduce((s, l, i) => s + (l.pkg.price || 0) + xfCost(i) + exCost(i), 0)
+  const lineTotal = i => (lines[i].pkg.price || 0) + xfCost(i) + exCost(i)
+  // Discount preview (the order API applies the real one). Cents, per video.
+  const off = discount.rule ? discountLines(discount.rule, lines.map((l, i) => ({package: l.pkg.name, cents: lineTotal(i) * 100}))) : lines.map(() => 0)
+  const offTotal = off.reduce((s, c) => s + c, 0) / 100
+  const total = lines.reduce((s, l, i) => s + lineTotal(i), 0) - offTotal
+
+  async function applyCode() {
+    const code = formRef.current?.elements.discount_code?.value || ''
+    setDiscount(d => ({...d, busy: true, error: ''}))
+    try {
+      const res = await fetch('/api/discount', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({code, packages: lines.map(l => l.pkg.name)})})
+      const data = await res.json()
+      if (!res.ok) return setDiscount({rule: null, error: data.error || 'That code isn’t valid.', busy: false})
+      setDiscount({rule: data.rule, error: '', busy: false})
+    } catch {
+      setDiscount({rule: null, error: 'Couldn’t check that code. Try again.', busy: false})
+    }
+  }
   const val = name => formRef.current?.elements[name]?.value || ''
 
   const Nav = ({n}) => (
@@ -693,8 +713,27 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               </li>
             )
           })}
+          {offTotal > 0 && <li className="review-discount"><span>Discount <span className="muted">{discount.rule.code} · {describeDiscount(discount.rule)}</span></span><b>−{formatPrice(offTotal)}</b></li>}
           <li className="review-total"><span>Total <span className="intro-tag">Introductory pricing</span></span><b>{formatPrice(total)}</b></li>
         </ul>
+        <div className="discount-box">
+          {discount.rule ? (
+            <p className="discount-on">
+              <span><b>{discount.rule.code}</b> applied{offTotal > 0 ? `: −${formatPrice(offTotal)}` : ', but it doesn’t apply to what’s in this order'}</span>
+              <button type="button" className="link-btn" onClick={() => setDiscount({rule: null, error: '', busy: false})}>Remove</button>
+            </p>
+          ) : (
+            <>
+              <label htmlFor="discount-code" className="discount-label">Have a discount code?</label>
+              <div className="discount-row">
+                <input id="discount-code" name="discount_code" autoComplete="off" autoCapitalize="characters" placeholder="Enter code"
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); applyCode() } }} />
+                <button type="button" className="btn btn-ghost btn-sm" disabled={discount.busy} onClick={applyCode}>{discount.busy ? 'Checking…' : 'Apply'}</button>
+              </div>
+              {discount.error && <p className="form-error" role="alert">{discount.error}</p>}
+            </>
+          )}
+        </div>
         <p className="review-edit"><button type="button" className="link-btn" onClick={() => go(0)}>Edit contact details</button> · <button type="button" className="link-btn" onClick={() => go(1)}>Edit brand</button></p>
 
         <section className="addons-card checkout-extras" aria-labelledby="extras-title">

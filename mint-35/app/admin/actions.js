@@ -13,6 +13,8 @@ import {chargeCard, paymentsReady, disconnect as qbDisconnect} from '@/lib/qb'
 import {currentOwner} from '@/lib/owner'
 import {customerNotice, receipt} from '@/lib/notices'
 import {sendPasswordLink} from '@/lib/passwordLink'
+import {normalizeCode} from '@/lib/discounts'
+import {PACKAGES} from '@/lib/packages'
 
 async function requireMember() {
   const supabase = await createClient()
@@ -325,4 +327,35 @@ export async function disconnectQuickBooks() {
   await qbDisconnect()
   revalidatePath('/admin/settings')
   redirect('/admin/settings')
+}
+
+// Discount codes (Admin → Discounts). Only the owner creates or switches them.
+export async function createDiscount(_, formData) {
+  const {supabase, me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can create codes.'}
+  const code = normalizeCode(formData.get('code'))
+  if (!/^[A-Z0-9_-]{3,40}$/.test(code)) return {error: 'Use 3–40 letters or numbers for the code (no spaces).'}
+  const kind = formData.get('kind') === 'amount' ? 'amount' : 'percent'
+  const value = Number(String(formData.get('value') || '').replace(/[$,%\s]/g, ''))
+  if (!(value > 0)) return {error: 'Enter how much it takes off.'}
+  if (kind === 'percent' && value > 100) return {error: 'A percentage can’t be more than 100.'}
+  const names = PACKAGES.map(p => p.name)
+  const packages = formData.getAll('packages').filter(n => names.includes(n))
+  const maxRaw = String(formData.get('max_uses') || '').trim()
+  const max_uses = maxRaw ? Math.floor(Number(maxRaw)) : null
+  if (maxRaw && !(max_uses > 0)) return {error: 'Uses must be a whole number, or leave it blank for unlimited.'}
+  const expires_on = formData.get('expires_on') || null
+  const note = String(formData.get('note') || '').trim().slice(0, 300) || null
+  const {error} = await supabase.from('discount_codes').insert({code, kind, value, packages: packages.length === names.length ? [] : packages, max_uses, expires_on, note, created_by: me.id})
+  if (error) return {error: /duplicate|unique/i.test(error.message) ? 'That code already exists.' : 'Couldn’t save the code. Has the discounts database update been run?'}
+  revalidatePath('/admin/discounts')
+  return {ok: true, message: `${code} is ready to use.`}
+}
+
+export async function setDiscountActive(formData) {
+  const {supabase, me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can change codes.'}
+  await supabase.from('discount_codes').update({active: formData.get('active') === 'true'}).eq('id', String(formData.get('id')))
+  revalidatePath('/admin/discounts')
+  return {ok: true}
 }
