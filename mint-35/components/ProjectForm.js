@@ -565,7 +565,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           </label>
           <label>ZIP<input name="billing_zip" required inputMode="numeric" autoComplete="postal-code" pattern="\d{5}(-\d{4})?" title="Please enter a 5-digit ZIP code." /></label>
         </div>
-        <p className="hint">For your receipt. New Jersey addresses include NJ sales tax.</p>
+        <p className="hint">For your receipt. New Jersey addresses include NJ sales tax, unless your organization is tax-exempt (you can mark that at checkout).</p>
         {/* Text/WhatsApp alerts are hidden until Twilio is set up; every order gets email. To bring them
             back, restore the "How should we alert you?" choice over ALERTS (lib/intake.js). */}
         <input type="hidden" name="alert_channel" value="email" />
