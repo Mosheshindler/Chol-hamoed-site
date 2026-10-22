@@ -124,3 +124,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Twilio texting / WhatsApp alerts (after launch): the form's alert choice is hidden and sends 'email'; restore it
   in ProjectForm step 1, then send alerts per `alert_channel` at each job step. Add SMS wording back to /terms and /privacy.
 - Automated customer emails at each job step, once the site is confirmed.
+- QuickBooks accounting sync (owner asked Oct 22; waiting on the bookkeeper): on each charge, find/create the QBO customer,
+  a project (or sub-customer) per job "M35-#### · Package", and a sales receipt linked to the Payments charge, one line per item.
+  Items live under Products & services category "Mint 35" > "Packages" (Single 35, Campaign 3, Momentum Pack) and "Add-ons"
+  (Extra format, 15-second cutdown, Subtitles, Extra revision round, Rush delivery, Price adjustment); match by exact name.
+  Needs the accounting scope added (reconnect; check Intuit's rules first). Items non-taxable until the owner's tax advisor answers.
+  First real charge: Agudah, $2,975 (Single 35 + 15-second cutdown), before the sync; bookkeeper may enter it by hand.
