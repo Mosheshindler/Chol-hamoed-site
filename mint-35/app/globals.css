@@ -897,3 +897,14 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 /* Customer page: a script shared as pasted text */
 .cp-files .cp-text-label { color: var(--muted); }
 .cp-text { flex-basis: 100%; white-space: pre-wrap; padding: 14px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); line-height: 1.55; max-height: 460px; overflow: auto; }
+
+/* Checkout: discount code */
+.review-discount { color: var(--lime); }
+.review-discount .muted { font-size: .85rem; margin-left: 6px; }
+.discount-box { margin: 14px 0 0; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 14px; }
+.discount-label { display: block; font-weight: 600; margin-bottom: 8px; }
+.discount-row { display: flex; gap: 8px; }
+.discount-row input { flex: 1; min-width: 0; text-transform: uppercase; }
+.discount-on { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0; color: var(--lime); }
+.discount-box .form-error { margin: 8px 0 0; }
+.review-discount b, .review-total b { white-space: nowrap; }

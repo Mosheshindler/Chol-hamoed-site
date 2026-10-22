@@ -8,6 +8,8 @@ import {verifyHuman} from '@/lib/turnstile'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 import {earliestDelivery, isClosedDay} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
+import {findDiscount, claimDiscount} from '@/lib/discountCodes'
+import {discountLines, describeDiscount} from '@/lib/discounts'
 import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, UPLOAD_KINDS, DISCLAIMER_POINTS} from '@/lib/intake'
 
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -145,6 +147,22 @@ export async function POST(request) {
     if (missing !== -1) return bad(`Please upload the logo or graphics for what you’re promoting${items.length > 1 ? ` (video ${missing + 1})` : ''}.`)
   }
 
+  // Listed price per video: package + extra formats + priced extras chosen at checkout.
+  const listedCents = items.map(it => {
+    const listed = packageByName(it.package)
+    return listed ? (listed.price + extraFormatsCost(listed, it.brief.extra_formats?.length || 0) + checkoutExtrasCost(listed, it.brief.extras)) * 100 : null
+  })
+  // A discount code is checked again here (the checkout preview isn't trusted) and one use is claimed.
+  let off = items.map(() => 0)
+  if (typeof body.discountCode === 'string' && body.discountCode.trim()) {
+    const {rule, error: codeError} = await findDiscount(body.discountCode, items.map(it => it.package))
+    if (codeError) return bad(`${codeError} Remove it to place your order without it.`)
+    off = discountLines(rule, items.map((it, i) => ({package: it.package, cents: listedCents[i] || 0})))
+    if (!off.some(Boolean)) return bad('That code doesn’t apply to this order. Remove it to continue.')
+    if (!(await claimDiscount(rule.id))) return bad('That code has just been fully used. Remove it to continue.')
+    items.forEach((it, i) => { if (off[i]) it.brief.discount = {code: rule.code, label: describeDiscount(rule), cents: off[i]} })
+  }
+
   const orderId = randomUUID()
 
   // With QuickBooks connected, a card is required and is saved before the order is created.
@@ -160,13 +178,12 @@ export async function POST(request) {
     }
   }
   const rows = items.map((it, i) => {
-    const listed = packageByName(it.package)
     return {
       ...contact, name, ...it,
       order_id: orderId, order_item: i + 1, order_size: items.length,
       ...(card && {qb_customer_id: orderId, qb_card_id: card.id, card_last4: card.last4, card_brand: card.brand}),
-      // list price + extra formats chosen at checkout; the team can change it when accepting
-      price_cents: listed ? (listed.price + extraFormatsCost(listed, it.brief.extra_formats?.length || 0) + checkoutExtrasCost(listed, it.brief.extras)) * 100 : null,
+      // list price + extras chosen at checkout, less any discount; the team can change it when accepting
+      price_cents: listedCents[i] != null ? listedCents[i] - off[i] : null,
     }
   })
 

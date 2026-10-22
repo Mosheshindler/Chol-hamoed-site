@@ -118,6 +118,12 @@ separate from the Mint Media video site at the repo root (don't touch root files
   final, plus extra formats (kind `extra_format`, labeled by shape) and the 15-sec cutdown (kind `cutdown`) as separate files;
   subtitles are noted as part of the video. Kinds added in migration 20261022000000_more_deliverables.sql.
 
+- Discount codes (Oct 22): Admin → Discounts (owner creates/turns off; % or $ off, packages it applies to, use limit, last day,
+  note). Table `discount_codes` + `claim_discount()` (migration 20261022010000_discount_codes.sql). Checkout "Have a discount
+  code?" on Review & pay calls /api/discount for a preview; the order API re-checks, claims one use, and lowers each video's
+  price_cents (math in lib/discounts.js, shared). Saved as brief.discount {code, label, cents}; Billing shows a discount line.
+  Discount covers package + checkout extras, not later add-ons.
+
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).

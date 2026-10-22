@@ -115,6 +115,8 @@ export function billing(j, addons) {
       ? {label: `Extra: ${a.label}`, detail: what + per(a.price * 100), cents: a.price * videos * 100}
       : {label: `Extra: ${a.label}`, detail: 'Quoted separately', cents: null})
   }
+  const d = j.brief?.discount
+  if (d?.cents) lines.push({label: `Discount: ${d.code}`, detail: d.label, cents: -d.cents})
   const listed = lines.reduce((s, l) => s + (l.cents || 0), 0)
   const price = j.price_cents ?? (listed || null)
   const adjust = j.price_cents != null && pkg && j.price_cents !== listed ? j.price_cents - listed : 0
