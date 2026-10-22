@@ -334,27 +334,48 @@ export async function disconnectQuickBooks() {
   redirect('/admin/settings')
 }
 
-// Discount codes (Admin → Discounts). Only the owner creates or switches them.
-export async function createDiscount(_, formData) {
-  const {supabase, me} = await requireMember()
-  if (me.role !== 'owner') return {error: 'Only the owner can create codes.'}
-  const code = normalizeCode(formData.get('code'))
-  if (!/^[A-Z0-9_-]{3,40}$/.test(code)) return {error: 'Use 3–40 letters or numbers for the code (no spaces).'}
+// Discount codes (Admin → Discounts). Only the owner creates, edits or switches them.
+// The terms of a code from the New code / Edit form; {error} when something is off.
+function discountTerms(formData) {
   const kind = formData.get('kind') === 'amount' ? 'amount' : 'percent'
   const value = Number(String(formData.get('value') || '').replace(/[$,%\s]/g, ''))
   if (!(value > 0)) return {error: 'Enter how much it takes off.'}
   if (kind === 'percent' && value > 100) return {error: 'A percentage can’t be more than 100.'}
   const names = PACKAGES.map(p => p.name)
   const packages = formData.getAll('packages').filter(n => names.includes(n))
+  if (!packages.length) return {error: 'Pick at least one package it works on.'}
   const maxRaw = String(formData.get('max_uses') || '').trim()
   const max_uses = maxRaw ? Math.floor(Number(maxRaw)) : null
   if (maxRaw && !(max_uses > 0)) return {error: 'Uses must be a whole number, or leave it blank for unlimited.'}
   const expires_on = formData.get('expires_on') || null
   const note = String(formData.get('note') || '').trim().slice(0, 300) || null
-  const {error} = await supabase.from('discount_codes').insert({code, kind, value, packages: packages.length === names.length ? [] : packages, max_uses, expires_on, note, created_by: me.id})
+  return {terms: {kind, value, packages: packages.length === names.length ? [] : packages, max_uses, expires_on, note}}
+}
+
+export async function createDiscount(_, formData) {
+  const {supabase, me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can create codes.'}
+  const code = normalizeCode(formData.get('code'))
+  if (!/^[A-Z0-9_-]{3,40}$/.test(code)) return {error: 'Use 3–40 letters or numbers for the code (no spaces).'}
+  const {terms, error: bad} = discountTerms(formData)
+  if (bad) return {error: bad}
+  const {error} = await supabase.from('discount_codes').insert({code, ...terms, created_by: me.id})
   if (error) return {error: /duplicate|unique/i.test(error.message) ? 'That code already exists.' : 'Couldn’t save the code. Has the discounts database update been run?'}
   revalidatePath('/admin/discounts')
   return {ok: true, message: `${code} is ready to use.`}
+}
+
+// The code itself stays the same, so past orders still match it; everything else can change.
+// Orders that already used it keep their price.
+export async function updateDiscount(_, formData) {
+  const {supabase, me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can change codes.'}
+  const {terms, error: bad} = discountTerms(formData)
+  if (bad) return {error: bad}
+  const {error} = await supabase.from('discount_codes').update(terms).eq('id', String(formData.get('id')))
+  if (error) return {error: 'Couldn’t save the changes. Try again.'}
+  revalidatePath('/admin/discounts')
+  return {ok: true, message: 'Saved.'}
 }
 
 export async function setDiscountActive(formData) {

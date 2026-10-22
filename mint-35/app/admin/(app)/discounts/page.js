@@ -3,7 +3,7 @@ import {formatDate} from '@/lib/dates'
 import {formatMoney} from '@/lib/status'
 import {PACKAGES} from '@/lib/packages'
 import {describeDiscount} from '@/lib/discounts'
-import {CreateDiscount, ToggleDiscount} from './DiscountForms'
+import {CreateDiscount, CodeItem} from './DiscountForms'
 
 export default async function DiscountsPage() {
   const supabase = await createClient()
@@ -31,14 +31,13 @@ export default async function DiscountsPage() {
               : codes?.length ? (
                 <ul className="codes">
                   {codes.map(c => (
-                    <li key={c.id}>
+                    <CodeItem key={c.id} c={c} packages={PACKAGES.map(p => p.name)} isOwner={isOwner}>
                       <div>
                         <b className="mono">{c.code}</b> <span className={`pill ${state(c) === 'Active' ? 'pill-go' : 'pill-off'}`}>{state(c)}</span>
                         <p className="muted small">{describeDiscount(c)}{c.packages?.length ? '' : ', any package'} · used {c.uses}{c.max_uses != null ? ` of ${c.max_uses}` : ''}{c.expires_on ? ` · until ${formatDate(c.expires_on)}` : ''}{given[c.code] ? ` · ${formatMoney(given[c.code])} given` : ''}</p>
                         {c.note && <p className="muted small">{c.note}</p>}
                       </div>
-                      {isOwner && <ToggleDiscount id={c.id} active={c.active} />}
-                    </li>
+                    </CodeItem>
                   ))}
                 </ul>
               ) : <p className="muted">No codes yet.</p>}
@@ -54,7 +53,7 @@ export default async function DiscountsPage() {
               <li>Clients enter the code on the last step of checkout and see the new total before they pay.</li>
               <li>The discount comes off the package and any extras picked at checkout. Add-ons requested later are full price.</li>
               <li>A dollar amount comes off the whole order once, shared across the videos it applies to.</li>
-              <li>Turn a code off anytime. Orders that already used it keep their price.</li>
+              <li>Edit or turn a code off anytime. Orders that already used it keep their price.</li>
             </ul>
           </section>
         </aside>
