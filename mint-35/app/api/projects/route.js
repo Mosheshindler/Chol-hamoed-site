@@ -10,7 +10,8 @@ import {earliestDelivery, isClosedDay} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {findDiscount, claimDiscount} from '@/lib/discountCodes'
 import {discountLines, describeDiscount} from '@/lib/discounts'
-import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, UPLOAD_KINDS, DISCLAIMER_POINTS} from '@/lib/intake'
+import {SALES_TAX_RATE, TAX_STATE, EXEMPT_REASONS} from '@/lib/tax'
+import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, UPLOAD_KINDS, DISCLAIMER_POINTS, US_STATES} from '@/lib/intake'
 
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
 const MAX_ITEMS = 10
@@ -53,6 +54,14 @@ export async function POST(request) {
   if (!contact.company) return bad('Please enter your company or organization name.', 400)
   if (!contact.alert_channel) return bad('Something went wrong with the form. Please refresh and try again.')
   const name = [contact.first_name, contact.last_name].join(' ')
+  const ba = c.billing || {}
+  const billing = {
+    line1: str(ba.line1, 200), line2: str(ba.line2, 200), city: str(ba.city, 100),
+    state: US_STATES.some(([code]) => code === ba.state) ? ba.state : null, zip: str(ba.zip, 10),
+  }
+  if (!billing.line1 || !billing.city || !billing.state) return bad('Please enter your billing address.')
+  if (!/^\d{5}(-\d{4})?$/.test(billing.zip || '')) return bad('Please enter a valid 5-digit ZIP code.')
+  if (!billing.line2) delete billing.line2
 
   // Step 2: brand details shared by every video in the order.
   const b = body.brand || {}
@@ -162,6 +171,16 @@ export async function POST(request) {
     if (!(await claimDiscount(rule.id))) return bad('That code has just been fully used. Remove it to continue.')
     items.forEach((it, i) => { if (off[i]) it.brief.discount = {code: rule.code, label: describeDiscount(rule), cents: off[i]} })
   }
+
+  // Sales tax: NJ billing addresses only, unless the client says their organization is exempt (and why).
+  const t = body.tax || {}
+  const taxed = billing.state === TAX_STATE
+  const exemptReason = taxed && t.exempt ? EXEMPT_REASONS.find(r => r.value === t.reason)?.value : null
+  if (taxed && t.exempt && !exemptReason) return bad('Please choose why your organization is tax-exempt.')
+  const tax = !taxed ? {exempt: false, rate: 0, outside: true}
+    : exemptReason ? {exempt: true, reason: exemptReason, rate: 0} : {exempt: false, rate: SALES_TAX_RATE}
+  items.forEach(it => { it.brief.tax = tax; it.brief.billing = billing })
+  if (!exemptReason && files.some(f => f.kind === 'tax_exempt')) return bad('Remove the exemption certificate, or mark your organization as tax-exempt.')
 
   const orderId = randomUUID()
 

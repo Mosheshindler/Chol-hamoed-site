@@ -20,9 +20,9 @@
 .back:hover { color: var(--lime); }
 
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
-.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 4px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; grid-template-rows: 1fr auto; gap: 8px; }
 .stat span { color: var(--muted); font-size: .85rem; }
-.stat b { font-family: var(--display); font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat b { align-self: end; font-family: var(--display); font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
 .stat-alert { border-color: rgba(224,122,107,.5); }
 .stat-alert b { color: var(--red); }
 

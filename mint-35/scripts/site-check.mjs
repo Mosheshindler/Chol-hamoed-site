@@ -109,6 +109,8 @@ for (const d of DEVICES) {
     await page.fill('[name=first_name]', 'Site'); await page.fill('[name=last_name]', 'Check')
     await page.fill('[name=email]', 'site-check@example.com'); await page.fill('[name=phone]', '7325550000')
     await page.fill('[name=company]', 'Site Check')
+    await page.fill('[name=billing_line1]', '1 Main St'); await page.fill('[name=billing_city]', 'Lakewood')
+    await page.selectOption('[name=billing_state]', 'NJ'); await page.fill('[name=billing_zip]', '08701')
     if (await page.locator('.alert-opt').count()) await page.locator('.alert-opt').last().click()
     await page.locator('.wizard-step:not([hidden]) .step-nav .btn-primary').click(); await page.waitForTimeout(500)
     expect(d.name, 'Form step 2 (brand) opens', /brand/i.test(await page.locator('#form-title').innerText()))

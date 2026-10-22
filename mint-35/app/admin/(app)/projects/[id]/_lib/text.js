@@ -3,11 +3,12 @@ import {addonByKey} from '@/lib/addons'
 import {packageByName, EXTRA_FORMAT_PRICE, CHECKOUT_EXTRAS} from '@/lib/packages'
 import {formatDate, businessDaysUntil} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
+import {jobTaxRate, taxCents, exemptLabel, SALES_TAX_LABEL} from '@/lib/tax'
 import {STYLES, STORY, VOICES, TONES, MUSIC, labelOf} from '@/lib/intake'
 
-export const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', script: 'Script', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format', other: 'Other'}
+export const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', tax_exempt: 'Tax-exempt certificate', script: 'Script', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format', other: 'Other'}
 // Files the customer sent with the order, and the ones we deliver.
-export const INTAKE_KINDS = ['logo', 'brand_image', 'brand_material', 'design_file', 'media', 'reference']
+export const INTAKE_KINDS = ['logo', 'brand_image', 'brand_material', 'design_file', 'media', 'reference', 'tax_exempt']
 export const DELIVERY_KINDS = ['script', 'first_cut', 'final', 'cutdown', 'extra_format', 'other']
 // The step that sends each deliverable, and what that deliverable is.
 export const DELIVERS = {script_sent: 'script', first_cut_sent: 'first_cut', delivered: 'final'}
@@ -122,9 +123,14 @@ export function billing(j, addons) {
   const adjust = j.price_cents != null && pkg && j.price_cents !== listed ? j.price_cents - listed : 0
   const later = addons.filter(a => a.project_id === j.id && a.status === 'accepted')
   const pending = addons.filter(a => a.project_id === j.id && a.status === 'requested')
-  const total = (price || 0) + later.reduce((s, a) => s + (a.price_cents || 0), 0)
-  const paid = (j.charged_cents || 0) + later.filter(a => a.charge_id).reduce((s, a) => s + (a.price_cents || 0), 0)
-  return {lines, listed, price, adjust, later, pending, total, paid}
+  // Sales tax on the job and on later add-ons (none when exempt or ordered before tax was added).
+  const rate = jobTaxRate(j)
+  const laterCents = later.reduce((s, a) => s + (a.price_cents || 0), 0)
+  const tax = taxCents(price, rate) + later.reduce((s, a) => s + taxCents(a.price_cents, rate), 0)
+  const taxInfo = j.brief?.tax?.exempt ? `Exempt: ${exemptLabel(j.brief.tax.reason)}` : rate ? SALES_TAX_LABEL : j.brief?.tax?.outside ? 'No sales tax (billed outside NJ)' : 'No sales tax (ordered before tax was added)'
+  const total = (price || 0) + laterCents + tax
+  const paid = (j.charged_cents || 0) + later.filter(a => a.charge_id).reduce((s, a) => s + (a.price_cents || 0) + taxCents(a.price_cents, rate), 0)
+  return {lines, listed, price, adjust, later, pending, tax, taxInfo, total, paid}
 }
 
 export function describe(e, names, pkg) {

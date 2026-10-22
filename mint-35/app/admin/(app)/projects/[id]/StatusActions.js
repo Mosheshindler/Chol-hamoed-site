@@ -8,7 +8,7 @@ const KIND_NAME = {script: 'script', first_cut: 'first cut', final: 'final video
 
 // Next-step buttons for one job. Steps that email the client open a panel showing that exact email,
 // with room for a personal line; steps that deliver something also hold the box to share it.
-export default function StatusActions({id, status, steps, price, card, shared = {}, scriptWord = 'script', alsoDue = []}) {
+export default function StatusActions({id, status, steps, price, chargeTotal, card, shared = {}, scriptWord = 'script', alsoDue = []}) {
   const [open, setOpen] = useState(null)
   const [error, setError] = useState('')
   const [pending, start] = useTransition()
@@ -70,7 +70,7 @@ export default function StatusActions({id, status, steps, price, card, shared = 
             {open.needs === 'confirm' && (
               <p>{open.skipCharge || status === 'quoted'
                 ? 'Start this job without charging a card? Use this only if the client paid another way, like a QuickBooks invoice.'
-                : `Start this job and charge ${price ? '$' + (price / 100).toLocaleString('en-US', {minimumFractionDigits: 2}) : 'the job price'} to ${card || 'the card on file'}?`}</p>
+                : `Start this job and charge ${price ? '$' + ((chargeTotal ?? price) / 100).toLocaleString('en-US', {minimumFractionDigits: 2}) + (chargeTotal > price ? ' (including sales tax)' : '') : 'the job price'} to ${card || 'the card on file'}?`}</p>
             )}
             {open.danger && !open.needs && <p>{open.label} this job? The client isn&rsquo;t emailed.</p>}
             {open.preview && (

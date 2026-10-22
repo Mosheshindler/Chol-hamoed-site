@@ -28,6 +28,7 @@ export default async function Billing({params}) {
                 {b.later.map(a => (
                   <tr key={a.id}><th scope="row">Add-on: {a.label}{a.details && <small>{a.details}</small>}</th><td>{formatMoney(a.price_cents)}</td></tr>
                 ))}
+                <tr><th scope="row">Sales tax<small>{b.taxInfo}</small></th><td>{b.tax ? formatMoney(b.tax) : '—'}</td></tr>
                 <tr className="bill-total"><th scope="row">Total</th><td>{formatMoney(b.total)}</td></tr>
               </tbody>
             </table>
