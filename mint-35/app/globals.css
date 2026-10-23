@@ -737,6 +737,10 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 /* In upload cards the tip spans the card instead of the narrow title column. */
 .upload-card { position: relative; }
 .upload-card .tip-pop { left: 14px; right: 14px; top: auto; margin-top: 10px; max-width: none; }
+.upload-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; }
+.upload-list li { display: flex; align-items: baseline; gap: 6px; color: var(--lime); font-size: .85rem; font-weight: 600; overflow-wrap: anywhere; }
+.upload-list li span { min-width: 0; }
+.upload-list .upload-count { color: var(--muted); font-weight: 400; }
 .upload-remove { margin-left: 6px; font-size: .8rem; color: var(--muted); }
 .tip-pop { position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 40; display: grid; gap: 8px; max-width: 440px; padding: 12px 14px; border-radius: 12px; background: #f2f6f2; color: #0a0c0a; font-size: .88rem; font-weight: 500; line-height: 1.5; text-transform: none; letter-spacing: 0; box-shadow: 0 16px 40px rgba(0,0,0,.55); }
 .tip-pop b { font-weight: 700; }
@@ -890,7 +894,11 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 /* Order form step 1: what to have ready */
 .have-ready { display: grid; gap: 4px; margin: 0 0 18px; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(136,192,64,.35); background: rgba(136,192,64,.08); }
 .have-ready b { font-family: var(--display); font-size: 1.02rem; }
-.have-ready span { color: var(--muted); font-size: .95rem; }
+.have-ready > span { color: var(--muted); font-size: .95rem; }
+.prep-list { list-style: none; margin: 6px 0 4px; padding: 0; display: grid; gap: 7px; }
+.prep-list li { display: flex; align-items: flex-start; gap: 10px; font-size: .95rem; }
+.prep-list svg { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; color: var(--lime); }
+.have-ready .prep-note { font-size: .88rem; }
 @media (max-width: 560px) { .hero-what { font-size: .95rem; } }
 
 /* Scroll reveal (components/ScrollReveal.js) */
