@@ -2,11 +2,11 @@ import {notFound} from 'next/navigation'
 import Logo from '@/components/Logo'
 import {loadOrderByToken} from '@/lib/customer'
 import {withTax, jobTaxRate} from '@/lib/tax'
-import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus, scriptWord, STATUSES} from '@/lib/status'
+import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus, scriptWord, STATUSES, ADD_FILES_STATUSES} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {ADDONS, ADDON_STATUSES} from '@/lib/addons'
 import {formatPrice} from '@/lib/packages'
-import {Decision, MessageForm, AddonForm} from './CustomerForms'
+import {Decision, MessageForm, AddonForm, AddFiles} from './CustomerForms'
 
 export const metadata = {title: 'Your project · Mint 35', robots: {index: false, follow: false}}
 export const dynamic = 'force-dynamic'
@@ -21,7 +21,7 @@ export default async function CustomerPage({params}) {
   const {token} = await params
   const order = await loadOrderByToken(token)
   if (!order) notFound()
-  const {jobs, files, messages, addons} = order
+  const {jobs, files, messages, addons, added} = order
   const first = jobs[0]
   // Prices shown with sales tax, as charged.
   const total = jobs.reduce((s, j) => s + withTax(j, j.price_cents), 0)
@@ -49,6 +49,7 @@ export default async function CustomerPage({params}) {
           const jobFiles = files.filter(f => f.project_id === job.id)
           const jobMessages = messages.filter(m => m.project_id === job.id)
           const jobAddons = addons.filter(a => a.project_id === job.id)
+          const jobAdded = added.filter(f => f.project_id === job.id)
           const closed = !(job.status in STATUSES) || ['declined', 'cancelled'].includes(job.status)
           const w = scriptWord(job.package)
           const reviewing = job.status === 'script_sent' ? w : job.status === 'first_cut_sent' ? 'first cut' : null
@@ -97,6 +98,17 @@ export default async function CustomerPage({params}) {
               )}
 
               {reviewing && <Decision token={token} job={job.id} what={reviewing} />}
+
+              {ADD_FILES_STATUSES.includes(job.status) && (
+                <section className="cp-addons" aria-label="Add photos and files">
+                  <h3>Add more photos &amp; files</h3>
+                  <p className="muted">Forgot something? Send more photos, videos or graphics. You can add files until production starts.</p>
+                  <AddFiles token={token} job={job.id} />
+                </section>
+              )}
+              {jobAdded.length > 0 && (
+                <p className="muted small cp-added">You&rsquo;ve added {jobAdded.length} file{jobAdded.length > 1 ? 's' : ''} since ordering: {jobAdded.map(f => f.name).join(', ')}</p>
+              )}
 
               {ADDON_STATUSES.includes(job.status) && (
                 <section className="cp-addons" aria-label="Add-ons">

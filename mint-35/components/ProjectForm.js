@@ -106,12 +106,54 @@ function Orientation({name, label, pkg, chosen}) {
 const Opt = () => <span className="optional"> (optional)</span>
 
 // An upload as a compact card: icon, title, one short line, an Upload button and the chosen file names.
+// The "Before you start" checklist on step 1, matching the questions asked later in the form.
+const PREP_CLASSIC = [
+  ['megaphone', 'What you’re promoting, and who it’s for'],
+  ['sparkles', 'The one thing viewers should remember'],
+  ['route', 'What viewers should do next: call, visit, donate, buy'],
+  ['form', 'Details that must appear: price, dates, phone, web address'],
+  ['image', 'Your logo, plus any photos or videos you want included'],
+  ['calendar', 'The latest date you need the video delivered to you'],
+]
+const PREP_CAMPAIGN = [
+  ['heart', 'What the campaign is raising money for, and why now'],
+  ['form', 'Your campaign page link, goal amount and any matching'],
+  ['calendar', 'The launch date and time'],
+  ['route', 'What donors should do: donate today, double your gift…'],
+  ['image', 'Your logo, campaign graphics and any photos or videos, saved in one place'],
+]
+
+// Picking files again adds to the ones already chosen (instead of replacing them), so a client can
+// add photos a few at a time. Each file can be removed on its own.
 function UploadCard({name, icon, title, hint, accept, multiple, required, optional, tip, children}) {
   const [names, setNames] = useState([])
   const input = useRef(null)
-  function clear() {
-    input.current.value = ''
-    setNames([])
+  const kept = useRef([]) // the files chosen so far
+  const replacing = useRef(false) // set when we change the list ourselves (Remove)
+  const key = f => `${f.name}|${f.size}|${f.lastModified}`
+  function setFiles(files) {
+    const dt = new DataTransfer()
+    files.forEach(f => dt.items.add(f))
+    input.current.files = dt.files
+  }
+  function onChange(e) {
+    const picked = [...e.currentTarget.files]
+    let files = picked
+    if (multiple && !replacing.current) {
+      const seen = new Set(kept.current.map(key))
+      files = [...kept.current, ...picked.filter(f => !seen.has(key(f)))]
+      if (files.length !== picked.length) {
+        try { setFiles(files) } catch { files = picked } // very old browsers: keep the new pick only
+      }
+    }
+    replacing.current = false
+    kept.current = files
+    setNames(files.map(f => f.name))
+  }
+  function remove(i) {
+    const files = i == null ? [] : kept.current.filter((_, n) => n !== i)
+    try { setFiles(files) } catch { input.current.value = '' }
+    replacing.current = true
     input.current.dispatchEvent(new Event('change', {bubbles: true}))
   }
   return (
@@ -121,12 +163,16 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
         <b>{title}{tip && <> <Tip>{tip}</Tip></>}</b>
         {optional && <span className="opt-tag">Optional</span>}
         {hint && <span className="upload-hint">{hint}</span>}
-        {names.length > 0 && <span className="upload-names">✓ {names.join(', ')} <button type="button" className="link-btn upload-remove" onClick={clear}>Remove</button></span>}
+        {names.length > 0 && (multiple
+          ? <ul className="upload-list">
+              {names.map((n, i) => <li key={i}><span>✓ {n}</span><button type="button" className="link-btn upload-remove" aria-label={`Remove ${n}`} onClick={() => remove(i)}>Remove</button></li>)}
+              {names.length > 1 && <li className="upload-count">{names.length} files</li>}
+            </ul>
+          : <span className="upload-names">✓ {names.join(', ')} <button type="button" className="link-btn upload-remove" onClick={() => remove(null)}>Remove</button></span>)}
       </div>
       <label className="upload-btn">
-        {names.length ? 'Change' : 'Upload'}
-        <input ref={input} type="file" name={name} accept={accept} multiple={multiple} required={required}
-          onChange={e => setNames([...e.currentTarget.files].map(f => f.name))} />
+        {!names.length ? 'Upload' : multiple ? 'Add more' : 'Change'}
+        <input ref={input} type="file" name={name} accept={accept} multiple={multiple} required={required} onChange={onChange} />
       </label>
       {children && <div className="upload-extra">{children}</div>}
     </div>
@@ -536,8 +582,11 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       {/* Step 1 · You */}
       <fieldset className="wizard-step" data-step={0} hidden={step !== 0}>
         <div className="have-ready">
-          <b>Have these handy</b>
-          <span>Your logo, a few lines about what you&rsquo;re promoting, and any photos or videos you&rsquo;d like us to use.</span>
+          <b>Before you start, please prepare for the following:</b>
+          <ul className="prep-list">
+            {(lines.every(l => l.pkg.orgOnly) ? PREP_CAMPAIGN : PREP_CLASSIC).map(([icon, text]) => <li key={text}><Icon name={icon} /><span>{text}</span></li>)}
+          </ul>
+          <span className="prep-note">A sentence or two for each is plenty. Your answers save on this device as you go, so you can stop and come back.</span>
         </div>
         <p className="step-intro">For the most efficient process, we work with one point of contact per order.</p>
         <div className="form-row">

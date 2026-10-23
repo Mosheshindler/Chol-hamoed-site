@@ -146,6 +146,7 @@ export function describe(e, names, pkg) {
     case 'note': return null
     case 'charge_failed': return `Charge failed: ${e.data.message}`
     case 'customer': return `Customer ${e.data.decision === 'approve' ? 'approved' : 'requested changes'}, moved to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”`
+    case 'files_added': return `Customer added ${e.data.count} file${e.data.count > 1 ? 's' : ''} from their project page${e.data.note ? `: “${e.data.note}”` : ''}`
     case 'addon': return `Customer requested add-on: ${e.data.label}${e.data.details ? ` (${e.data.details})` : ''}`
     case 'addon_accepted': return `${who} confirmed add-on ${e.data.label} at ${formatMoney(e.data.price_cents)}`
     case 'addon_declined': return `${who} declined add-on ${e.data.label}`

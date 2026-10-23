@@ -5,7 +5,8 @@ import {loadOrderByToken} from '@/lib/customer'
 import {addBusinessDays} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {addonByKey, ADDON_STATUSES} from '@/lib/addons'
-import {projectRef, scriptWord} from '@/lib/status'
+import {randomBytes} from 'node:crypto'
+import {projectRef, scriptWord, ADD_FILES_STATUSES} from '@/lib/status'
 import {sendEmail, esc} from '@/lib/email'
 import {siteOrigin} from '@/lib/site'
 
@@ -93,4 +94,68 @@ export async function requestAddon(formData) {
   await tellTeam(job, `Add-on requested: ${addon.label}`, `<p><b>${esc(job.name)}</b> requested <b>${esc(addon.label)}</b>${details ? ` (${esc(details)})` : ''}.</p>`)
   revalidatePath(`/p/${token}`)
   return {ok: true}
+}
+
+// Adding photos and files after ordering, until production starts. Step 1 hands out one signed upload
+// URL per file, all under one batch folder (`<job>/added/<batch>/`); the browser uploads straight to
+// storage; step 2 records what arrived and emails the team. Each batch is listed and downloaded on its own.
+const MAX_ADD_FILES = 40
+const MAX_ADD_BYTES = 250 * 1024 * 1024
+const BATCH = /^\d{8}-\d{6}-[0-9a-f]{6}$/
+
+export async function startAddFiles({token, job: jobId, files}) {
+  const fd = new FormData(); fd.set('token', token); fd.set('job', jobId)
+  const r = await jobFor(fd)
+  if (r.error) return r
+  const {order, job} = r
+  if (!ADD_FILES_STATUSES.includes(job.status)) return {error: 'Production has started, so files can’t be added here any more. Send us a message instead.'}
+  const list = Array.isArray(files) ? files.slice(0, MAX_ADD_FILES + 1) : []
+  if (!list.length) return {error: 'Choose at least one file.'}
+  if (list.length > MAX_ADD_FILES) return {error: `Please send up to ${MAX_ADD_FILES} files at a time.`}
+  if (list.some(f => !(Number(f?.size) > 0))) return {error: 'One of the files is empty. Remove it and try again.'}
+  if (list.some(f => Number(f.size) > MAX_ADD_BYTES)) return {error: 'Each file can be up to 250 MB. For bigger videos, send us a link in a message.'}
+
+  const now = new Date()
+  const batch = now.toISOString().replace(/\D/g, '').slice(0, 14).replace(/^(\d{8})/, '$1-') + '-' + randomBytes(3).toString('hex')
+  const uploads = []
+  for (const [i, f] of list.entries()) {
+    const safe = String(f.name || 'file').replace(/[^\w.\-]+/g, '_').slice(-120)
+    const path = `${job.id}/added/${batch}/${i}-${safe}`
+    const {data, error} = await order.db.storage.from('project-files').createSignedUploadUrl(path)
+    if (error) return {error: 'We couldn’t start the upload. Please try again.'}
+    uploads.push({index: i, path, token: data.token})
+  }
+  return {batch, uploads}
+}
+
+export async function finishAddFiles({token, job: jobId, batch, names, note}) {
+  const fd = new FormData(); fd.set('token', token); fd.set('job', jobId)
+  const r = await jobFor(fd)
+  if (r.error) return r
+  const {order, job} = r
+  if (!BATCH.test(String(batch || ''))) return {error: 'Something went wrong. Please try again.'}
+  const folder = `${job.id}/added/${batch}`
+  const {data: already} = await order.db.from('project_files').select('id').like('path', `${folder}/%`).limit(1)
+  if (already?.length) return {ok: true}
+
+  // Only files that really arrived in storage are recorded.
+  const {data: listed} = await order.db.storage.from('project-files').list(folder, {limit: 100})
+  const given = names && typeof names === 'object' ? names : {}
+  const rows = (listed || []).map(o => {
+    const path = `${folder}/${o.name}`
+    return {project_id: job.id, kind: 'media', path, name: clean(given[path], 200) || o.name.replace(/^\d+-/, ''), size: o.metadata?.size ?? null}
+  })
+  if (!rows.length) return {error: 'None of the files arrived. Please try again.'}
+  const {error} = await order.db.from('project_files').insert(rows)
+  if (error) return {error: 'We couldn’t save your files. Please try again.'}
+
+  const text = clean(note, 2000)
+  await order.db.from('project_events').insert({project_id: job.id, type: 'files_added', data: {batch, count: rows.length, note: text || undefined}})
+  if (text) await order.db.from('project_messages').insert({project_id: job.id, author: 'customer', body: `Sent ${rows.length} more file${rows.length > 1 ? 's' : ''}: ${text}`})
+  await tellTeam(job, `Customer added ${rows.length} file${rows.length > 1 ? 's' : ''}`,
+    `<p><b>${esc(job.name)}</b> added ${rows.length} file${rows.length > 1 ? 's' : ''} to ${projectRef(job.number)}.</p>
+${text ? `<blockquote>${esc(text)}</blockquote>` : ''}<ul>${rows.map(f => `<li>${esc(f.name)}</li>`).join('')}</ul>
+<p>They're on the Project page under &ldquo;Added after ordering&rdquo;, where this batch can be downloaded on its own.</p>`)
+  revalidatePath(`/p/${token}`)
+  return {ok: true, count: rows.length}
 }

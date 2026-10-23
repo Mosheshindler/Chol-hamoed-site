@@ -16,6 +16,9 @@ export const STATUSES = {
 
 export const ACTIVE = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent', 'in_production', 'first_cut_sent', 'approved', 'revising']
 
+// Customers can add photos and files from their project page until production starts.
+export const ADD_FILES_STATUSES = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent']
+
 export const projectRef = n => `M35-${n}`
 
 export function formatMoney(cents) {
