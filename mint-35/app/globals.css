@@ -503,6 +503,11 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .cp-addons, .cp-thread { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
 .cp-addons > p, .cp-thread > p { margin: 0; }
 .cp-addon-wrap { display: grid; gap: 12px; }
+.cp-add-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.cp-form .cp-file-btn { display: inline-flex; position: relative; overflow: hidden; cursor: pointer; font-size: .9rem; }
+.cp-form .cp-file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; padding: 0; border: 0; }
+.cp-file-btn:has(input:focus-visible) { outline: 2px solid var(--lime); outline-offset: 3px; }
+.cp-added { margin: 12px 0 0; overflow-wrap: anywhere; }
 .cp-addon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
 .cp-addon { display: grid; gap: 4px; text-align: left; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; cursor: pointer; transition: border-color .2s, background .2s; }
 .cp-addon:hover { border-color: rgba(136,192,64,.5); }

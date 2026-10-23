@@ -289,3 +289,8 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .mini-check { display: flex !important; align-items: center; gap: 8px; font-weight: 400 !important; }
 .mini-check input { width: auto !important; }
 .hint-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--muted); font-size: .9rem; }
+/* Files a client added after ordering, one box per batch (Project page). */
+.batch { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 10px 0; }
+.batch-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.batch-note { margin: 8px 0 0; color: var(--muted); font-style: italic; }
+.batch .files { margin-top: 8px; }

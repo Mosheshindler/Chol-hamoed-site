@@ -48,6 +48,10 @@ separate from the Mint Media video site at the repo root (don't touch root files
   progress, files (script/first_cut/final), approve/request changes, messages, add-on requests at any stage (order to delivery; homepage says extras can be added anytime).
   Add-on list in `lib/addons.js`: extra format $450/video, 15-sec cutdown $175/video, subtitles $150/video;
   extra revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
+  Clients can add photos/files from their page until production starts (ADD_FILES_STATUSES in lib/status.js: up to script_sent).
+  Server actions startAddFiles/finishAddFiles (app/p/[token]/actions.js) hand out signed upload URLs under
+  `<job>/added/<batch>/`, record what arrived as kind `media`, log a `files_added` event, save any note as a message and email
+  the team. Admin Project page lists each batch separately ("Added after ordering") with "Download all".
   Admin Files can share a deliverable as an upload, a link (e.g. Google Doc) or pasted text (`recordShared`; project_files.url /
   .body, migration 20261021000000_shared_links.sql, placeholder path with no storage object). The customer page opens links in a
   new tab and shows pasted text inline.
@@ -63,12 +67,14 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Order form v2 (`components/ProjectForm.js`): steps 1 You, 2 Your brand, 3 one page per video (classic vs
   Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (name,
-  email, cell, company always required; no title field since Oct 21; alerts by email only for now). Step 1 opens with a "Have these handy" note.
+  email, cell, company always required; no title field since Oct 21; alerts by email only for now).
   Campaign 3 ("3 different videos, one look"; owner: avoid "stories") asks "General direction only" vs "I have an idea for each video" (3 optional boxes) -> brief.stories / brief.video_ideas. Logo required unless "I only have a
   logo for what I'm promoting" (then each video's media upload is required). Per-video answers beyond the old
   columns live in `projects.brief` (jsonb); `latest_date` is the in-hand deadline (Momentum: launch date).
   Chosen files are also kept in the browser (IndexedDB, `lib/fileStash.js`) so a reload keeps them; cleared on submit or after 14 days.
   Disclaimer: 3 key points ticked + full text scrolled to the end before the accept box unlocks.
+  Upload boxes that take several files add to the list when used again ("Add more", Remove per file). Step 1 opens with the
+  owner's "Before you start, please prepare for the following:" checklist (PREP_CLASSIC / PREP_CAMPAIGN in ProjectForm.js).
 
 - Checkout has Cloudflare Turnstile (`lib/turnstile.js`, widget above Submit) when NEXT_PUBLIC_TURNSTILE_SITE_KEY and
   TURNSTILE_SECRET_KEY are set in Vercel; the order API refuses orders without a valid token. QuickBooks errors log intuit_tid.

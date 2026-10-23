@@ -1,6 +1,7 @@
 import {projectRef} from '@/lib/status'
-import {formatDate} from '@/lib/dates'
+import {formatDate, formatDateTime} from '@/lib/dates'
 import {CustomerLink} from '../CustomerPanel'
+import DownloadAll from '../DownloadAll'
 import {loadOrder} from '../_lib/order'
 import {answers, checkoutExtras, neededBy, KIND_LABEL, INTAKE_KINDS} from '../_lib/text'
 import {exemptLabel, SALES_TAX_LABEL} from '@/lib/tax'
@@ -10,12 +11,15 @@ const site = w => (w.startsWith('http') ? w : `https://${w}`)
 
 export default async function ProjectDetails({params}) {
   const {id} = await params
-  const {p, jobs, multi, files, custUrl} = await loadOrder(id)
+  const {p, jobs, multi, files, events, custUrl} = await loadOrder(id)
   return (
     <div className="project-grid">
       <div className="col-main">
         {jobs.map(j => {
-          const theirs = files.filter(f => f.project_id === j.id && INTAKE_KINDS.includes(f.kind))
+          const theirs = files.filter(f => f.project_id === j.id && INTAKE_KINDS.includes(f.kind) && !f.batch)
+          // Batches added from the client's page, newest first.
+          const batches = Object.entries(Object.groupBy(files.filter(f => f.project_id === j.id && f.batch), f => f.batch))
+            .sort(([a], [b]) => b.localeCompare(a))
           return (
             <section key={j.id} className="panel">
               <h2>{multi ? `${projectRef(j.number)} · ` : ''}{j.package || 'No package'}</h2>
@@ -41,6 +45,29 @@ export default async function ProjectDetails({params}) {
                   ))}
                 </ul>
               ) : <p className="muted">No files.</p>}
+              {batches.length > 0 && <>
+                <h3 className="sub-head">Added after ordering</h3>
+                {batches.map(([batch, list]) => {
+                  const note = events.find(e => e.project_id === j.id && e.type === 'files_added' && e.data?.batch === batch)?.data?.note
+                  return (
+                    <div key={batch} className="batch">
+                      <div className="batch-head">
+                        <span><b>{formatDateTime(list[0].created_at)}</b> <span className="muted">· {list.length} file{list.length > 1 ? 's' : ''}</span></span>
+                        <DownloadAll files={list.map(f => ({name: f.name, url: f.download}))} />
+                      </div>
+                      {note && <p className="batch-note">&ldquo;{note}&rdquo;</p>}
+                      <ul className="files">
+                        {list.map(f => (
+                          <li key={f.id}>
+                            <span className="file-kind">{KIND_LABEL[f.kind]}</span>
+                            <a href={f.href} target="_blank" rel="noopener noreferrer">{f.name}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                })}
+              </>}
             </section>
           )
         })}

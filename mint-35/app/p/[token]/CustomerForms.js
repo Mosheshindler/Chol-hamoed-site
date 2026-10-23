@@ -1,7 +1,9 @@
 'use client'
 
 import {useActionState, useRef, useState} from 'react'
-import {customerDecision, customerMessage, requestAddon} from './actions'
+import {useRouter} from 'next/navigation'
+import {createClient} from '@/lib/supabase/browser'
+import {customerDecision, customerMessage, requestAddon, startAddFiles, finishAddFiles} from './actions'
 import {formats} from '@/components/formats'
 
 export function Decision({token, job, what}) {
@@ -109,5 +111,75 @@ export function AddonForm({token, job, addons, orientation}) {
       )}
       {state?.ok && !chosen && <p className="form-ok">Requested. We&rsquo;ll confirm it with you by email.</p>}
     </div>
+  )
+}
+
+// Add more photos, videos and files after ordering. Picking again adds to the list.
+export function AddFiles({token, job}) {
+  const router = useRouter()
+  const ref = useRef(null)
+  const [files, setFiles] = useState([])
+  const [state, setState] = useState({phase: 'idle'}) // idle | uploading {done,total} | done {count} | error {error}
+  const key = f => `${f.name}|${f.size}|${f.lastModified}`
+
+  function pick(e) {
+    const seen = new Set(files.map(key))
+    setFiles([...files, ...[...e.currentTarget.files].filter(f => !seen.has(key(f)))])
+    e.currentTarget.value = ''
+    setState({phase: 'idle'})
+  }
+
+  async function send(e) {
+    e.preventDefault()
+    if (!files.length) return setState({phase: 'error', error: 'Choose at least one file.'})
+    const note = new FormData(e.currentTarget).get('note')
+    setState({phase: 'uploading', done: 0, total: files.length})
+    const start = await startAddFiles({token, job, files: files.map(f => ({name: f.name, size: f.size}))})
+    if (start?.error) return setState({phase: 'error', error: start.error})
+    const supabase = createClient()
+    const names = {}
+    let done = 0
+    for (const u of start.uploads) {
+      const f = files[u.index]
+      const {error} = await supabase.storage.from('project-files').uploadToSignedUrl(u.path, u.token, f, {contentType: f.type || undefined})
+      if (!error) names[u.path] = f.name
+      setState({phase: 'uploading', done: ++done, total: files.length})
+    }
+    const res = await finishAddFiles({token, job, batch: start.batch, names, note})
+    if (res?.error) return setState({phase: 'error', error: res.error})
+    const missed = files.length - Object.keys(names).length
+    setFiles([])
+    ref.current?.reset()
+    setState({phase: 'done', count: res.count, missed})
+    router.refresh()
+  }
+
+  const busy = state.phase === 'uploading'
+  return (
+    <form ref={ref} className="cp-form cp-add-files" onSubmit={send}>
+      <div className="cp-add-pick">
+        <label className="btn btn-ghost btn-sm cp-file-btn">
+          {files.length ? 'Add more' : 'Choose files'}
+          <input type="file" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd,.svg" onChange={pick} disabled={busy} />
+        </label>
+        <span className="muted small">Photos, videos, logos or graphics · up to 250 MB each</span>
+      </div>
+      {files.length > 0 && (
+        <ul className="upload-list">
+          {files.map((f, i) => (
+            <li key={key(f)}><span>✓ {f.name}</span>{!busy && <button type="button" className="link-btn upload-remove" aria-label={`Remove ${f.name}`} onClick={() => setFiles(files.filter((_, n) => n !== i))}>Remove</button>}</li>
+          ))}
+          {files.length > 1 && <li className="upload-count">{files.length} files</li>}
+        </ul>
+      )}
+      {files.length > 0 && <label>What are these for? <span className="optional">— optional</span><input name="note" placeholder="e.g. Use the second photo at the end" disabled={busy} /></label>}
+      {state.phase === 'error' && <p className="form-error" role="alert">{state.error}</p>}
+      {state.phase === 'done' && <p className="form-ok">Sent {state.count} file{state.count > 1 ? 's' : ''}. Thanks, our team has been notified.{state.missed > 0 && ` ${state.missed} didn’t upload; please try those again.`}</p>}
+      {files.length > 0 && (
+        <button className="btn btn-primary btn-sm" disabled={busy}>
+          {busy ? `Uploading ${Math.min(state.done + 1, state.total)} of ${state.total}…` : `Send ${files.length} file${files.length > 1 ? 's' : ''}`}
+        </button>
+      )}
+    </form>
   )
 }
