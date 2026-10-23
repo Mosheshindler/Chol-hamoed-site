@@ -110,10 +110,10 @@ const Opt = () => <span className="optional"> (optional)</span>
 const PREP_CLASSIC = [
   ['megaphone', 'What you’re promoting, and who it’s for'],
   ['sparkles', 'The one thing viewers should remember'],
-  ['route', 'What viewers should do next: call, visit, register, buy'],
-  ['form', 'Details that must appear: price, dates, phone, address'],
-  ['image', 'Your logo, plus any photos or videos, saved in one place on your phone or computer'],
-  ['calendar', 'The latest date you need the video'],
+  ['route', 'What viewers should do next: call, visit, donate, buy'],
+  ['form', 'Details that must appear: price, dates, phone, web address'],
+  ['image', 'Your logo, plus any photos or videos you want included'],
+  ['calendar', 'The latest date you need the video delivered to you'],
 ]
 const PREP_CAMPAIGN = [
   ['heart', 'What the campaign is raising money for, and why now'],
@@ -582,7 +582,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       {/* Step 1 · You */}
       <fieldset className="wizard-step" data-step={0} hidden={step !== 0}>
         <div className="have-ready">
-          <b>Before you start, think through</b>
+          <b>Before you start, please prepare for the following:</b>
           <ul className="prep-list">
             {(lines.every(l => l.pkg.orgOnly) ? PREP_CAMPAIGN : PREP_CLASSIC).map(([icon, text]) => <li key={text}><Icon name={icon} /><span>{text}</span></li>)}
           </ul>
