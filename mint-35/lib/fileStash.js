@@ -4,7 +4,9 @@
 const DB = 'mint35-files'
 const STORE = 'stash'
 const MAX_AGE = 14 * 24 * 60 * 60 * 1000
-const MAX_FILE = 300 * 1024 * 1024 // very large videos are skipped (they'd need picking again)
+import {MAX_UPLOAD_BYTES} from './intake'
+
+const MAX_FILE = MAX_UPLOAD_BYTES // files over the upload limit aren't kept
 
 function open() {
   return new Promise((resolve, reject) => {

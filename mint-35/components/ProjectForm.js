@@ -10,7 +10,8 @@ import Icon from './Icon'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
 import {loadFiles, saveFiles, clearFiles} from '@/lib/fileStash'
 import {earliestDelivery, formatDate, isClosedDay} from '@/lib/dates'
-import {STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, US_STATES, labelOf} from '@/lib/intake'
+import {STYLES, STORY, VOICES, TONES, MUSIC, DISCLAIMER_POINTS, US_STATES, MAX_UPLOAD_MB, MAX_UPLOAD_BYTES, formatSize, labelOf} from '@/lib/intake'
+import TooBigDialog from './TooBigDialog'
 import {discountLines, describeDiscount} from '@/lib/discounts'
 import {SALES_TAX_RATE, SALES_TAX_LABEL, TAX_STATE, EXEMPT_REASONS, taxCents} from '@/lib/tax'
 
@@ -124,31 +125,44 @@ const PREP_CAMPAIGN = [
 ]
 
 // Picking files again adds to the ones already chosen (instead of replacing them), so a client can
-// add photos a few at a time. Each file can be removed on its own.
-function UploadCard({name, icon, title, hint, accept, multiple, required, optional, tip, children}) {
-  const [names, setNames] = useState([])
+// add photos a few at a time. Each file can be removed on its own and shows its size. Files over the
+// upload limit are left out and a pop-up suggests sharing them from Google Drive or Dropbox; with
+// `linkName`, the card has a field for those links (the pop-up can fill it in).
+function UploadCard({name, icon, title, hint, accept, multiple, required, optional, tip, linkName, children}) {
+  const [picked, setPicked] = useState([]) // [{name, size}]
+  const [tooBig, setTooBig] = useState(null)
+  const [showLinks, setShowLinks] = useState(false)
   const input = useRef(null)
+  const links = useRef(null)
   const kept = useRef([]) // the files chosen so far
   const replacing = useRef(false) // set when we change the list ourselves (Remove)
   const key = f => `${f.name}|${f.size}|${f.lastModified}`
+  // Links restored from a saved draft open the field by themselves.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => { if (links.current?.value) setShowLinks(true) })
+    return () => cancelAnimationFrame(id)
+  }, [])
   function setFiles(files) {
     const dt = new DataTransfer()
     files.forEach(f => dt.items.add(f))
     input.current.files = dt.files
   }
   function onChange(e) {
-    const picked = [...e.currentTarget.files]
-    let files = picked
+    const chosen = [...e.currentTarget.files]
+    const big = replacing.current ? [] : chosen.filter(f => f.size > MAX_UPLOAD_BYTES)
+    const fresh = chosen.filter(f => !big.includes(f))
+    let files = fresh
     if (multiple && !replacing.current) {
       const seen = new Set(kept.current.map(key))
-      files = [...kept.current, ...picked.filter(f => !seen.has(key(f)))]
-      if (files.length !== picked.length) {
-        try { setFiles(files) } catch { files = picked } // very old browsers: keep the new pick only
-      }
+      files = [...kept.current, ...fresh.filter(f => !seen.has(key(f)))]
+    } else if (!fresh.length && big.length) files = kept.current // a too-big pick keeps the earlier file
+    if (files.length !== chosen.length || files.some((f, i) => f !== chosen[i])) {
+      try { setFiles(files) } catch { if (big.length) { input.current.value = ''; files = [] } else files = chosen }
     }
     replacing.current = false
     kept.current = files
-    setNames(files.map(f => f.name))
+    setPicked(files.map(f => ({name: f.name, size: f.size})))
+    if (big.length) setTooBig(big.map(f => ({name: f.name, size: f.size})))
   }
   function remove(i) {
     const files = i == null ? [] : kept.current.filter((_, n) => n !== i)
@@ -156,6 +170,17 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
     replacing.current = true
     input.current.dispatchEvent(new Event('change', {bubbles: true}))
   }
+  function addLink(url) {
+    setShowLinks(true)
+    requestAnimationFrame(() => {
+      const el = links.current
+      if (!el) return
+      el.value = el.value.trim() ? `${el.value.trim()}\n${url}` : url
+      el.dispatchEvent(new Event('input', {bubbles: true}))
+      el.dispatchEvent(new Event('change', {bubbles: true}))
+    })
+  }
+  const label = f => <>{f.name} <span className="upload-size">{formatSize(f.size)}</span></>
   return (
     <div className="upload-card">
       <span className="upload-icon"><Icon name={icon} /></span>
@@ -163,18 +188,30 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
         <b>{title}{tip && <> <Tip>{tip}</Tip></>}</b>
         {optional && <span className="opt-tag">Optional</span>}
         {hint && <span className="upload-hint">{hint}</span>}
-        {names.length > 0 && (multiple
+        <span className="upload-limit">Up to {MAX_UPLOAD_MB} MB per file</span>
+        {picked.length > 0 && (multiple
           ? <ul className="upload-list">
-              {names.map((n, i) => <li key={i}><span>✓ {n}</span><button type="button" className="link-btn upload-remove" aria-label={`Remove ${n}`} onClick={() => remove(i)}>Remove</button></li>)}
-              {names.length > 1 && <li className="upload-count">{names.length} files</li>}
+              {picked.map((f, i) => <li key={i}><span>✓ {label(f)}</span><button type="button" className="link-btn upload-remove" aria-label={`Remove ${f.name}`} onClick={() => remove(i)}>Remove</button></li>)}
+              {picked.length > 1 && <li className="upload-count">{picked.length} files · {formatSize(picked.reduce((s, f) => s + f.size, 0))}</li>}
             </ul>
-          : <span className="upload-names">✓ {names.join(', ')} <button type="button" className="link-btn upload-remove" onClick={() => remove(null)}>Remove</button></span>)}
+          : <span className="upload-names">✓ {label(picked[0])} <button type="button" className="link-btn upload-remove" onClick={() => remove(null)}>Remove</button></span>)}
+        {linkName && (
+          <>
+            {!showLinks && <button type="button" className="reveal-link" onClick={() => setShowLinks(true)}>Bigger files? Share a Google Drive or Dropbox link</button>}
+            <label className="upload-links" hidden={!showLinks}>
+              <span>Links to your files <span className="muted">(Google Drive, Dropbox)</span></span>
+              <textarea ref={links} name={linkName} rows={2} placeholder="https://drive.google.com/…" />
+              <span className="hint">Set sharing to &ldquo;Anyone with the link&rdquo; so we can open it.</span>
+            </label>
+          </>
+        )}
       </div>
       <label className="upload-btn">
-        {!names.length ? 'Upload' : multiple ? 'Add more' : 'Change'}
+        {!picked.length ? 'Upload' : multiple ? 'Add more' : 'Change'}
         <input ref={input} type="file" name={name} accept={accept} multiple={multiple} required={required} onChange={onChange} />
       </label>
       {children && <div className="upload-extra">{children}</div>}
+      {tooBig && <TooBigDialog files={tooBig} onLink={linkName ? addLink : null} onClose={() => setTooBig(null)} />}
     </div>
   )
 }
@@ -242,7 +279,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         const orientation = fd.get(`i${i}_orientation`)
         const xf = formats.filter(f => fd.get(xfName(`i${i}_orientation`, f)) === 'on' && !orientation?.startsWith(f.ratio + ' ')).map(f => `${f.ratio} ${f.name}`)
         const extras = CHECKOUT_EXTRAS.filter(a => fd.get(`i${i}_x_${a.key}`) === 'on').map(a => a.key)
-        return {style: fd.get(`i${i}_style`), story: fd.get(`i${i}_story`), stories: fd.get(`i${i}_stories`), orientation, xf, extras}
+        return {style: fd.get(`i${i}_style`), story: fd.get(`i${i}_story`), stories: fd.get(`i${i}_stories`), orientation, xf, extras, mediaLinks: !!fd.get(`i${i}_media_links`)?.trim()}
       }),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -472,13 +509,13 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         billing: {line1: fd.get('billing_line1'), line2: fd.get('billing_line2'), city: fd.get('billing_city'), state: fd.get('billing_state'), zip: fd.get('billing_zip')},
         alert_channel: fd.get('alert_channel'),
       },
-      brand: {logo_override: fd.get('logo_override') === 'on', design_link: fd.get('design_link'), designer: fd.get('designer')},
+      brand: {logo_override: fd.get('logo_override') === 'on', design_link: fd.get('design_link'), designer: fd.get('designer'), brand_links: fd.get('brand_links')},
       items: lines.map((l, i) => ({
         package: l.pkg.name,
         promoting: g(i, 'promoting'), item_website: g(i, 'item_website'), audience: g(i, 'audience'),
         key_message: g(i, 'key_message'), desired_action: g(i, 'desired_action'), must_appear: g(i, 'must_appear'),
         orientation: g(i, 'orientation'), extra_formats: watch.items?.[i]?.xf || [], extras: watch.items?.[i]?.extras || [], style: g(i, 'style'), story: g(i, 'story'), voice: g(i, 'voice'),
-        tone: g(i, 'tone'), music: g(i, 'music'), references_links: g(i, 'references_links'),
+        tone: g(i, 'tone'), music: g(i, 'music'), references_links: g(i, 'references_links'), media_links: g(i, 'media_links'),
         legal_text: g(i, 'legal_text'), restrictions: g(i, 'restrictions'),
         ideal_date: g(i, 'ideal_date'), latest_date: g(i, 'latest_date'),
         campaign_link: g(i, 'campaign_link'), goal: g(i, 'goal'), match: g(i, 'match'),
@@ -633,16 +670,13 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           </label>
           {watch.override && <span className="upload-hint">No problem. You&rsquo;ll add it in the next step.</span>}
         </UploadCard>
-        <UploadCard name="brand_materials" icon="palette" title="Brand materials" optional multiple accept="image/*,.pdf"
+        <UploadCard name="brand_materials" icon="palette" title="Brand materials" optional multiple accept="image/*,.pdf" linkName="brand_links"
           hint="Brochures, flyers, anything that shows your look" />
-        <UploadCard name="design_files" icon="layers" title="Open design files" optional multiple
+        <UploadCard name="design_files" icon="layers" title="Open design files" optional multiple linkName="design_link"
           hint="Editable files: AI, PSD, Canva…"
           tip="The original, editable versions of your graphics: Illustrator (.ai), Photoshop (.psd), InDesign, layered PDF, or a Canva or Figma link. They let us use your exact fonts, colors and artwork. Don’t have them? Your designer’s email works too, or we’ll work from what you send.">
-          <Reveal label="Share a link or your designer’s email instead">
-            <div className="stack">
-              <input name="design_link" placeholder="Link (Drive, Dropbox, Canva)" aria-label="Link to design files" />
-              <input name="designer" placeholder="Designer’s email" aria-label="Designer email" />
-            </div>
+          <Reveal label="Or send us your designer’s email">
+            <input name="designer" placeholder="Designer’s email" aria-label="Designer email" />
           </Reveal>
         </UploadCard>
         <Nav n={1} />
@@ -712,10 +746,10 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             )}
 
             <h3 className="q-group">The look and sound</h3>
-            <UploadCard name={p('media')} icon="image" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd"
+            <UploadCard name={p('media')} icon="image" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd" linkName={p('media_links')}
               title={momentum ? 'Campaign graphics, photos & videos' : 'Photos, videos & graphics to use'}
               hint={momentum ? 'Campaign logo, artwork, flyers, footage. Different photos for each video? Number the files 1–5.' : 'Product photos, footage, its own logo, artwork. Need your product to look exact? Upload real photos or video of it.'}
-              required={!!watch.override} optional={!watch.override}>
+              required={!!watch.override && !w.mediaLinks} optional={!watch.override}>
               <span className="upload-warn">⚠️ Anything you upload here may appear in your video.</span>
             </UploadCard>
             <Orientation name={p('orientation')} label={momentum ? 'Video format (one for all 5 videos)' : multi ? `Video format (one for all ${multi} videos)` : 'Video format'} pkg={l.pkg} chosen={watch.items?.[i]?.orientation} />

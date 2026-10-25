@@ -114,3 +114,10 @@ export const US_STATES = [
   ['WI', 'Wisconsin'],
   ['WY', 'Wyoming'],
 ]
+
+// Largest file a client can upload (order form and project page). 50 MB is Supabase's default per-file limit;
+// the owner prefers clients share bigger footage from their own Google Drive or Dropbox (Oct 25).
+export const MAX_UPLOAD_MB = 50
+export const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
+export const formatSize = b => (b >= 1024 * 1024 * 1024 ? `${(b / 1024 ** 3).toFixed(1)} GB`
+  : b >= 1024 * 1024 ? `${(b / 1024 ** 2).toFixed(b >= 10 * 1024 ** 2 ? 0 : 1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`)

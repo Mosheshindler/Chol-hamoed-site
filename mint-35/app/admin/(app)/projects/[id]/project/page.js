@@ -45,10 +45,20 @@ export default async function ProjectDetails({params}) {
                   ))}
                 </ul>
               ) : <p className="muted">No files.</p>}
+              {(() => {
+                const shared = events.filter(e => e.project_id === j.id && e.type === 'files_added' && !e.data?.batch && e.data?.links?.length)
+                return shared.length > 0 && <>
+                  <h3 className="sub-head">Links they shared to bigger files</h3>
+                  <ul className="files">
+                    {shared.flatMap(e => e.data.links.map(u => <li key={e.id + u}><span className="file-kind">{formatDateTime(e.created_at)}</span><a href={u} target="_blank" rel="noopener noreferrer">{u}</a></li>))}
+                  </ul>
+                </>
+              })()}
               {batches.length > 0 && <>
                 <h3 className="sub-head">Added after ordering</h3>
                 {batches.map(([batch, list]) => {
-                  const note = events.find(e => e.project_id === j.id && e.type === 'files_added' && e.data?.batch === batch)?.data?.note
+                  const ev = events.find(e => e.project_id === j.id && e.type === 'files_added' && e.data?.batch === batch)?.data || {}
+                  const note = ev.note
                   return (
                     <div key={batch} className="batch">
                       <div className="batch-head">
@@ -56,6 +66,7 @@ export default async function ProjectDetails({params}) {
                         <DownloadAll files={list.map(f => ({name: f.name, url: f.download}))} />
                       </div>
                       {note && <p className="batch-note">&ldquo;{note}&rdquo;</p>}
+                      {ev.links?.length > 0 && <p className="batch-links">Links to bigger files: {ev.links.map(u => <a key={u} href={u} target="_blank" rel="noopener noreferrer">{u}</a>)}</p>}
                       <ul className="files">
                         {list.map(f => (
                           <li key={f.id}>
