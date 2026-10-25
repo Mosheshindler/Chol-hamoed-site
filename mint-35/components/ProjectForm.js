@@ -211,7 +211,7 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
         <input ref={input} type="file" name={name} accept={accept} multiple={multiple} required={required} onChange={onChange} />
       </label>
       {children && <div className="upload-extra">{children}</div>}
-      {tooBig && <TooBigDialog files={tooBig} onLink={linkName ? addLink : null} onClose={() => setTooBig(null)} />}
+      {tooBig && <TooBigDialog files={tooBig} onLink={linkName ? addLink : null} onClose={() => { setTooBig(null); if (linkName) setShowLinks(true) }} />}
     </div>
   )
 }

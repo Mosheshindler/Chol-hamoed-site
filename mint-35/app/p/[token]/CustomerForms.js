@@ -220,7 +220,7 @@ export function AddFiles({token, job}) {
             : files.length ? `Send ${files.length} file${files.length > 1 ? 's' : ''}${hasLinks ? ' + link' : ''}` : 'Send link'}
         </button>
       )}
-      {tooBig && <TooBigDialog files={tooBig} onLink={addLink} onClose={() => setTooBig(null)} />}
+      {tooBig && <TooBigDialog files={tooBig} onLink={addLink} onClose={() => { setTooBig(null); setShowLinks(true) }} />}
     </form>
   )
 }
