@@ -931,3 +931,19 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .exempt-box { margin: 12px 0 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; display: grid; gap: 12px; }
 .exempt-fields { display: grid; gap: 12px; }
 .cp-tax { display: block; font-size: .75rem; font-weight: 500; color: var(--muted); text-align: right; }
+
+/* Too-big-file pop-up (components/TooBigDialog.js) */
+.too-big { width: min(560px, calc(100% - 32px)); }
+.too-big .modal-body { padding: 32px; }
+.too-big h2 { font-size: clamp(1.3rem, 3vw, 1.6rem); margin: 0 0 12px; }
+.too-big-files { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 4px; overflow-wrap: anywhere; }
+.too-big-steps { margin: 10px 0 18px; padding-left: 20px; display: grid; gap: 6px; }
+.too-big-link { display: grid; gap: 12px; }
+.too-big-link input { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; color: var(--text); padding: 11px 13px; font: inherit; }
+.too-big-link input:focus { outline: none; border-color: var(--lime); }
+.too-big-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.upload-size { color: var(--muted); font-weight: 400; margin-left: 4px; }
+.upload-limit { display: block; color: var(--muted); font-size: .8rem; margin-top: 2px; }
+.upload-links { display: grid; gap: 6px; margin-top: 8px; }
+.upload-links textarea { width: 100%; }
+@media (max-width: 560px) { .too-big .modal-body { padding: 26px 18px; } }

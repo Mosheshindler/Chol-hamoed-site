@@ -52,6 +52,10 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Server actions startAddFiles/finishAddFiles (app/p/[token]/actions.js) hand out signed upload URLs under
   `<job>/added/<batch>/`, record what arrived as kind `media`, log a `files_added` event, save any note as a message and email
   the team. Admin Project page lists each batch separately ("Added after ordering") with "Download all".
+- Upload limit (owner, Oct 25): MAX_UPLOAD_MB = 50 per file (`lib/intake.js`; Supabase's default per-file limit) on the order
+  form and the project page. Sizes show next to each file. Bigger files are left out and a pop-up (`components/TooBigDialog.js`)
+  asks the client to share them from their own Google Drive or Dropbox (owner prefers their storage to ours). Links go in
+  brief.media_links (per video), brief.brand_links, design_link, or (project page) a message + email + `files_added` event.
   Admin Files can share a deliverable as an upload, a link (e.g. Google Doc) or pasted text (`recordShared`; project_files.url /
   .body, migration 20261021000000_shared_links.sql, placeholder path with no storage object). The customer page opens links in a
   new tab and shows pasted text inline.

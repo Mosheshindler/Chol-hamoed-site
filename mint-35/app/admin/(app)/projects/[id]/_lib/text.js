@@ -48,6 +48,7 @@ export function answers(p) {
     ['Voice', b.voice && labelOf(VOICES, b.voice)],
     ['Voice tone', b.tone && labelOf(TONES, b.tone)],
     ['Music mood', b.music && labelOf(MUSIC, b.music)],
+    ['Footage links (too big to upload)', b.media_links],
     ['References', p.references_links],
     ['Required text / legal', p.legal_text],
     ['Can’t do', p.restrictions],
@@ -56,6 +57,7 @@ export function answers(p) {
     ['Where it will run', [...(p.placements || []), p.placement_other].filter(Boolean).join(', ')],
     ['Brand colors', p.brand_colors],
     ['Logo', b.logo_override ? 'Customer only has a logo for what they’re promoting (see their files)' : ''],
+    ['Brand materials links', b.brand_links],
     ['Design files link', b.design_link],
     ['Designer', b.designer],
   ].filter(([, v]) => v)
@@ -146,7 +148,7 @@ export function describe(e, names, pkg) {
     case 'note': return null
     case 'charge_failed': return `Charge failed: ${e.data.message}`
     case 'customer': return `Customer ${e.data.decision === 'approve' ? 'approved' : 'requested changes'}, moved to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”`
-    case 'files_added': return `Customer added ${e.data.count} file${e.data.count > 1 ? 's' : ''} from their project page${e.data.note ? `: “${e.data.note}”` : ''}`
+    case 'files_added': return `Customer ${[e.data.count ? `added ${e.data.count} file${e.data.count > 1 ? 's' : ''}` : '', e.data.links?.length ? `shared ${e.data.links.length > 1 ? 'links' : 'a link'} to bigger files` : ''].filter(Boolean).join(' and ')} from their project page${e.data.note ? `: “${e.data.note}”` : ''}`
     case 'addon': return `Customer requested add-on: ${e.data.label}${e.data.details ? ` (${e.data.details})` : ''}`
     case 'addon_accepted': return `${who} confirmed add-on ${e.data.label} at ${formatMoney(e.data.price_cents)}`
     case 'addon_declined': return `${who} declined add-on ${e.data.label}`

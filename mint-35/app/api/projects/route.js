@@ -11,12 +11,11 @@ import {upcomingClosedDays} from '@/lib/holidays'
 import {findDiscount, claimDiscount} from '@/lib/discountCodes'
 import {discountLines, describeDiscount} from '@/lib/discounts'
 import {SALES_TAX_RATE, TAX_STATE, EXEMPT_REASONS} from '@/lib/tax'
-import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, UPLOAD_KINDS, DISCLAIMER_POINTS, US_STATES} from '@/lib/intake'
+import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, UPLOAD_KINDS, DISCLAIMER_POINTS, US_STATES, MAX_UPLOAD_BYTES, MAX_UPLOAD_MB} from '@/lib/intake'
 
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
 const MAX_ITEMS = 10
 const MAX_FILES = 40
-const MAX_FILE_BYTES = 250 * 1024 * 1024
 
 const str = (v, max = 4000) => (typeof v === 'string' ? v.trim().slice(0, max) : '') || null
 const pick = (list, v) => (list.some(o => o.value === v) ? v : 'pick')
@@ -65,7 +64,7 @@ export async function POST(request) {
 
   // Step 2: brand details shared by every video in the order.
   const b = body.brand || {}
-  const brand = {logo_override: !!b.logo_override, design_link: str(b.design_link, 1000), designer: str(b.designer, 300)}
+  const brand = {logo_override: !!b.logo_override, design_link: str(b.design_link, 1000), designer: str(b.designer, 300), brand_links: str(b.brand_links, 2000)}
 
   // Step 3: one brief per video.
   const rawItems = Array.isArray(body.items) ? body.items : []
@@ -86,6 +85,8 @@ export async function POST(request) {
     }
     // Voice and tone are only asked when narration is chosen.
     if (!brief.story?.startsWith('narration')) { delete brief.voice; delete brief.tone }
+    // Links to footage too big to upload (the client's own Google Drive / Dropbox).
+    brief.media_links = str(it?.media_links, 2000)
     const row = {
       package: pkg,
       promoting: str(it?.promoting),
@@ -147,12 +148,12 @@ export async function POST(request) {
   }
 
   const files = (Array.isArray(body.files) ? body.files : []).slice(0, MAX_FILES)
-  if (files.some(f => !f || typeof f.name !== 'string' || !(f.size > 0) || f.size > MAX_FILE_BYTES || !UPLOAD_KINDS[f.kind])) {
-    return bad('Each file must be under 250 MB.')
+  if (files.some(f => !f || typeof f.name !== 'string' || !(f.size > 0) || f.size > MAX_UPLOAD_BYTES || !UPLOAD_KINDS[f.kind])) {
+    return bad(`Each file can be up to ${MAX_UPLOAD_MB} MB. Share bigger files with a Google Drive or Dropbox link instead.`)
   }
   if (!brand.logo_override && !files.some(f => f.kind === 'logo')) return bad('Please upload your main logo.')
   if (brand.logo_override) {
-    const missing = items.findIndex((_, i) => !files.some(f => f.kind === 'media' && f.item === i))
+    const missing = items.findIndex((it, i) => !it.brief.media_links && !files.some(f => f.kind === 'media' && f.item === i))
     if (missing !== -1) return bad(`Please upload the logo or graphics for what you’re promoting${items.length > 1 ? ` (video ${missing + 1})` : ''}.`)
   }
 

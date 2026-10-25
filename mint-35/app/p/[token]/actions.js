@@ -8,6 +8,7 @@ import {addonByKey, ADDON_STATUSES} from '@/lib/addons'
 import {randomBytes} from 'node:crypto'
 import {projectRef, scriptWord, ADD_FILES_STATUSES} from '@/lib/status'
 import {sendEmail, esc} from '@/lib/email'
+import {MAX_UPLOAD_BYTES, MAX_UPLOAD_MB} from '@/lib/intake'
 import {siteOrigin} from '@/lib/site'
 
 const clean = (v, max = 5000) => String(v ?? '').trim().slice(0, max)
@@ -100,7 +101,6 @@ export async function requestAddon(formData) {
 // URL per file, all under one batch folder (`<job>/added/<batch>/`); the browser uploads straight to
 // storage; step 2 records what arrived and emails the team. Each batch is listed and downloaded on its own.
 const MAX_ADD_FILES = 40
-const MAX_ADD_BYTES = 250 * 1024 * 1024
 const BATCH = /^\d{8}-\d{6}-[0-9a-f]{6}$/
 
 export async function startAddFiles({token, job: jobId, files}) {
@@ -113,7 +113,7 @@ export async function startAddFiles({token, job: jobId, files}) {
   if (!list.length) return {error: 'Choose at least one file.'}
   if (list.length > MAX_ADD_FILES) return {error: `Please send up to ${MAX_ADD_FILES} files at a time.`}
   if (list.some(f => !(Number(f?.size) > 0))) return {error: 'One of the files is empty. Remove it and try again.'}
-  if (list.some(f => Number(f.size) > MAX_ADD_BYTES)) return {error: 'Each file can be up to 250 MB. For bigger videos, send us a link in a message.'}
+  if (list.some(f => Number(f.size) > MAX_UPLOAD_BYTES)) return {error: `Each file can be up to ${MAX_UPLOAD_MB} MB. Share bigger files with a Google Drive or Dropbox link instead.`}
 
   const now = new Date()
   const batch = now.toISOString().replace(/\D/g, '').slice(0, 14).replace(/^(\d{8})/, '$1-') + '-' + randomBytes(3).toString('hex')
@@ -128,7 +128,7 @@ export async function startAddFiles({token, job: jobId, files}) {
   return {batch, uploads}
 }
 
-export async function finishAddFiles({token, job: jobId, batch, names, note}) {
+export async function finishAddFiles({token, job: jobId, batch, names, note, links}) {
   const fd = new FormData(); fd.set('token', token); fd.set('job', jobId)
   const r = await jobFor(fd)
   if (r.error) return r
@@ -150,12 +150,35 @@ export async function finishAddFiles({token, job: jobId, batch, names, note}) {
   if (error) return {error: 'We couldn’t save your files. Please try again.'}
 
   const text = clean(note, 2000)
-  await order.db.from('project_events').insert({project_id: job.id, type: 'files_added', data: {batch, count: rows.length, note: text || undefined}})
-  if (text) await order.db.from('project_messages').insert({project_id: job.id, author: 'customer', body: `Sent ${rows.length} more file${rows.length > 1 ? 's' : ''}: ${text}`})
-  await tellTeam(job, `Customer added ${rows.length} file${rows.length > 1 ? 's' : ''}`,
+  const urls = linkList(links)
+  await order.db.from('project_events').insert({project_id: job.id, type: 'files_added', data: {batch, count: rows.length, note: text || undefined, links: urls.length ? urls : undefined}})
+  if (text || urls.length) await order.db.from('project_messages').insert({project_id: job.id, author: 'customer', body: [`Sent ${rows.length} more file${rows.length > 1 ? 's' : ''}${text ? `: ${text}` : '.'}`, ...urls.length ? ['Links to bigger files:', ...urls] : []].join('\n')})
+  await tellTeam(job, `Customer added ${rows.length} file${rows.length > 1 ? 's' : ''}${urls.length ? ' and a link' : ''}`,
     `<p><b>${esc(job.name)}</b> added ${rows.length} file${rows.length > 1 ? 's' : ''} to ${projectRef(job.number)}.</p>
-${text ? `<blockquote>${esc(text)}</blockquote>` : ''}<ul>${rows.map(f => `<li>${esc(f.name)}</li>`).join('')}</ul>
+${text ? `<blockquote>${esc(text)}</blockquote>` : ''}<ul>${rows.map(f => `<li>${esc(f.name)}</li>`).join('')}</ul>${linksHtml(urls)}
 <p>They're on the Project page under &ldquo;Added after ordering&rdquo;, where this batch can be downloaded on its own.</p>`)
   revalidatePath(`/p/${token}`)
   return {ok: true, count: rows.length}
+}
+
+// Links to files too big to upload (the client's own Google Drive / Dropbox), one per line.
+const linkList = v => clean(v, 3000).split(/\s+/).filter(u => /^https?:\/\/\S+\.\S+/i.test(u)).slice(0, 20)
+const linksHtml = urls => (urls.length ? `<p><b>Links to bigger files:</b></p><ul>${urls.map(u => `<li><a href="${esc(u)}">${esc(u)}</a></li>`).join('')}</ul>` : '')
+
+// Just a link (no uploads): saved as a message and emailed to the team.
+export async function shareFileLinks({token, job: jobId, links, note}) {
+  const fd = new FormData(); fd.set('token', token); fd.set('job', jobId)
+  const r = await jobFor(fd)
+  if (r.error) return r
+  const {order, job} = r
+  if (!ADD_FILES_STATUSES.includes(job.status)) return {error: 'Production has started, so files can’t be added here any more. Send us a message instead.'}
+  const urls = linkList(links)
+  if (!urls.length) return {error: 'Paste a full link, starting with https://'}
+  const text = clean(note, 2000)
+  await order.db.from('project_messages').insert({project_id: job.id, author: 'customer', body: ['Links to my files:', ...urls, ...text ? ['', text] : []].join('\n')})
+  await order.db.from('project_events').insert({project_id: job.id, type: 'files_added', data: {count: 0, links: urls, note: text || undefined}})
+  await tellTeam(job, 'Customer shared a link to their files',
+    `<p><b>${esc(job.name)}</b> shared files for ${projectRef(job.number)} from their own storage.</p>${text ? `<blockquote>${esc(text)}</blockquote>` : ''}${linksHtml(urls)}`)
+  revalidatePath(`/p/${token}`)
+  return {ok: true}
 }

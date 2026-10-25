@@ -3,7 +3,9 @@
 import {useActionState, useRef, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import {createClient} from '@/lib/supabase/browser'
-import {customerDecision, customerMessage, requestAddon, startAddFiles, finishAddFiles} from './actions'
+import {customerDecision, customerMessage, requestAddon, startAddFiles, finishAddFiles, shareFileLinks} from './actions'
+import {MAX_UPLOAD_MB, MAX_UPLOAD_BYTES, formatSize} from '@/lib/intake'
+import TooBigDialog from '@/components/TooBigDialog'
 import {formats} from '@/components/formats'
 
 export function Decision({token, job, what}) {
@@ -114,47 +116,79 @@ export function AddonForm({token, job, addons, orientation}) {
   )
 }
 
-// Add more photos, videos and files after ordering. Picking again adds to the list.
+// Add more photos, videos and files after ordering. Picking again adds to the list. Files over the
+// upload limit are left out and a pop-up suggests a Google Drive or Dropbox link, which can be sent here too.
 export function AddFiles({token, job}) {
   const router = useRouter()
   const ref = useRef(null)
+  const linksRef = useRef(null)
   const [files, setFiles] = useState([])
-  const [state, setState] = useState({phase: 'idle'}) // idle | uploading {done,total} | done {count} | error {error}
+  const [tooBig, setTooBig] = useState(null)
+  const [showLinks, setShowLinks] = useState(false)
+  const [hasLinks, setHasLinks] = useState(false)
+  const [state, setState] = useState({phase: 'idle'}) // idle | uploading {done,total} | done {count, links} | error {error}
   const key = f => `${f.name}|${f.size}|${f.lastModified}`
 
   function pick(e) {
+    const chosen = [...e.currentTarget.files]
+    const big = chosen.filter(f => f.size > MAX_UPLOAD_BYTES)
     const seen = new Set(files.map(key))
-    setFiles([...files, ...[...e.currentTarget.files].filter(f => !seen.has(key(f)))])
+    setFiles([...files, ...chosen.filter(f => f.size <= MAX_UPLOAD_BYTES && !seen.has(key(f)))])
     e.currentTarget.value = ''
     setState({phase: 'idle'})
+    if (big.length) setTooBig(big.map(f => ({name: f.name, size: f.size})))
+  }
+
+  function addLink(url) {
+    setShowLinks(true)
+    requestAnimationFrame(() => {
+      const el = linksRef.current
+      if (!el) return
+      el.value = el.value.trim() ? `${el.value.trim()}\n${url}` : url
+      setHasLinks(true)
+    })
   }
 
   async function send(e) {
     e.preventDefault()
-    if (!files.length) return setState({phase: 'error', error: 'Choose at least one file.'})
-    const note = new FormData(e.currentTarget).get('note')
-    setState({phase: 'uploading', done: 0, total: files.length})
-    const start = await startAddFiles({token, job, files: files.map(f => ({name: f.name, size: f.size}))})
-    if (start?.error) return setState({phase: 'error', error: start.error})
-    const supabase = createClient()
-    const names = {}
-    let done = 0
-    for (const u of start.uploads) {
-      const f = files[u.index]
-      const {error} = await supabase.storage.from('project-files').uploadToSignedUrl(u.path, u.token, f, {contentType: f.type || undefined})
-      if (!error) names[u.path] = f.name
-      setState({phase: 'uploading', done: ++done, total: files.length})
+    const fd = new FormData(e.currentTarget)
+    const note = fd.get('note')
+    const links = String(fd.get('links') || '').trim()
+    if (!files.length && !links) return setState({phase: 'error', error: 'Choose a file or add a link first.'})
+    let count = 0, missed = 0
+    if (files.length) {
+      setState({phase: 'uploading', done: 0, total: files.length})
+      const start = await startAddFiles({token, job, files: files.map(f => ({name: f.name, size: f.size}))})
+      if (start?.error) return setState({phase: 'error', error: start.error})
+      const supabase = createClient()
+      const names = {}
+      let done = 0
+      for (const u of start.uploads) {
+        const f = files[u.index]
+        const {error} = await supabase.storage.from('project-files').uploadToSignedUrl(u.path, u.token, f, {contentType: f.type || undefined})
+        if (!error) names[u.path] = f.name
+        setState({phase: 'uploading', done: ++done, total: files.length})
+      }
+      const res = await finishAddFiles({token, job, batch: start.batch, names, note, links})
+      if (res?.error) return setState({phase: 'error', error: res.error})
+      count = res.count
+      missed = files.length - Object.keys(names).length
+    } else {
+      setState({phase: 'uploading', done: 0, total: 0})
+      const res = await shareFileLinks({token, job, links, note})
+      if (res?.error) return setState({phase: 'error', error: res.error})
     }
-    const res = await finishAddFiles({token, job, batch: start.batch, names, note})
-    if (res?.error) return setState({phase: 'error', error: res.error})
-    const missed = files.length - Object.keys(names).length
     setFiles([])
     ref.current?.reset()
-    setState({phase: 'done', count: res.count, missed})
+    setHasLinks(false)
+    setShowLinks(false)
+    setState({phase: 'done', count, links: !!links, missed})
     router.refresh()
   }
 
   const busy = state.phase === 'uploading'
+  const ready = files.length > 0 || hasLinks
+  const sent = state.phase === 'done' && [state.count ? `${state.count} file${state.count > 1 ? 's' : ''}` : '', state.links ? 'your link' : ''].filter(Boolean).join(' and ')
   return (
     <form ref={ref} className="cp-form cp-add-files" onSubmit={send}>
       <div className="cp-add-pick">
@@ -162,24 +196,31 @@ export function AddFiles({token, job}) {
           {files.length ? 'Add more' : 'Choose files'}
           <input type="file" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd,.svg" onChange={pick} disabled={busy} />
         </label>
-        <span className="muted small">Photos, videos, logos or graphics · up to 250 MB each</span>
+        <span className="muted small">Photos, videos, logos or graphics · up to {MAX_UPLOAD_MB} MB each</span>
       </div>
       {files.length > 0 && (
         <ul className="upload-list">
           {files.map((f, i) => (
-            <li key={key(f)}><span>✓ {f.name}</span>{!busy && <button type="button" className="link-btn upload-remove" aria-label={`Remove ${f.name}`} onClick={() => setFiles(files.filter((_, n) => n !== i))}>Remove</button>}</li>
+            <li key={key(f)}><span>✓ {f.name} <span className="upload-size">{formatSize(f.size)}</span></span>{!busy && <button type="button" className="link-btn upload-remove" aria-label={`Remove ${f.name}`} onClick={() => setFiles(files.filter((_, n) => n !== i))}>Remove</button>}</li>
           ))}
-          {files.length > 1 && <li className="upload-count">{files.length} files</li>}
+          {files.length > 1 && <li className="upload-count">{files.length} files · {formatSize(files.reduce((s, f) => s + f.size, 0))}</li>}
         </ul>
       )}
-      {files.length > 0 && <label>What are these for? <span className="optional">— optional</span><input name="note" placeholder="e.g. Use the second photo at the end" disabled={busy} /></label>}
+      {!showLinks && <button type="button" className="reveal-link" onClick={() => setShowLinks(true)}>Bigger files? Share a Google Drive or Dropbox link</button>}
+      <label hidden={!showLinks}>Links to your files <span className="optional">(Google Drive, Dropbox)</span>
+        <textarea ref={linksRef} name="links" rows={2} placeholder="https://drive.google.com/…" disabled={busy} onInput={e => setHasLinks(!!e.currentTarget.value.trim())} />
+        <span className="hint">Set sharing to &ldquo;Anyone with the link&rdquo; so we can open it.</span>
+      </label>
+      {ready && <label>What are these for? <span className="optional">— optional</span><input name="note" placeholder="e.g. Use the second photo at the end" disabled={busy} /></label>}
       {state.phase === 'error' && <p className="form-error" role="alert">{state.error}</p>}
-      {state.phase === 'done' && <p className="form-ok">Sent {state.count} file{state.count > 1 ? 's' : ''}. Thanks, our team has been notified.{state.missed > 0 && ` ${state.missed} didn’t upload; please try those again.`}</p>}
-      {files.length > 0 && (
+      {state.phase === 'done' && <p className="form-ok">Sent {sent}. Thanks, our team has been notified.{state.missed > 0 && ` ${state.missed} file${state.missed > 1 ? 's' : ''} didn’t upload; please try again or share a link.`}</p>}
+      {ready && (
         <button className="btn btn-primary btn-sm" disabled={busy}>
-          {busy ? `Uploading ${Math.min(state.done + 1, state.total)} of ${state.total}…` : `Send ${files.length} file${files.length > 1 ? 's' : ''}`}
+          {busy ? (state.total ? `Uploading ${Math.min(state.done + 1, state.total)} of ${state.total}…` : 'Sending…')
+            : files.length ? `Send ${files.length} file${files.length > 1 ? 's' : ''}${hasLinks ? ' + link' : ''}` : 'Send link'}
         </button>
       )}
+      {tooBig && <TooBigDialog files={tooBig} onLink={addLink} onClose={() => { setTooBig(null); setShowLinks(true) }} />}
     </form>
   )
 }
