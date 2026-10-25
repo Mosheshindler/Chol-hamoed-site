@@ -49,6 +49,7 @@ export function answers(p) {
     ['Voice tone', b.tone && labelOf(TONES, b.tone)],
     ['Music mood', b.music && labelOf(MUSIC, b.music)],
     ['Footage links (too big to upload)', b.media_links],
+    ['Too big to upload, no link given', b.skipped_files?.join(', ')],
     ['References', p.references_links],
     ['Required text / legal', p.legal_text],
     ['Can’t do', p.restrictions],

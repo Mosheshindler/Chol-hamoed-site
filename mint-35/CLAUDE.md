@@ -56,6 +56,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   form and the project page. Sizes show next to each file. Bigger files are left out and a pop-up (`components/TooBigDialog.js`)
   asks the client to share them from their own Google Drive or Dropbox (owner prefers their storage to ours). Links go in
   brief.media_links (per video), brief.brand_links, design_link, or (project page) a message + email + `files_added` event.
+  Files left out for being too big, from boxes with no link added, are sent as skippedFiles -> brief.skipped_files; the
+  confirmation email then has a "Still to send" box with Drive/Dropbox steps and a link to the project page (team email lists them too).
   Admin Files can share a deliverable as an upload, a link (e.g. Google Doc) or pasted text (`recordShared`; project_files.url /
   .body, migration 20261021000000_shared_links.sql, placeholder path with no storage object). The customer page opens links in a
   new tab and shows pasted text inline.

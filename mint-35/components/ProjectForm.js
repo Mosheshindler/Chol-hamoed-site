@@ -131,6 +131,7 @@ const PREP_CAMPAIGN = [
 function UploadCard({name, icon, title, hint, accept, multiple, required, optional, tip, linkName, children}) {
   const [picked, setPicked] = useState([]) // [{name, size}]
   const [tooBig, setTooBig] = useState(null)
+  const [skipped, setSkipped] = useState([]) // names of files left out for being too big
   const [showLinks, setShowLinks] = useState(false)
   const input = useRef(null)
   const links = useRef(null)
@@ -162,7 +163,10 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
     replacing.current = false
     kept.current = files
     setPicked(files.map(f => ({name: f.name, size: f.size})))
-    if (big.length) setTooBig(big.map(f => ({name: f.name, size: f.size})))
+    if (big.length) {
+      setTooBig(big.map(f => ({name: f.name, size: f.size})))
+      setSkipped(old => [...new Set([...old, ...big.map(f => f.name)])])
+    }
   }
   function remove(i) {
     const files = i == null ? [] : kept.current.filter((_, n) => n !== i)
@@ -211,6 +215,7 @@ function UploadCard({name, icon, title, hint, accept, multiple, required, option
         <input ref={input} type="file" name={name} accept={accept} multiple={multiple} required={required} onChange={onChange} />
       </label>
       {children && <div className="upload-extra">{children}</div>}
+      {skipped.length > 0 && <span hidden data-skipped={JSON.stringify(skipped)} data-link={linkName || ''} />}
       {tooBig && <TooBigDialog files={tooBig} onLink={linkName ? addLink : null} onClose={() => { setTooBig(null); if (linkName) setShowLinks(true) }} />}
     </div>
   )
@@ -523,6 +528,10 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         stories: g(i, 'stories'), video_ideas: [1, 2, 3].map(n => g(i, `video_${n}`)),
       })),
       files: files.map(f => ({name: f.file.name, size: f.file.size, kind: f.kind, item: f.item})),
+      // Files left out for being too big, from boxes where no link was added: the welcome email reminds them.
+      skippedFiles: [...formRef.current.querySelectorAll('[data-skipped]')]
+        .filter(el => !(el.dataset.link && String(fd.get(el.dataset.link) || '').trim()))
+        .flatMap(el => JSON.parse(el.dataset.skipped)),
       acceptedDisclaimer: DISCLAIMER_VERSION,
       acceptedPoints: DISCLAIMER_POINTS.filter((_, n) => fd.get(`dp${n}`)).length,
       discountCode: discount.rule?.code || null,

@@ -164,6 +164,11 @@ export async function POST(request) {
   })
   // A discount code is checked again here (the checkout preview isn't trusted) and one use is claimed.
   let off = items.map(() => 0)
+  // Files the client couldn't upload (over the limit) and hasn't shared a link for yet; the confirmation
+  // email reminds them to add these on their project page.
+  const skipped = (Array.isArray(body.skippedFiles) ? body.skippedFiles : []).map(n => str(n, 200)).filter(Boolean).slice(0, 40)
+  if (skipped.length) items.forEach(it => { it.brief.skipped_files = skipped })
+
   if (typeof body.discountCode === 'string' && body.discountCode.trim()) {
     const {rule, error: codeError} = await findDiscount(body.discountCode, items.map(it => it.package))
     if (codeError) return bad(`${codeError} Remove it to place your order without it.`)
