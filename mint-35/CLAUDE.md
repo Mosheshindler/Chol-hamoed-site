@@ -48,7 +48,6 @@ separate from the Mint Media video site at the repo root (don't touch root files
   progress, files (script/first_cut/final), approve/request changes, messages, add-on requests at any stage (order to delivery; homepage says extras can be added anytime).
   Add-on list in `lib/addons.js`: extra format $450/video, 15-sec cutdown $175/video, subtitles $150/video;
   extra revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
-  Clients can add photos/files from their page until production starts (ADD_FILES_STATUSES in lib/status.js: up to script_sent).
   Server actions startAddFiles/finishAddFiles (app/p/[token]/actions.js) hand out signed upload URLs under
   `<job>/added/<batch>/`, record what arrived as kind `media`, log a `files_added` event, save any note as a message and email
   the team. Admin Project page lists each batch separately ("Added after ordering") with "Download all".
@@ -144,6 +143,17 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Charges (job and later add-ons) add tax via withTax/jobTaxRate; jobs without brief.tax (ordered before Oct 22) stay untaxed.
   Shown at checkout, in emails/receipts, on the client's page (incl. tax) and on admin Billing/Project. The certificate upload has no
   "Optional" tag (owner's call) but is still not required.
+
+- File retention (owner, Oct 26; `lib/retention.js`, daily Vercel cron vercel.json -> /api/cron/delete-files, needs CRON_SECRET):
+  files clients send (logo, brand images/materials, design files, media, references) are deleted once the job has been Delivered
+  7 days and the file is 7 days old (deliveries before RETENTION_START, Oct 26, count from then, so Agudah gets its full 7 days); uploaded deliverables (script, cuts, final, extras) are deleted 90 days after delivery while
+  clients are told 60 (owner's choice). Shared links, tax-exempt certificates and team files stay. Shared order-wide files wait
+  until every job using them is due. Logs `files_deleted` / `deliverables_deleted` events. Delivery email, the client's page and
+  /privacy: "deleted 7 days after you receive all your final files"; "final videos are available on your project page for 60 days".
+  Admin has Download all for files sent with the order and for each added batch.
+- Clients can add photos/videos/links from their project page at any stage except declined/cancelled (`canAddFiles`). Once past
+  PRE_PRODUCTION_STATUSES a pop-up warns that new files may not be included; the team is emailed for every upload or link
+  (subject notes the stage when late).
 
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);

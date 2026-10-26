@@ -6,7 +6,7 @@ import {addBusinessDays} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {addonByKey, ADDON_STATUSES} from '@/lib/addons'
 import {randomBytes} from 'node:crypto'
-import {projectRef, scriptWord, ADD_FILES_STATUSES} from '@/lib/status'
+import {projectRef, scriptWord, PRE_PRODUCTION_STATUSES, canAddFiles, STATUSES} from '@/lib/status'
 import {sendEmail, esc} from '@/lib/email'
 import {MAX_UPLOAD_BYTES, MAX_UPLOAD_MB} from '@/lib/intake'
 import {siteOrigin} from '@/lib/site'
@@ -97,7 +97,7 @@ export async function requestAddon(formData) {
   return {ok: true}
 }
 
-// Adding photos and files after ordering, until production starts. Step 1 hands out one signed upload
+// Adding photos and files after ordering, at any stage (clients are warned once production has started). Step 1 hands out one signed upload
 // URL per file, all under one batch folder (`<job>/added/<batch>/`); the browser uploads straight to
 // storage; step 2 records what arrived and emails the team. Each batch is listed and downloaded on its own.
 const MAX_ADD_FILES = 40
@@ -108,7 +108,7 @@ export async function startAddFiles({token, job: jobId, files}) {
   const r = await jobFor(fd)
   if (r.error) return r
   const {order, job} = r
-  if (!ADD_FILES_STATUSES.includes(job.status)) return {error: 'Production has started, so files can’t be added here any more. Send us a message instead.'}
+  if (!canAddFiles(job.status)) return {error: 'This project is closed, so files can’t be added here. Send us a message instead.'}
   const list = Array.isArray(files) ? files.slice(0, MAX_ADD_FILES + 1) : []
   if (!list.length) return {error: 'Choose at least one file.'}
   if (list.length > MAX_ADD_FILES) return {error: `Please send up to ${MAX_ADD_FILES} files at a time.`}
@@ -153,7 +153,7 @@ export async function finishAddFiles({token, job: jobId, batch, names, note, lin
   const urls = linkList(links)
   await order.db.from('project_events').insert({project_id: job.id, type: 'files_added', data: {batch, count: rows.length, note: text || undefined, links: urls.length ? urls : undefined}})
   if (text || urls.length) await order.db.from('project_messages').insert({project_id: job.id, author: 'customer', body: [`Sent ${rows.length} more file${rows.length > 1 ? 's' : ''}${text ? `: ${text}` : '.'}`, ...urls.length ? ['Links to bigger files:', ...urls] : []].join('\n')})
-  await tellTeam(job, `Customer added ${rows.length} file${rows.length > 1 ? 's' : ''}${urls.length ? ' and a link' : ''}`,
+  await tellTeam(job, `Customer added ${rows.length} file${rows.length > 1 ? 's' : ''}${urls.length ? ' and a link' : ''}${late(job)}`,
     `<p><b>${esc(job.name)}</b> added ${rows.length} file${rows.length > 1 ? 's' : ''} to ${projectRef(job.number)}.</p>
 ${text ? `<blockquote>${esc(text)}</blockquote>` : ''}<ul>${rows.map(f => `<li>${esc(f.name)}</li>`).join('')}</ul>${linksHtml(urls)}
 <p>They're on the Project page under &ldquo;Added after ordering&rdquo;, where this batch can be downloaded on its own.</p>`)
@@ -171,14 +171,17 @@ export async function shareFileLinks({token, job: jobId, links, note}) {
   const r = await jobFor(fd)
   if (r.error) return r
   const {order, job} = r
-  if (!ADD_FILES_STATUSES.includes(job.status)) return {error: 'Production has started, so files can’t be added here any more. Send us a message instead.'}
+  if (!canAddFiles(job.status)) return {error: 'This project is closed, so files can’t be added here. Send us a message instead.'}
   const urls = linkList(links)
   if (!urls.length) return {error: 'Paste a full link, starting with https://'}
   const text = clean(note, 2000)
   await order.db.from('project_messages').insert({project_id: job.id, author: 'customer', body: ['Links to my files:', ...urls, ...text ? ['', text] : []].join('\n')})
   await order.db.from('project_events').insert({project_id: job.id, type: 'files_added', data: {count: 0, links: urls, note: text || undefined}})
-  await tellTeam(job, 'Customer shared a link to their files',
+  await tellTeam(job, `Customer shared a link to their files${late(job)}`,
     `<p><b>${esc(job.name)}</b> shared files for ${projectRef(job.number)} from their own storage.</p>${text ? `<blockquote>${esc(text)}</blockquote>` : ''}${linksHtml(urls)}`)
   revalidatePath(`/p/${token}`)
   return {ok: true}
 }
+
+// Subject note when files arrive after production started (the client was warned they may not make it in).
+const late = job => (PRE_PRODUCTION_STATUSES.includes(job.status) ? '' : ` (during ${STATUSES[job.status]?.label.toLowerCase() || job.status})`)

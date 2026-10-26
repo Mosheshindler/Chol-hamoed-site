@@ -16,8 +16,10 @@ export const STATUSES = {
 
 export const ACTIVE = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent', 'in_production', 'first_cut_sent', 'approved', 'revising']
 
-// Customers can add photos and files from their project page until production starts.
-export const ADD_FILES_STATUSES = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent']
+// Customers can add photos, videos and links from their project page at any stage (not on declined or
+// cancelled jobs). Once production has started they're warned first that new files may not make it in.
+export const PRE_PRODUCTION_STATUSES = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent']
+export const canAddFiles = status => !['declined', 'cancelled'].includes(status)
 
 export const projectRef = n => `M35-${n}`
 

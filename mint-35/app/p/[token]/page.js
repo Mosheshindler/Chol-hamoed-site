@@ -2,10 +2,11 @@ import {notFound} from 'next/navigation'
 import Logo from '@/components/Logo'
 import {loadOrderByToken} from '@/lib/customer'
 import {withTax, jobTaxRate} from '@/lib/tax'
-import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus, scriptWord, STATUSES, ADD_FILES_STATUSES} from '@/lib/status'
+import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus, scriptWord, STATUSES, PRE_PRODUCTION_STATUSES, canAddFiles} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {ADDONS, ADDON_STATUSES} from '@/lib/addons'
 import {formatPrice} from '@/lib/packages'
+import {CLIENT_FILE_DAYS, FINAL_AVAILABLE_DAYS, addDays} from '@/lib/retention'
 import {Decision, MessageForm, AddonForm, AddFiles} from './CustomerForms'
 
 export const metadata = {title: 'Your project · Mint 35', robots: {index: false, follow: false}}
@@ -98,12 +99,24 @@ export default async function CustomerPage({params}) {
               )}
 
               {reviewing && <Decision token={token} job={job.id} what={reviewing} />}
+              {job.status === 'delivered' && (() => {
+                // Dated from when the final was shared (the last final file on this job).
+                const finalAt = jobFiles.filter(f => f.kind === 'final').at(-1)?.created_at
+                return (
+                  <div className="cp-retention">
+                    <p><b>Please download your final videos.</b> They&rsquo;re available here for {FINAL_AVAILABLE_DAYS} days{finalAt ? <>, until <b>{formatDate(addDays(finalAt, FINAL_AVAILABLE_DAYS))}</b></> : ''}.</p>
+                    <p className="muted small">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted {CLIENT_FILE_DAYS} days after you receive all your final files{finalAt ? <>, on {formatDate(addDays(finalAt, CLIENT_FILE_DAYS))}</> : ''}.</p>
+                  </div>
+                )
+              })()}
 
-              {ADD_FILES_STATUSES.includes(job.status) && (
+              {canAddFiles(job.status) && (
                 <section className="cp-addons" aria-label="Add photos and files">
                   <h3>Add more photos &amp; files</h3>
-                  <p className="muted">Forgot something? Send more photos, videos or graphics. You can add files until production starts.</p>
-                  <AddFiles token={token} job={job.id} />
+                  <p className="muted">{PRE_PRODUCTION_STATUSES.includes(job.status)
+                    ? 'Forgot something? Send more photos, videos or graphics, or share a Google Drive or Dropbox link.'
+                    : 'Your video is already in production, so we can’t promise new files will be included. You can still send them, or share a Google Drive or Dropbox link.'}</p>
+                  <AddFiles token={token} job={job.id} inProduction={!PRE_PRODUCTION_STATUSES.includes(job.status)} />
                 </section>
               )}
               {jobAdded.length > 0 && (

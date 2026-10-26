@@ -295,3 +295,5 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .batch-note { margin: 8px 0 0; color: var(--muted); font-style: italic; }
 .batch .files { margin-top: 8px; }
 .batch-links { margin: 8px 0 0; display: grid; gap: 2px; overflow-wrap: anywhere; }
+.sub-head-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin: 22px 0 10px; }
+.sub-head-row .sub-head { margin: 0; }

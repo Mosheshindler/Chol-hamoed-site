@@ -63,8 +63,7 @@ export async function POST(request, ctx) {
 <li>Upload ${skipped.length > 1 ? 'them' : 'it'} to Google Drive or Dropbox (a folder works too).</li>
 <li>Set sharing to <b>&ldquo;Anyone with the link&rdquo;</b> can view.</li>
 <li>Open <a href="${page}">your project page</a> and paste the link under <b>Add more photos &amp; files</b>.</li>
-</ol>
-<p style="margin:0;color:#666;font-size:13px">You can add files until production starts.</p></div>` : ''
+</ol></div>` : ''
   const lines = jobs.map(j => `<li><b>${projectRef(j.number)}</b> · ${esc(j.package || 'Package not chosen')} · ${j.price_cents ? formatMoney(j.price_cents) : 'quote'}<br>${esc(j.promoting)}</li>`).join('')
   const teamLinks = jobs.map(j => `<li><a href="${site}/admin/projects/${j.id}">Open ${projectRef(j.number)}</a></li>`).join('')
 

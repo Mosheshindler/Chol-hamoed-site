@@ -947,3 +947,5 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .upload-links { display: grid; gap: 6px; margin-top: 8px; }
 .upload-links textarea { width: 100%; }
 @media (max-width: 560px) { .too-big .modal-body { padding: 26px 18px; } }
+.cp-retention { margin: 14px 0 0; padding: 12px 14px; border: 1px solid rgba(136,192,64,.35); border-radius: 12px; background: rgba(136,192,64,.06); display: grid; gap: 4px; }
+.cp-retention p { margin: 0; }
