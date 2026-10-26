@@ -63,6 +63,6 @@ export function customerNotice({status, p, link, priceCents, charge, note}) {
     + `<p><a href="${link}">Open your project page</a></p>`
     // The full address in plain sight, so the link isn't hidden behind button text (a phishing signal for spam filters).
     + `<p style="color:#666;font-size:13px">Or copy this address into your browser:<br>${link}</p>`
-    + `<p>Questions? Just reply to this email or call (732) 813-4222.</p><p>— The Mint 35 team</p>`
+    + `<p>Questions? Just reply to this email.</p><p>— The Mint 35 team</p>`
   return {subject, html}
 }
