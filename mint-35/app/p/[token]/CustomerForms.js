@@ -1,6 +1,6 @@
 'use client'
 
-import {useActionState, useRef, useState} from 'react'
+import {useActionState, useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import {createClient} from '@/lib/supabase/browser'
 import {customerDecision, customerMessage, requestAddon, startAddFiles, finishAddFiles, shareFileLinks} from './actions'
@@ -118,10 +118,15 @@ export function AddonForm({token, job, addons, orientation}) {
 
 // Add more photos, videos and files after ordering. Picking again adds to the list. Files over the
 // upload limit are left out and a pop-up suggests a Google Drive or Dropbox link, which can be sent here too.
-export function AddFiles({token, job}) {
+export function AddFiles({token, job, inProduction}) {
   const router = useRouter()
   const ref = useRef(null)
   const linksRef = useRef(null)
+  const fileRef = useRef(null)
+  // Once production has started, a pop-up warns first that new files may not make it in.
+  const [warn, setWarn] = useState(null) // null | 'file' | 'link'
+  const [ack, setAck] = useState(false)
+  const bypass = useRef(false) // lets our own click through after "I understand"
   const [files, setFiles] = useState([])
   const [tooBig, setTooBig] = useState(null)
   const [showLinks, setShowLinks] = useState(false)
@@ -192,9 +197,9 @@ export function AddFiles({token, job}) {
   return (
     <form ref={ref} className="cp-form cp-add-files" onSubmit={send}>
       <div className="cp-add-pick">
-        <label className="btn btn-ghost btn-sm cp-file-btn">
+        <label className="btn btn-ghost btn-sm cp-file-btn" onClick={e => { if (bypass.current) { bypass.current = false; return } if (inProduction && !ack) { e.preventDefault(); setWarn('file') } }}>
           {files.length ? 'Add more' : 'Choose files'}
-          <input type="file" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd,.svg" onChange={pick} disabled={busy} />
+          <input ref={fileRef} type="file" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd,.svg" onChange={pick} disabled={busy} />
         </label>
         <span className="muted small">Photos, videos, logos or graphics · up to {MAX_UPLOAD_MB} MB each</span>
       </div>
@@ -206,7 +211,7 @@ export function AddFiles({token, job}) {
           {files.length > 1 && <li className="upload-count">{files.length} files · {formatSize(files.reduce((s, f) => s + f.size, 0))}</li>}
         </ul>
       )}
-      {!showLinks && <button type="button" className="reveal-link" onClick={() => setShowLinks(true)}>Bigger files? Share a Google Drive or Dropbox link</button>}
+      {!showLinks && <button type="button" className="reveal-link" onClick={() => (inProduction && !ack ? setWarn('link') : setShowLinks(true))}>Bigger files? Share a Google Drive or Dropbox link</button>}
       <label hidden={!showLinks}>Links to your files <span className="optional">(Google Drive, Dropbox)</span>
         <textarea ref={linksRef} name="links" rows={2} placeholder="https://drive.google.com/…" disabled={busy} onInput={e => setHasLinks(!!e.currentTarget.value.trim())} />
         <span className="hint">Set sharing to &ldquo;Anyone with the link&rdquo; so we can open it.</span>
@@ -220,7 +225,32 @@ export function AddFiles({token, job}) {
             : files.length ? `Send ${files.length} file${files.length > 1 ? 's' : ''}${hasLinks ? ' + link' : ''}` : 'Send link'}
         </button>
       )}
+      {warn && <ProductionWarning onCancel={() => setWarn(null)} onOk={() => {
+        setAck(true)
+        if (warn === 'file') { bypass.current = true; fileRef.current?.click() }
+        else setShowLinks(true)
+        setWarn(null)
+      }} />}
       {tooBig && <TooBigDialog files={tooBig} onLink={addLink} onClose={() => { setTooBig(null); setShowLinks(true) }} />}
     </form>
+  )
+}
+
+// Shown before adding files once a video is in production.
+function ProductionWarning({onOk, onCancel}) {
+  const ref = useRef(null)
+  useEffect(() => { ref.current?.showModal() }, [])
+  return (
+    <dialog ref={ref} className="modal too-big" onClose={onCancel} aria-labelledby="prod-warn-title">
+      <div className="modal-body">
+        <button type="button" className="modal-close" onClick={onCancel} aria-label="Close">✕</button>
+        <h2 id="prod-warn-title">Your video is already in production</h2>
+        <p className="modal-lead">You can still send new photos, videos or links, and our team will be notified right away. But because work on your video has started, we can&rsquo;t promise these new files will be added.</p>
+        <div className="too-big-actions">
+          <button type="button" className="btn btn-primary btn-sm" onClick={onOk}>I understand, continue</button>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel}>Cancel</button>
+        </div>
+      </div>
+    </dialog>
   )
 }

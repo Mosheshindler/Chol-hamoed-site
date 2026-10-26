@@ -2,7 +2,7 @@ import {projectRef} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {CustomerLink} from '../CustomerPanel'
 import DownloadAll from '../DownloadAll'
-import {CLIENT_FILE_DAYS, CLIENT_FILE_KINDS} from '@/lib/retention'
+import {CLIENT_FILE_DAYS, CLIENT_FILE_KINDS, FINAL_DELETE_DAYS, FINAL_AVAILABLE_DAYS} from '@/lib/retention'
 import {loadOrder} from '../_lib/order'
 import {answers, checkoutExtras, neededBy, KIND_LABEL, INTAKE_KINDS} from '../_lib/text'
 import {exemptLabel, SALES_TAX_LABEL} from '@/lib/tax'
@@ -53,7 +53,7 @@ export default async function ProjectDetails({params}) {
                 return <p className="muted">{gone ? `Deleted ${formatDate(gone.created_at)}, ${gone.data.days} days after delivery.` : 'No files.'}</p>
               })()}
               {j.status === 'delivered' && theirs.some(f => CLIENT_FILE_KINDS.includes(f.kind) && !f.url && !f.body) && (
-                <p className="muted small">Client files are deleted automatically {CLIENT_FILE_DAYS} days after delivery. Use Download all to keep a copy.</p>
+                <p className="muted small">Client files are deleted automatically {CLIENT_FILE_DAYS} days after delivery, and uploaded deliverables after {FINAL_DELETE_DAYS} (the client is told {FINAL_AVAILABLE_DAYS}). Use Download all to keep a copy.</p>
               )}
               {(() => {
                 const shared = events.filter(e => e.project_id === j.id && e.type === 'files_added' && !e.data?.batch && e.data?.links?.length)

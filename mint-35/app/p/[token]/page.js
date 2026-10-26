@@ -2,7 +2,7 @@ import {notFound} from 'next/navigation'
 import Logo from '@/components/Logo'
 import {loadOrderByToken} from '@/lib/customer'
 import {withTax, jobTaxRate} from '@/lib/tax'
-import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus, scriptWord, STATUSES, ADD_FILES_STATUSES} from '@/lib/status'
+import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus, scriptWord, STATUSES, PRE_PRODUCTION_STATUSES, canAddFiles} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {ADDONS, ADDON_STATUSES} from '@/lib/addons'
 import {formatPrice} from '@/lib/packages'
@@ -110,11 +110,13 @@ export default async function CustomerPage({params}) {
                 )
               })()}
 
-              {ADD_FILES_STATUSES.includes(job.status) && (
+              {canAddFiles(job.status) && (
                 <section className="cp-addons" aria-label="Add photos and files">
                   <h3>Add more photos &amp; files</h3>
-                  <p className="muted">Forgot something? Send more photos, videos or graphics. You can add files until production starts.</p>
-                  <AddFiles token={token} job={job.id} />
+                  <p className="muted">{PRE_PRODUCTION_STATUSES.includes(job.status)
+                    ? 'Forgot something? Send more photos, videos or graphics, or share a Google Drive or Dropbox link.'
+                    : 'Your video is already in production, so we can’t promise new files will be included. You can still send them, or share a Google Drive or Dropbox link.'}</p>
+                  <AddFiles token={token} job={job.id} inProduction={!PRE_PRODUCTION_STATUSES.includes(job.status)} />
                 </section>
               )}
               {jobAdded.length > 0 && (
