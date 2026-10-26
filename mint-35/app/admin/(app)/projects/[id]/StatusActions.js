@@ -11,6 +11,7 @@ const KIND_NAME = {script: 'script', first_cut: 'first cut', final: 'final video
 export default function StatusActions({id, status, steps, price, chargeTotal, card, shared = {}, scriptWord = 'script', alsoDue = []}) {
   const [open, setOpen] = useState(null)
   const [error, setError] = useState('')
+  const [warning, setWarning] = useState('')
   const [pending, start] = useTransition()
 
   if (!steps.length) return null
@@ -20,10 +21,11 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
     fd.set('to', step.to)
     if (step.skipCharge) fd.set('skipCharge', '1')
     setError('')
+    setWarning('')
     start(async () => {
       const res = await moveStatus(fd)
       if (res?.error) setError(res.error)
-      else setOpen(null)
+      else { setOpen(null); setWarning(res?.warning || '') }
     })
   }
   const choose = step => (step.needs || step.preview || step.danger ? setOpen(step) : run(step))
@@ -86,7 +88,7 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
               </div>
             )}
             <div className="actions-row">
-              <button className={`btn btn-sm ${open.danger ? 'btn-danger' : 'btn-primary'}`} disabled={pending}>
+              <button className={`btn btn-sm ${open.danger ? 'btn-danger' : 'btn-primary'}`} disabled={pending || (deliverable && !items.length)}>
                 {pending ? 'Working…' : open.sendLabel || `Yes, ${open.label.toLowerCase()}`}
               </button>
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(null)}>Cancel</button>
@@ -95,7 +97,9 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
         </div>
       )}
 
+      {open && deliverable && !items.length && <p className="warn small">Share the {kindName} above first (paste the link or choose the file, then press <b>Share</b> or <b>Upload</b>). Sending unlocks once it&rsquo;s listed.</p>}
       {error && <p className="form-error" role="alert">{error}</p>}
+      {warning && <p className="form-error" role="alert">{warning}</p>}
     </div>
   )
 }

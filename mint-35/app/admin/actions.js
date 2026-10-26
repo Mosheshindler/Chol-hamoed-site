@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation'
 import {revalidatePath} from 'next/cache'
 import {createClient} from '@/lib/supabase/server'
 import {createAdminClient} from '@/lib/supabase/admin'
-import {TRANSITIONS, STATUSES, projectRef, formatMoney} from '@/lib/status'
+import {TRANSITIONS, STATUSES, projectRef, formatMoney, forPackage} from '@/lib/status'
 import {addBusinessDays} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
@@ -90,6 +90,12 @@ export async function moveStatus(formData) {
       return {error: `Charge failed: ${e.message} The job was not started.`}
     }
   }
+  // Sending the script, first cut or final needs something shared first, or the client's page would be empty.
+  const deliver = {script_sent: 'script', first_cut_sent: 'first_cut', delivered: 'final'}[to]
+  if (deliver) {
+    const {data: have} = await supabase.from('project_files').select('id').eq('project_id', id).eq('kind', deliver).limit(1)
+    if (!have?.length) return {error: `Share the ${deliver === 'first_cut' ? 'first cut' : deliver === 'final' ? 'final video' : forPackage('script', p.package)} first (add a link or upload the file and press Share), then send.`}
+  }
   if (to === 'in_production') {
     patch.due_date = addBusinessDays(new Date(), 3, upcomingClosedDays())
     event.due_date = patch.due_date
@@ -103,14 +109,36 @@ export async function moveStatus(formData) {
   // An optional personal line from the team goes in the email and on the customer's message thread.
   const note = String(formData.get('note') || '').trim().slice(0, 2000)
   const notice = customerNotice({status: patch.status, p, link, priceCents: patch.price_cents, charge: patch.charge_id ? {cents: patch.charged_cents, id: patch.charge_id} : null, note})
+  let warning = null
   if (notice) {
-    await sendEmail({to: p.email, subject: notice.subject, html: notice.html})
+    const sent = await emailClient(supabase, me, p, notice)
+    if (!sent.ok) warning = `The job moved to “${STATUSES[patch.status].label}”, but the email to ${p.email} didn’t send (${sent.error}). Use “Email the client again” on this page.`
     if (note) await supabase.from('project_messages').insert({project_id: id, author: 'team', member_id: me.id, body: note})
   }
 
   revalidatePath('/admin/projects/[id]', 'layout')
   revalidatePath('/admin')
-  return {ok: true, label: STATUSES[patch.status].label}
+  return {ok: true, label: STATUSES[patch.status].label, warning}
+}
+
+// Sends a client email and logs it on the job (type 'email'), so the team can see whether it went out.
+async function emailClient(supabase, me, p, notice) {
+  const sent = await sendEmail({to: p.email, subject: notice.subject, html: notice.html})
+  await supabase.from('project_events').insert({project_id: p.id, actor: me.id, type: 'email', data: {to: p.email, subject: notice.subject, ok: !!sent.ok, error: sent.ok ? undefined : sent.error}})
+  return sent
+}
+
+// Sends the email for the job's current step again (e.g. the client says it never arrived).
+export async function resendNotice(formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents, package, customer_token, brief').eq('id', id).single()
+  if (!p) return {error: 'Job not found. Refresh the page.'}
+  const notice = customerNotice({status: p.status, p, link: customerLink(await siteOrigin(), p.customer_token), priceCents: p.price_cents})
+  if (!notice) return {error: 'There’s no client email for this step.'}
+  const sent = await emailClient(supabase, me, p, notice)
+  revalidatePath('/admin/projects/[id]', 'layout')
+  return sent.ok ? {ok: true} : {error: `It didn’t send: ${sent.error}`}
 }
 
 export async function updateJob(formData) {
