@@ -60,6 +60,9 @@ export function customerNotice({status, p, link, priceCents, charge, note}) {
   }
   const personal = note ? `<p>${esc(note).replace(/\n/g, '<br>')}</p>` : ''
   const html = `<p>Hi ${esc((p.name || '').split(' ')[0])},</p>` + body + personal
-    + `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`
+    + `<p><a href="${link}">Open your project page</a></p>`
+    // The full address in plain sight, so the link isn't hidden behind button text (a phishing signal for spam filters).
+    + `<p style="color:#666;font-size:13px">Or copy this address into your browser:<br>${link}</p>`
+    + `<p>Questions? Just reply to this email.</p><p>— The Mint 35 team</p>`
   return {subject, html}
 }
