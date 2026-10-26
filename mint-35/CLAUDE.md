@@ -150,6 +150,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   clients are told 60 (owner's choice). Shared links, tax-exempt certificates and team files stay. Shared order-wide files wait
   until every job using them is due. Logs `files_deleted` / `deliverables_deleted` events. Delivery email, the client's page and
   /privacy: "deleted 7 days after you receive all your final files"; "final videos are available on your project page for 60 days".
+- Branding (owner, Oct 26): Terms §9 and the FAQ "Who owns the video?" say Mint 35 reserves the right to add a small Mint 35
+  logo at the end of videos and to show them in its online portfolio (replaced the old "unless you ask us in writing" opt-out).
   Admin has Download all for files sent with the order and for each added batch.
 - Clients can add photos/videos/links from their project page at any stage except declined/cancelled (`canAddFiles`). Once past
   PRE_PRODUCTION_STATUSES a pop-up warns that new files may not be included; the team is emailed for every upload or link
