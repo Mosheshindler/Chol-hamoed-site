@@ -35,7 +35,10 @@ export default async function ProjectDetails({params}) {
               <dl className="answers">
                 {answers(j).map(([label, v]) => <div key={label}><dt>{label}</dt><dd>{v}</dd></div>)}
               </dl>
-              <h3 className="sub-head">Files they sent</h3>
+              <div className="sub-head-row">
+                <h3 className="sub-head">Files they sent with the order</h3>
+                {theirs.length > 0 && <DownloadAll files={theirs.map(f => ({name: f.name, url: f.download}))} />}
+              </div>
               {theirs.length ? (
                 <ul className="files">
                   {theirs.map(f => (
@@ -50,7 +53,7 @@ export default async function ProjectDetails({params}) {
                 return <p className="muted">{gone ? `Deleted ${formatDate(gone.created_at)}, ${gone.data.days} days after delivery.` : 'No files.'}</p>
               })()}
               {j.status === 'delivered' && theirs.some(f => CLIENT_FILE_KINDS.includes(f.kind) && !f.url && !f.body) && (
-                <p className="muted small">Client files are deleted automatically {CLIENT_FILE_DAYS} days after delivery. Download anything you want to keep.</p>
+                <p className="muted small">Client files are deleted automatically {CLIENT_FILE_DAYS} days after delivery. Use Download all to keep a copy.</p>
               )}
               {(() => {
                 const shared = events.filter(e => e.project_id === j.id && e.type === 'files_added' && !e.data?.batch && e.data?.links?.length)

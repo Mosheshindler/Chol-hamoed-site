@@ -6,7 +6,7 @@ import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus,
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {ADDONS, ADDON_STATUSES} from '@/lib/addons'
 import {formatPrice} from '@/lib/packages'
-import {CLIENT_FILE_DAYS} from '@/lib/retention'
+import {CLIENT_FILE_DAYS, FINAL_AVAILABLE_DAYS, addDays} from '@/lib/retention'
 import {Decision, MessageForm, AddonForm, AddFiles} from './CustomerForms'
 
 export const metadata = {title: 'Your project · Mint 35', robots: {index: false, follow: false}}
@@ -99,9 +99,16 @@ export default async function CustomerPage({params}) {
               )}
 
               {reviewing && <Decision token={token} job={job.id} what={reviewing} />}
-              {job.status === 'delivered' && (
-                <p className="muted small cp-retention">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted {CLIENT_FILE_DAYS} days after delivery. Your finished videos stay here.</p>
-              )}
+              {job.status === 'delivered' && (() => {
+                // Dated from when the final was shared (the last final file on this job).
+                const finalAt = jobFiles.filter(f => f.kind === 'final').at(-1)?.created_at
+                return (
+                  <div className="cp-retention">
+                    <p><b>Please download your final videos.</b> They&rsquo;re available here for {FINAL_AVAILABLE_DAYS} days{finalAt ? <>, until <b>{formatDate(addDays(finalAt, FINAL_AVAILABLE_DAYS))}</b></> : ''}.</p>
+                    <p className="muted small">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted {CLIENT_FILE_DAYS} days after you receive all your final files{finalAt ? <>, on {formatDate(addDays(finalAt, CLIENT_FILE_DAYS))}</> : ''}.</p>
+                  </div>
+                )
+              })()}
 
               {ADD_FILES_STATUSES.includes(job.status) && (
                 <section className="cp-addons" aria-label="Add photos and files">

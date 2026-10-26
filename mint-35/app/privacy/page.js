@@ -54,7 +54,7 @@ export default function PrivacyPage() {
       <p>We may also share information if the law requires it, or to protect our rights or someone&rsquo;s safety.</p>
 
       <h2>How long we keep it</h2>
-      <p>We keep order records and files while your project is active. The files you send us (logos, photos, videos and graphics) are deleted 7 days after your project is delivered. Your finished videos and order records are kept so you can download them and request add-ons. Records needed for tax or legal reasons, such as tax-exemption certificates, are kept as long as the law requires. You can ask us to delete your files sooner.</p>
+      <p>We keep order records and files while your project is active. The files you send us (logos, photos, videos and graphics) are deleted 7 days after you receive all your final files. Your final videos are available on your project page for 60 days. Order records are kept so you can request add-ons. Records needed for tax or legal reasons, such as tax-exemption certificates, are kept as long as the law requires. You can ask us to delete your files sooner.</p>
 
       <h2>Security</h2>
       <p>Your files are stored privately and shared only through expiring links. Access to our admin tools is limited to the Mint Media team. No system is perfectly secure, but we take reasonable steps to protect your information.</p>

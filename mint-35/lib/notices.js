@@ -3,7 +3,7 @@ import {projectRef, formatMoney, scriptWord} from '@/lib/status'
 import {formatDate} from '@/lib/dates'
 import {esc} from '@/lib/email'
 import {jobTaxRate, taxCents} from '@/lib/tax'
-import {CLIENT_FILE_DAYS} from './retention'
+import {CLIENT_FILE_DAYS, FINAL_AVAILABLE_DAYS} from './retention'
 
 // Payment receipt added to every email that follows a charge.
 export function receipt({cents, taxCents: tax, brand, last4, chargeId, ref, item}) {
@@ -53,7 +53,7 @@ export function customerNotice({status, p, link, priceCents, charge, note}) {
       break
     case 'delivered':
       subject = `Your final video is ready (${ref})`
-      body = `<p>Your final files are ready to download on your project page.</p><p style="color:#666;font-size:13px">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted ${CLIENT_FILE_DAYS} days after delivery. Your finished videos stay on your project page.</p>`
+      body = `<p>Your final files are ready to download on your project page.</p><p style="color:#666;font-size:13px">Please download them soon: your final videos are available on your project page for ${FINAL_AVAILABLE_DAYS} days. For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted ${CLIENT_FILE_DAYS} days after you receive all your final files.</p>`
       break
     default:
       return null

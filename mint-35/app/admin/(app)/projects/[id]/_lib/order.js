@@ -4,6 +4,7 @@ import {notFound} from 'next/navigation'
 import {createClient} from '@/lib/supabase/server'
 import {siteOrigin, customerLink} from '@/lib/site'
 import {STATUSES} from '@/lib/status'
+import {INTAKE_KINDS} from './text'
 
 // Files a client added from their project page after ordering: `<job>/added/<batch>/<file>`.
 export const isAdded = path => /^[^/]+\/added\/[^/]+\//.test(path || '')
@@ -32,8 +33,8 @@ export const loadOrder = cache(async id => {
     ? await supabase.storage.from('project-files').createSignedUrls(stored.map(f => f.path), 3600)
     : {data: []}
   const urls = Object.fromEntries((signed || []).map(s => [s.path, s.signedUrl]))
-  // Files the client added after ordering also get download links, for "Download all" per batch.
-  const added = stored.filter(f => isAdded(f.path))
+  // Files the client sent (with the order or added later) also get download links, for "Download all".
+  const added = stored.filter(f => INTAKE_KINDS.includes(f.kind))
   const {data: dlSigned} = added.length
     ? await supabase.storage.from('project-files').createSignedUrls(added.map(f => f.path), 3600, {download: true})
     : {data: []}
