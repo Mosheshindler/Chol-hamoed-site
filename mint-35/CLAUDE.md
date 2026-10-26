@@ -145,6 +145,12 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Shown at checkout, in emails/receipts, on the client's page (incl. tax) and on admin Billing/Project. The certificate upload has no
   "Optional" tag (owner's call) but is still not required.
 
+- File retention (owner, Oct 26): files clients send (CLIENT_FILE_KINDS in lib/retention.js: logo, brand images/materials,
+  design files, media, references) are deleted 7 days after the job's latest move to Delivered, by a daily Vercel cron
+  (vercel.json -> /api/cron/delete-files, needs CRON_SECRET in Vercel). Deliverables, tax-exempt certificates and team files stay.
+  Shared order-wide files wait until every job using them is due. Logs a `files_deleted` event. Delivery email, the client's page
+  and /privacy say so.
+
 ## Planned (owner asked)
 - Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).

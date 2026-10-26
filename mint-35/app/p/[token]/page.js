@@ -6,6 +6,7 @@ import {projectRef, formatMoney, CUSTOMER_STAGES, customerStage, customerStatus,
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {ADDONS, ADDON_STATUSES} from '@/lib/addons'
 import {formatPrice} from '@/lib/packages'
+import {CLIENT_FILE_DAYS} from '@/lib/retention'
 import {Decision, MessageForm, AddonForm, AddFiles} from './CustomerForms'
 
 export const metadata = {title: 'Your project · Mint 35', robots: {index: false, follow: false}}
@@ -98,6 +99,9 @@ export default async function CustomerPage({params}) {
               )}
 
               {reviewing && <Decision token={token} job={job.id} what={reviewing} />}
+              {job.status === 'delivered' && (
+                <p className="muted small cp-retention">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted {CLIENT_FILE_DAYS} days after delivery. Your finished videos stay here.</p>
+              )}
 
               {ADD_FILES_STATUSES.includes(job.status) && (
                 <section className="cp-addons" aria-label="Add photos and files">
