@@ -128,6 +128,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   (`businessDaysUntil` in lib/dates.js), and a Deliverables checklist (`deliverables()` in _lib/text.js): script, first cut,
   final, plus extra formats (kind `extra_format`, labeled by shape) and the 15-sec cutdown (kind `cutdown`) as separate files;
   subtitles are noted as part of the video. Kinds added in migration 20261022000000_more_deliverables.sql.
+  Sending the script / first cut / final is blocked until one is shared (button disabled + moveStatus refuses), after a first cut
+  went out with nothing on the client page (Oct 26). Every client email from moveStatus/resendNotice is logged as an `email` event
+  {to, subject, ok, error}; a failed send warns the team, and Progress has "Email the client again" with the last email's status.
 
 - Discount codes (Oct 22): Admin → Discounts (owner creates/turns off; % or $ off, packages it applies to, use limit, last day,
   note). Table `discount_codes` + `claim_discount()` (migration 20261022010000_discount_codes.sql). Checkout "Have a discount
