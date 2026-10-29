@@ -12,6 +12,7 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
   const [open, setOpen] = useState(null)
   const [error, setError] = useState('')
   const [warning, setWarning] = useState('')
+  const [note, setNote] = useState('')
   const [pending, start] = useTransition()
 
   if (!steps.length) return null
@@ -25,7 +26,7 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
     start(async () => {
       const res = await moveStatus(fd)
       if (res?.error) setError(res.error)
-      else { setOpen(null); setWarning(res?.warning || '') }
+      else { setOpen(null); setNote(''); setWarning(res?.warning || '') }
     })
   }
   const choose = step => (step.needs || step.preview || step.danger ? setOpen(step) : run(step))
@@ -82,9 +83,10 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
                   <p className="email-subject"><span className="muted">Subject:</span> {open.preview.subject}</p>
                   <div dangerouslySetInnerHTML={{__html: open.preview.html}} />
                 </div>
-                <label>Add a personal line <span className="hint">Optional. Goes in this email and on their project page.</span>
-                  <textarea name="note" rows={2} placeholder="e.g. We went with the warmer opening you mentioned." />
+                <label>Add your own text to this email <span className="hint">Optional. It appears above the project page link, and on their project page.</span>
+                  <textarea name="note" rows={3} placeholder="e.g. We went with the warmer opening you mentioned." onInput={e => setNote(e.currentTarget.value)} />
                 </label>
+                {note.trim() && <p className="note-preview"><span className="muted small">Your text in the email:</span><br />{note}</p>}
               </div>
             )}
             <div className="actions-row">

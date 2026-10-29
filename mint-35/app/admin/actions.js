@@ -134,8 +134,10 @@ export async function resendNotice(formData) {
   const id = String(formData.get('id'))
   const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents, package, customer_token, brief').eq('id', id).single()
   if (!p) return {error: 'Job not found. Refresh the page.'}
-  const notice = customerNotice({status: p.status, p, link: customerLink(await siteOrigin(), p.customer_token), priceCents: p.price_cents})
+  const note = String(formData.get('note') || '').trim().slice(0, 2000)
+  const notice = customerNotice({status: p.status, p, link: customerLink(await siteOrigin(), p.customer_token), priceCents: p.price_cents, note})
   if (!notice) return {error: 'There’s no client email for this step.'}
+  if (note) await supabase.from('project_messages').insert({project_id: id, author: 'team', member_id: me.id, body: note})
   const sent = await emailClient(supabase, me, p, notice)
   revalidatePath('/admin/projects/[id]', 'layout')
   return sent.ok ? {ok: true} : {error: `It didn’t send: ${sent.error}`}
@@ -342,6 +344,9 @@ export async function decideAddon(formData) {
 
   const {data: p} = await supabase.from('projects').select('number, name, email, customer_token').eq('id', a.project_id).single()
   const link = customerLink(await siteOrigin(), p.customer_token)
+  // Optional text from the team, added to the email and the client's message thread.
+  const note = String(formData.get('note') || '').trim().slice(0, 2000)
+  if (note) await supabase.from('project_messages').insert({project_id: a.project_id, author: 'team', member_id: me.id, body: note})
   await sendEmail({
     to: p.email,
     subject: `${a.label}: ${decision === 'accepted' ? 'confirmed' : 'update'} (${projectRef(p.number)})`,
@@ -349,6 +354,7 @@ export async function decideAddon(formData) {
       ? `<p>We've confirmed your request for <b>${esc(a.label)}</b>${a.details ? ` (${esc(a.details)})` : ''} at <b>${formatMoney(a.price_cents)}</b>${tax ? ` plus ${formatMoney(tax)} sales tax` : ''}.${charged ? ` Your ${esc(job.card_brand || 'card')} ending in ${esc(job.card_last4 || '••••')} was charged.` : ''}</p>`
       + (charged ? receipt({cents: a.price_cents + tax, taxCents: tax, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) : '')
       : `<p>We're not able to add <b>${esc(a.label)}</b> to this project. We'll be in touch if there's another option.</p>`)
+      + (note ? `<p>${esc(note).replace(/\n/g, '<br>')}</p>` : '')
       + `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`,
   })
   revalidatePath('/admin/projects/[id]', 'layout')
