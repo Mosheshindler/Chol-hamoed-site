@@ -39,6 +39,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Accepting a job with a card moves it to `card_saved`; "Start job & charge card" charges the job price;
   confirming an add-on charges it. Owner connects QuickBooks at /admin/settings (OAuth, tokens in `qb_connection`,
   service-role only; access tokens kept in memory only, refresh token AES-256-GCM encrypted with a key from QB_TOKEN_KEY or the client secret). Without keys/connection, checkout takes orders with no card.
+  Charges send context {mobile:false, isEcommerce:true}. Owner reported (Oct 28) Intuit billing them at the keyed rate (2.9% vs 2.6%);
+  since Oct 29 the card token also carries the order's billing street/city/state when its ZIP matches the card ZIP (AVS).
+  Owner is asking Intuit which rate API card-on-file charges qualify for; switching to QuickBooks invoices is the fallback.
 - Email: Resend, mint35.com verified (Oct 12); sent from hello@mint35.com. mint35.com has no mailbox (no MX), so replies go to
   EMAIL_REPLY_TO (default info@mintmediallc.com).
   A client flagged the first-cut email as phishing (Oct 26): sendEmail now adds a plain-text copy (toText) and a sender footer
