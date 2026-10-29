@@ -90,7 +90,9 @@ function luhn(num) {
 }
 
 // Reads the card inputs, checks them, and exchanges them for a one-time QuickBooks token.
-export async function tokenizeCard(tokenUrl) {
+// `billing` is the order's billing address; when its ZIP matches the card's, the full street address goes with
+// the card too, so the card network can check it (AVS), which helps card-not-present charges get better pricing.
+export async function tokenizeCard(tokenUrl, billing) {
   const v = id => document.getElementById(id)?.value || ''
   const number = digits(v('cc-number'))
   const exp = parseExpiry(v('cc-exp'))
@@ -107,7 +109,13 @@ export async function tokenizeCard(tokenUrl) {
     body: JSON.stringify({card: {
       name: v('cc-name').trim(), number, cvc,
       expMonth: exp.mm, expYear: exp.yyyy,
-      address: {postalCode: zip, country: 'US'},
+      address: {
+        postalCode: zip, country: 'US',
+        ...(billing?.line1 && billing.zip?.slice(0, 5) === zip.slice(0, 5) && {
+          streetAddress: [billing.line1, billing.line2].filter(Boolean).join(', ').slice(0, 100),
+          city: billing.city || undefined, region: billing.state || undefined,
+        }),
+      },
     }}),
   })
   const data = await res.json().catch(() => ({}))

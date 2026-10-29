@@ -541,7 +541,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
     try {
       if (tokenUrl) {
         setState({phase: 'card'})
-        payload.cardToken = await tokenizeCard(tokenUrl)
+        payload.cardToken = await tokenizeCard(tokenUrl, payload.contact.billing)
       }
       setState({phase: 'saving'})
       const res = await fetch('/api/projects', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)})
