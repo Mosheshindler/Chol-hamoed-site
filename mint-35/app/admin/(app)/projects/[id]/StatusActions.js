@@ -3,6 +3,7 @@
 import {useState, useTransition} from 'react'
 import {moveStatus} from '../../../actions'
 import FileUpload from './FileUpload'
+import EmailPreview from './EmailPreview'
 
 const KIND_NAME = {script: 'script', first_cut: 'first cut', final: 'final video'}
 
@@ -78,15 +79,11 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
             {open.danger && !open.needs && <p>{open.label} this job? The client isn&rsquo;t emailed.</p>}
             {open.preview && (
               <div className="deliver-box">
-                <p className="deliver-title">{deliverable ? '2. ' : ''}What the client gets</p>
-                <div className="email-preview">
-                  <p className="email-subject"><span className="muted">Subject:</span> {open.preview.subject}</p>
-                  <div dangerouslySetInnerHTML={{__html: open.preview.html}} />
-                </div>
-                <label>Add your own text to this email <span className="hint">Optional. It appears above the project page link, and on their project page.</span>
+                <p className="deliver-title">{deliverable ? '2. ' : ''}The email to the client</p>
+                <label>Add your own text <span className="hint">Optional. The preview below updates as you type. Your text also goes on their project page.</span>
                   <textarea name="note" rows={3} placeholder="e.g. We went with the warmer opening you mentioned." onInput={e => setNote(e.currentTarget.value)} />
                 </label>
-                {note.trim() && <p className="note-preview"><span className="muted small">Your text in the email:</span><br />{note}</p>}
+                <EmailPreview mail={open.preview} note={note} />
               </div>
             )}
             <div className="actions-row">

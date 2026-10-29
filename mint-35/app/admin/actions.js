@@ -14,6 +14,7 @@ import {currentOwner} from '@/lib/owner'
 import {customerNotice, receipt} from '@/lib/notices'
 import {withTax, jobTaxRate, taxCents} from '@/lib/tax'
 import {sendPasswordLink} from '@/lib/passwordLink'
+import {addonEmail} from '@/lib/emailParts'
 import {normalizeCode} from '@/lib/discounts'
 import {PACKAGES} from '@/lib/packages'
 
@@ -347,16 +348,10 @@ export async function decideAddon(formData) {
   // Optional text from the team, added to the email and the client's message thread.
   const note = String(formData.get('note') || '').trim().slice(0, 2000)
   if (note) await supabase.from('project_messages').insert({project_id: a.project_id, author: 'team', member_id: me.id, body: note})
-  await sendEmail({
-    to: p.email,
-    subject: `${a.label}: ${decision === 'accepted' ? 'confirmed' : 'update'} (${projectRef(p.number)})`,
-    html: `<p>Hi ${esc(p.name.split(' ')[0])},</p>` + (decision === 'accepted'
-      ? `<p>We've confirmed your request for <b>${esc(a.label)}</b>${a.details ? ` (${esc(a.details)})` : ''} at <b>${formatMoney(a.price_cents)}</b>${tax ? ` plus ${formatMoney(tax)} sales tax` : ''}.${charged ? ` Your ${esc(job.card_brand || 'card')} ending in ${esc(job.card_last4 || '••••')} was charged.` : ''}</p>`
-      + (charged ? receipt({cents: a.price_cents + tax, taxCents: tax, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) : '')
-      : `<p>We're not able to add <b>${esc(a.label)}</b> to this project. We'll be in touch if there's another option.</p>`)
-      + (note ? `<p>${esc(note).replace(/\n/g, '<br>')}</p>` : '')
-      + `<p><a href="${link}">Open your project page</a></p><p>— The Mint 35 team</p>`,
-  })
+  const mail = addonEmail({firstName: p.name.split(' ')[0], label: a.label, details: a.details, accepted: decision === 'accepted', priceCents: a.price_cents, taxCents: tax,
+    charged, cardBrand: job.card_brand, last4: job.card_last4, note, link, ref: projectRef(p.number)})
+  if (charged) mail.html = mail.html.replace('<p><a href=', receipt({cents: a.price_cents + tax, taxCents: tax, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) + '<p><a href=')
+  await sendEmail({to: p.email, ...mail})
   revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
 }
