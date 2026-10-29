@@ -4,10 +4,13 @@ import {AddonDecision} from '../CustomerPanel'
 import {PriceForm} from '../JobForm'
 import {loadOrder} from '../_lib/order'
 import {billing} from '../_lib/text'
+import {jobTaxRate} from '@/lib/tax'
+import {paymentsReady} from '@/lib/qb'
 
 export default async function Billing({params}) {
   const {id} = await params
-  const {p, jobs, multi, addons} = await loadOrder(id)
+  const {p, jobs, multi, addons, custUrl} = await loadOrder(id)
+  const canCharge = await paymentsReady()
   const bills = jobs.map(j => ({j, b: billing(j, addons)}))
   const total = bills.reduce((s, x) => s + x.b.total, 0)
   const paid = bills.reduce((s, x) => s + x.b.paid, 0)
@@ -40,7 +43,9 @@ export default async function Billing({params}) {
                   {b.pending.map(a => (
                     <li key={a.id}>
                       <div><b>{a.label}</b>{a.details && <span className="muted"> · {a.details}</span>}<small className="muted"> · {formatDateTime(a.created_at)}</small></div>
-                      <AddonDecision addonId={a.id} suggested={a.price_cents != null ? a.price_cents / 100 : null} />
+                      <AddonDecision addonId={a.id} suggested={a.price_cents != null ? a.price_cents / 100 : null}
+                        mail={{firstName: (j.name || '').split(' ')[0], label: a.label, details: a.details, ref: projectRef(j.number), link: custUrl,
+                          taxRate: jobTaxRate(j), willCharge: !!(canCharge && j.qb_card_id), cardBrand: j.card_brand, last4: j.card_last4}} />
                     </li>
                   ))}
                 </ul>
