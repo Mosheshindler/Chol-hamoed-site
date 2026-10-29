@@ -44,6 +44,7 @@ export function AddonDecision({addonId, suggested}) {
     <form action={action} className="addon-decide">
       <input type="hidden" name="addon" value={addonId} />
       <span className="money-input"><span>$</span><input name="price" inputMode="decimal" defaultValue={suggested ?? ''} placeholder="Price" aria-label="Add-on price" /></span>
+      <textarea name="note" rows={2} className="addon-note" placeholder="Add your own text to the email (optional)" aria-label="Your text for the email" />
       <button name="decision" value="accept" className="btn btn-primary btn-sm" disabled={pending}>Confirm</button>
       <button name="decision" value="decline" className="btn btn-danger btn-sm" disabled={pending}>Decline</button>
       {state?.error && <p className="form-error" role="alert">{state.error}</p>}

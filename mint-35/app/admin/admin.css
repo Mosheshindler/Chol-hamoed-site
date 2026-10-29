@@ -300,3 +300,7 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .resend { display: flex; align-items: center; justify-content: space-between; gap: 10px 14px; flex-wrap: wrap; margin: 10px 0 0; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 12px; }
 .resend .form-error, .resend .form-ok { flex-basis: 100%; margin: 0; }
 .actions .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.resend-form { flex-basis: 100%; display: grid; gap: 8px; }
+.resend-form textarea, .addon-note { flex-basis: 100%; width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 12px; font: inherit; font-weight: 400; }
+.resend-form textarea:focus, .addon-note:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 3px rgba(136,192,64,.15); }
+.note-preview { margin: 8px 0 0; padding: 10px 12px; border-left: 3px solid var(--lime); background: rgba(136,192,64,.06); white-space: pre-wrap; }
