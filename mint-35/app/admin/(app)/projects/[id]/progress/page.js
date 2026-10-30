@@ -5,7 +5,7 @@ import {withTax} from '@/lib/tax'
 import StatusPill from '../../../StatusPill'
 import StatusActions from '../StatusActions'
 import ResendEmail from '../ResendEmail'
-import {NOTE_SLOT} from '@/lib/emailParts'
+import {MESSAGE_SLOT} from '@/lib/emailParts'
 import UpdateForm from '../UpdateForm'
 import FileUpload from '../FileUpload'
 import {DueForm} from '../JobForm'
@@ -42,7 +42,7 @@ export default async function Progress({params}) {
         const steps = (TRANSITIONS[j.status] || []).map(s => {
           const charging = j.status === 'card_saved' && s.to === 'in_progress' && !s.skipCharge
           const to = s.to === 'quoted' && j.qb_card_id ? 'card_saved' : s.to
-          const preview = customerNotice({status: to, p: j, link: custUrl, priceCents: j.price_cents, charge: charging ? {cents: withTax(j, j.price_cents), id: '(shown after charging)'} : null, note: NOTE_SLOT})
+          const preview = customerNotice({status: to, p: j, link: custUrl, priceCents: j.price_cents, charge: charging ? {cents: withTax(j, j.price_cents), id: '(shown after charging)'} : null, message: MESSAGE_SLOT})
           return {...s, label: forPackage(s.label, j.package), preview, delivers: DELIVERS[s.to] || null,
             sendLabel: charging ? 'Charge card, start & email client' : sendLabels[s.to] || (preview ? `${forPackage(s.label, j.package)} & email client` : null)}
         })
@@ -80,7 +80,7 @@ export default async function Progress({params}) {
               alsoDue={extras.filter(r => r.kind && r.kind !== 'final').map(r => ({label: r.label, done: r.shared.length > 0}))} />
             {['quoted', 'card_saved', 'script_sent', 'first_cut_sent', 'delivered'].includes(j.status) && (() => {
               const e = log.find(x => x.type === 'email')
-              return <ResendEmail id={j.id} preview={customerNotice({status: j.status, p: j, link: custUrl, priceCents: j.price_cents, note: NOTE_SLOT})} last={e ? {ok: e.data.ok, subject: e.data.subject, to: e.data.to, when: formatDateTime(e.created_at)} : null} />
+              return <ResendEmail id={j.id} preview={customerNotice({status: j.status, p: j, link: custUrl, priceCents: j.price_cents, message: MESSAGE_SLOT})} last={e ? {ok: e.data.ok, subject: e.data.subject, to: e.data.to, when: formatDateTime(e.created_at)} : null} />
             })()}
 
             <div className="two-col">

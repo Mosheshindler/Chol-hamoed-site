@@ -11,7 +11,7 @@ export async function sendPasswordLink({email, name, invite}) {
   if (error || !token) return {error: 'Couldn’t create the link. Try again.'}
   const link = `${await siteOrigin()}/admin/set-password?token=${encodeURIComponent(token)}`
   const first = esc((name || '').split(' ')[0] || 'there')
-  const res = await sendEmail({
+  const res = await sendEmail({copy: false,
     to: email,
     subject: invite ? 'You’re invited to Mint 35 Admin' : 'Reset your Mint 35 Admin password',
     html: `<p>Hi ${first},</p>`

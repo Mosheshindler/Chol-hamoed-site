@@ -308,3 +308,8 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .addon-preview-toggle { flex-basis: 100%; font-size: .85rem; color: var(--muted); }
 .addon-preview-toggle .link-btn.on { text-decoration: underline; }
 .addon-preview { flex-basis: 100%; }
+.email-editor { display: grid; gap: 10px; }
+.email-editor label { display: grid; gap: 6px; font-weight: 600; font-size: .9rem; }
+.email-editor input, .email-editor textarea { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 12px; font: inherit; font-weight: 400; }
+.email-editor input:focus, .email-editor textarea:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 3px rgba(136,192,64,.15); }
+.email-reset { justify-self: start; font-size: .85rem; }
