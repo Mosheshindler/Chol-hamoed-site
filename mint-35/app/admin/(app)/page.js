@@ -9,6 +9,10 @@ const VIEWS = {
   customer: {label: 'Waiting on customer', match: s => STATUSES[s].waitingOn === 'customer'},
   active: {label: 'All active', match: s => ACTIVE.includes(s)},
   done: {label: 'Done', match: s => !ACTIVE.includes(s)},
+  // Opened from the numbers at the top (not tabs).
+  new: {label: 'New requests', tile: true, match: s => s === 'submitted'},
+  production: {label: 'In production', tile: true, match: s => s === 'in_production'},
+  overdue: {label: 'Overdue', tile: true, match: (s, p) => ACTIVE.includes(s) && p.due_date && p.due_date < new Date().toISOString().slice(0, 10)},
 }
 
 export default async function JobsPage({searchParams}) {
@@ -32,11 +36,12 @@ export default async function JobsPage({searchParams}) {
   const counts = Object.fromEntries(Object.entries(VIEWS).map(([k, x]) => [k, all.filter(p => x.match(p.status, p, needsReply)).length]))
   const today = new Date().toISOString().slice(0, 10)
 
+  // Each number opens the list of the jobs it counts.
   const stats = [
-    {label: 'New requests', value: all.filter(p => p.status === 'submitted').length},
-    {label: 'In production', value: all.filter(p => p.status === 'in_production').length},
-    {label: 'Overdue', value: all.filter(p => ACTIVE.includes(p.status) && p.due_date && p.due_date < today).length, alert: true},
-    {label: 'Active value', value: formatMoney(all.filter(p => ACTIVE.includes(p.status)).reduce((s, p) => s + (p.price_cents || 0), 0))},
+    {label: 'New requests', value: counts.new, view: 'new'},
+    {label: 'In production', value: counts.production, view: 'production'},
+    {label: 'Overdue', value: counts.overdue, alert: true, view: 'overdue'},
+    {label: 'Active value', value: formatMoney(all.filter(p => ACTIVE.includes(p.status)).reduce((s, p) => s + (p.price_cents || 0), 0)), view: 'active'},
   ]
 
   return (
@@ -47,17 +52,19 @@ export default async function JobsPage({searchParams}) {
 
       <div className="stats">
         {stats.map(s => (
-          <div key={s.label} className={`stat${s.alert && s.value > 0 ? ' stat-alert' : ''}`}>
+          <Link key={s.label} href={`/admin?view=${s.view}`} className={`stat${s.alert && s.value > 0 ? ' stat-alert' : ''}${view === s.view ? ' stat-on' : ''}`} aria-current={view === s.view ? 'page' : undefined}>
             <span>{s.label}</span><b>{s.value}</b>
-          </div>
+          </Link>
         ))}
       </div>
 
       <nav className="tabs" aria-label="Filter jobs">
-        {Object.entries(VIEWS).map(([k, x]) => (
+        {Object.entries(VIEWS).filter(([, x]) => !x.tile).map(([k, x]) => (
           <Link key={k} href={`/admin?view=${k}`} className={k === view ? 'active' : undefined}>{x.label} <span className="count">{counts[k]}</span></Link>
         ))}
       </nav>
+
+      {VIEWS[view].tile && <p className="view-note">Showing: <b>{VIEWS[view].label}</b> · <Link href="/admin">Back to Needs us</Link></p>}
 
       {rows.length === 0 ? (
         <div className="empty">

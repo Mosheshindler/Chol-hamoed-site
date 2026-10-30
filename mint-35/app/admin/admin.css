@@ -25,6 +25,12 @@
 .stat b { align-self: end; font-family: var(--display); font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
 .stat-alert { border-color: rgba(224,122,107,.5); }
 .stat-alert b { color: var(--red); }
+a.stat { color: var(--text); text-decoration: none; transition: border-color .15s, background .15s; }
+a.stat:hover { border-color: var(--lime); }
+a.stat:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.stat-on { border-color: var(--lime); background: rgba(136,192,64,.08); }
+.view-note { margin: -8px 0 14px; color: var(--muted); font-size: .9rem; }
+.view-note a { color: var(--lime); }
 
 .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
 .tabs a { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-weight: 600; font-size: .9rem; }
