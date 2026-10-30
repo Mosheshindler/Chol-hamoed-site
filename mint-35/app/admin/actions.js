@@ -107,20 +107,21 @@ export async function moveStatus(formData) {
   await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'status', data: event})
 
   const link = customerLink(await siteOrigin(), p.customer_token)
-  // An optional personal line from the team goes in the email and on the customer's message thread.
-  const note = String(formData.get('note') || '').trim().slice(0, 2000)
-  const notice = customerNotice({status: patch.status, p, link, priceCents: patch.price_cents, charge: patch.charge_id ? {cents: patch.charged_cents, id: patch.charge_id} : null, note})
+  // The team may have rewritten the email's subject and message in the preview before sending.
+  const notice = customerNotice({status: patch.status, p, link, priceCents: patch.price_cents, charge: patch.charge_id ? {cents: patch.charged_cents, id: patch.charge_id} : null, ...editedEmail(formData)})
   let warning = null
   if (notice) {
     const sent = await emailClient(supabase, me, p, notice)
     if (!sent.ok) warning = `The job moved to “${STATUSES[patch.status].label}”, but the email to ${p.email} didn’t send (${sent.error}). Use “Email the client again” on this page.`
-    if (note) await supabase.from('project_messages').insert({project_id: id, author: 'team', member_id: me.id, body: note})
   }
 
   revalidatePath('/admin/projects/[id]', 'layout')
   revalidatePath('/admin')
   return {ok: true, label: STATUSES[patch.status].label, warning}
 }
+
+// The subject and message the team edited in an email preview (blank = the standard wording).
+const editedEmail = fd => ({subject: String(fd.get('subject') || '').slice(0, 200), message: String(fd.get('message') || '').slice(0, 8000)})
 
 // Sends a client email and logs it on the job (type 'email'), so the team can see whether it went out.
 async function emailClient(supabase, me, p, notice) {
@@ -135,10 +136,8 @@ export async function resendNotice(formData) {
   const id = String(formData.get('id'))
   const {data: p} = await supabase.from('projects').select('id, number, status, name, email, price_cents, package, customer_token, brief').eq('id', id).single()
   if (!p) return {error: 'Job not found. Refresh the page.'}
-  const note = String(formData.get('note') || '').trim().slice(0, 2000)
-  const notice = customerNotice({status: p.status, p, link: customerLink(await siteOrigin(), p.customer_token), priceCents: p.price_cents, note})
+  const notice = customerNotice({status: p.status, p, link: customerLink(await siteOrigin(), p.customer_token), priceCents: p.price_cents, ...editedEmail(formData)})
   if (!notice) return {error: 'There’s no client email for this step.'}
-  if (note) await supabase.from('project_messages').insert({project_id: id, author: 'team', member_id: me.id, body: note})
   const sent = await emailClient(supabase, me, p, notice)
   revalidatePath('/admin/projects/[id]', 'layout')
   return sent.ok ? {ok: true} : {error: `It didn’t send: ${sent.error}`}
@@ -345,13 +344,12 @@ export async function decideAddon(formData) {
 
   const {data: p} = await supabase.from('projects').select('number, name, email, customer_token').eq('id', a.project_id).single()
   const link = customerLink(await siteOrigin(), p.customer_token)
-  // Optional text from the team, added to the email and the client's message thread.
-  const note = String(formData.get('note') || '').trim().slice(0, 2000)
-  if (note) await supabase.from('project_messages').insert({project_id: a.project_id, author: 'team', member_id: me.id, body: note})
+
+  const {subject, message} = editedEmail(formData)
   const mail = addonEmail({firstName: p.name.split(' ')[0], label: a.label, details: a.details, accepted: decision === 'accepted', priceCents: a.price_cents, taxCents: tax,
-    charged, cardBrand: job.card_brand, last4: job.card_last4, note, link, ref: projectRef(p.number)})
-  if (charged) mail.html = mail.html.replace('<p><a href=', receipt({cents: a.price_cents + tax, taxCents: tax, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) + '<p><a href=')
-  await sendEmail({to: p.email, ...mail})
+    charged, cardBrand: job.card_brand, last4: job.card_last4, message, link, ref: projectRef(p.number),
+    receiptHtml: charged ? receipt({cents: a.price_cents + tax, taxCents: tax, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) : ''})
+  await sendEmail({to: p.email, subject: subject.trim() || mail.subject, html: mail.html})
   revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
 }

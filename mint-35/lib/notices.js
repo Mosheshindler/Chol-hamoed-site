@@ -1,7 +1,7 @@
 import 'server-only'
 import {projectRef, formatMoney, scriptWord} from '@/lib/status'
 import {formatDate} from '@/lib/dates'
-import {esc, noteHtml, NOTE_SLOT} from '@/lib/emailParts'
+import {esc, toText, messagePart} from '@/lib/emailParts'
 import {jobTaxRate, taxCents} from '@/lib/tax'
 import {CLIENT_FILE_DAYS, FINAL_AVAILABLE_DAYS} from './retention'
 
@@ -20,12 +20,14 @@ export function receipt({cents, taxCents: tax, brand, last4, chargeId, ref, item
 }
 
 // The email the customer gets when a job moves to `status`, or null if that step sends none.
-// `p` is the job; `charge` is {cents, id} when a card was just charged; `note` is an optional personal line from the team.
+// `p` is the job; `charge` is {cents, id} when a card was just charged. The team can rewrite the greeting + message
+// (`message`, plain text; MESSAGE_SLOT in previews) and the subject before sending; the receipt, project page link,
+// sign-off and footer stay fixed. Returns the standard message as `text` (what the edit box starts with).
 // The admin Progress page shows this same email as a preview before the step is taken.
-export function customerNotice({status, p, link, priceCents, charge, note}) {
+export function customerNotice({status, p, link, priceCents, charge, message, subject: subjectOverride}) {
   const ref = projectRef(p.number)
   const w = scriptWord(p.package)
-  let subject, body
+  let subject, body, fixed = ''
   switch (status) {
     case 'quoted':
     case 'card_saved':
@@ -41,7 +43,7 @@ export function customerNotice({status, p, link, priceCents, charge, note}) {
       if (!charge) return null
       subject = `We've started your project (${ref})`
       body = `<p>We've started work on your project. Your ${esc(p.card_brand || 'card')} ending in ${esc(p.card_last4 || '••••')} was charged <b>${formatMoney(charge.cents)}</b>.</p>`
-        + receipt({cents: charge.cents, taxCents: taxCents(p.price_cents, jobTaxRate(p)), brand: p.card_brand, last4: p.card_last4, chargeId: charge.id, ref, item: `Mint 35 ${p.package || 'project'}`})
+      fixed = receipt({cents: charge.cents, taxCents: taxCents(p.price_cents, jobTaxRate(p)), brand: p.card_brand, last4: p.card_last4, chargeId: charge.id, ref, item: `Mint 35 ${p.package || 'project'}`})
       break
     case 'script_sent':
       subject = `Your ${w} is ready to review (${ref})`
@@ -58,12 +60,12 @@ export function customerNotice({status, p, link, priceCents, charge, note}) {
     default:
       return null
   }
-  // The team's own text (NOTE_SLOT in previews, filled in as they type).
-  const personal = note === NOTE_SLOT ? NOTE_SLOT : noteHtml(note)
-  const html = `<p>Hi ${esc((p.name || '').split(' ')[0])},</p>` + body + personal
+  const standard = `<p>Hi ${esc((p.name || '').split(' ')[0])},</p>` + body
+  const html = messagePart(standard, message) + fixed
     + `<p><a href="${link}">Open your project page</a></p>`
     // The full address in plain sight, so the link isn't hidden behind button text (a phishing signal for spam filters).
     + `<p style="color:#666;font-size:13px">Or copy this address into your browser:<br>${link}</p>`
     + `<p>Questions? Just reply to this email.</p><p>— The Mint 35 team</p>`
-  return {subject, html}
+  const edited = String(subjectOverride ?? '').trim().slice(0, 200)
+  return {subject: edited || subject, html, text: toText(standard), standardSubject: subject}
 }

@@ -138,10 +138,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Sending the script / first cut / final is blocked until one is shared (button disabled + moveStatus refuses), after a first cut
   went out with nothing on the client page (Oct 26). Every client email from moveStatus/resendNotice is logged as an `email` event
   {to, subject, ok, error}; a failed send warns the team, and Progress has "Email the client again" with the last email's status.
-  Team can add their own text to client emails: step emails ("Add your own text to this email", with a live preview), add-on
-  Confirm/Decline (note field) and "Email the client again"; the text goes above the project page link and into the message thread.
-  Each shows a full live preview of the email (EmailPreview.js); email pieces shared by sending and previewing live in
-  lib/emailParts.js (esc, FOOTER_*, NOTE_SLOT/fillNote, addonEmail), so the preview always matches what is sent.
+  Client emails sent from admin are editable before sending (owner, Oct 30): step emails, "Email the client again" and add-on
+  Confirm/Decline show Subject + Message (greeting and body as plain text, prefilled with the standard wording) and a live preview
+  (EmailEditor in EmailPreview.js). Receipt, project page link, sign-off and footer stay fixed. Unedited text sends the standard HTML.
+  Shared pieces in lib/emailParts.js (esc, toText, FOOTER_*, MESSAGE_SLOT/fillMessage/messagePart, addonEmail).
+  Every client email is BCC'd to hello@mint35.com only (owner, Oct 30; EMAIL_COPY_TO overrides); sendEmail({copy:false}) for internal mail.
 
 - Discount codes (Oct 22): Admin → Discounts (owner creates/turns off; % or $ off, packages it applies to, use limit, last day,
   note). Table `discount_codes` + `claim_discount()` (migration 20261022010000_discount_codes.sql). Checkout "Have a discount

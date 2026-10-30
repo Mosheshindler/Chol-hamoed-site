@@ -3,7 +3,7 @@
 import {useState, useTransition} from 'react'
 import {moveStatus} from '../../../actions'
 import FileUpload from './FileUpload'
-import EmailPreview from './EmailPreview'
+import EmailEditor from './EmailPreview'
 
 const KIND_NAME = {script: 'script', first_cut: 'first cut', final: 'final video'}
 
@@ -13,7 +13,6 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
   const [open, setOpen] = useState(null)
   const [error, setError] = useState('')
   const [warning, setWarning] = useState('')
-  const [note, setNote] = useState('')
   const [pending, start] = useTransition()
 
   if (!steps.length) return null
@@ -27,7 +26,7 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
     start(async () => {
       const res = await moveStatus(fd)
       if (res?.error) setError(res.error)
-      else { setOpen(null); setNote(''); setWarning(res?.warning || '') }
+      else { setOpen(null); setWarning(res?.warning || '') }
     })
   }
   const choose = step => (step.needs || step.preview || step.danger ? setOpen(step) : run(step))
@@ -80,10 +79,7 @@ export default function StatusActions({id, status, steps, price, chargeTotal, ca
             {open.preview && (
               <div className="deliver-box">
                 <p className="deliver-title">{deliverable ? '2. ' : ''}The email to the client</p>
-                <label>Add your own text <span className="hint">Optional. The preview below updates as you type. Your text also goes on their project page.</span>
-                  <textarea name="note" rows={3} placeholder="e.g. We went with the warmer opening you mentioned." onInput={e => setNote(e.currentTarget.value)} />
-                </label>
-                <EmailPreview mail={open.preview} note={note} />
+                <EmailEditor key={open.label} mail={open.preview} />
               </div>
             )}
             <div className="actions-row">
