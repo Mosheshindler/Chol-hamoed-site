@@ -143,6 +143,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   (EmailEditor in EmailPreview.js). Receipt, project page link, sign-off and footer stay fixed. Unedited text sends the standard HTML.
   Shared pieces in lib/emailParts.js (esc, toText, FOOTER_*, MESSAGE_SLOT/fillMessage/messagePart, addonEmail).
   Every client email is BCC'd to hello@mint35.com only (owner, Oct 30; EMAIL_COPY_TO overrides); sendEmail({copy:false}) for internal mail.
+  Team notifications (new orders, client messages, add-on requests, added files) go to hello@mint35.com (owner, Nov 1;
+  TEAM_NOTIFY_EMAIL overrides). hello@mint35.com is a Google Workspace alias of info@mintmediallc.com; EMAIL_REPLY_TO is set to it in Vercel.
 
 - Discount codes (Oct 22): Admin → Discounts (owner creates/turns off; % or $ off, packages it applies to, use limit, last day,
   note). Table `discount_codes` + `claim_discount()` (migration 20261022010000_discount_codes.sql). Checkout "Have a discount
