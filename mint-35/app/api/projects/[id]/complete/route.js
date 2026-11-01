@@ -69,7 +69,7 @@ export async function POST(request, ctx) {
 
   await Promise.all([
     sendEmail({
-      to: process.env.TEAM_NOTIFY_EMAIL || 'info@mintmediallc.com',
+      to: process.env.TEAM_NOTIFY_EMAIL || 'hello@mint35.com',
       replyTo: c.email,
       subject: `New Mint 35 ${jobs.length > 1 ? `order (${jobs.length} projects)` : 'request'} ${refs.join(', ')}: ${c.company || c.name}`,
       html: `<p><b>${esc(c.name)}</b>${c.company ? ` (${esc(c.company)})` : ''} submitted ${jobs.length > 1 ? `an order with ${jobs.length} projects` : 'a project'}.</p>

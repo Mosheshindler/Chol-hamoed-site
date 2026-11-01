@@ -25,7 +25,7 @@ async function jobFor(formData) {
 async function tellTeam(job, subject, html) {
   const origin = await siteOrigin()
   await sendEmail({
-    to: process.env.TEAM_NOTIFY_EMAIL || 'info@mintmediallc.com',
+    to: process.env.TEAM_NOTIFY_EMAIL || 'hello@mint35.com',
     replyTo: job.email,
     subject: `${projectRef(job.number)} · ${subject}`,
     html: `${html}<p><a href="${origin}/admin/projects/${job.id}">Open ${projectRef(job.number)} in the admin</a></p>`,
