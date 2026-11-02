@@ -4,9 +4,10 @@ const TZ = 'America/New_York'
 // Orders placed at or after 5pm Eastern, or on a weekend or holiday, count as placed the next
 // business day. `closed` is a list/Set of 'YYYY-MM-DD' holidays (see lib/holidays.js).
 export const CUTOFF_HOUR = 17
-// First cut takes 3 business days; with the revision round, the final is in hand about 6 business days out.
-export const LEAD_BUSINESS_DAYS = 3
-export const FINAL_LEAD_BUSINESS_DAYS = 6
+// First cut takes 5 business days once production starts; with the revision round, the final is in hand about
+// 8 business days out (owner, Nov 2; was 3 and 6).
+export const LEAD_BUSINESS_DAYS = 5
+export const FINAL_LEAD_BUSINESS_DAYS = 8
 
 const iso = d => d.toISOString().slice(0, 10)
 const asSet = closed => closed instanceof Set ? closed : new Set(Array.isArray(closed) ? closed : Object.keys(closed || {}))

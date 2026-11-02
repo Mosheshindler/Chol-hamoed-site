@@ -15,7 +15,7 @@ export default function PackageCards() {
           <p className="package-blurb">{p.blurb}</p>
           {p.why && <p className="package-why"><b>Why it costs less</b>{p.why}</p>}
           {p.milestones && (
-            <ol className="milestones" aria-label="The five videos">
+            <ol className="milestones" aria-label={`The ${p.milestones.length} videos`} style={{'--n': p.milestones.length}}>
               {p.milestones.map(m => <li key={m}><span aria-hidden="true" />{m}</li>)}
             </ol>
           )}
