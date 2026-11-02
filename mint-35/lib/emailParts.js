@@ -6,8 +6,8 @@ export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;',
 
 // Every email carries who it's from and why the reader got it. Spam filters treat HTML-only mail with a
 // bare link and no sender details as phishing (a client's first-cut email was flagged, Oct 26).
-export const FOOTER_HTML = `<hr style="border:0;border-top:1px solid #ddd;margin:24px 0 12px"><p style="color:#777;font-size:12px;line-height:1.5;margin:0">Mint 35 by Mint Media LLC · (732) 813-4222 · <a href="mailto:hello@mint35.com" style="color:#777">hello@mint35.com</a> · <a href="https://www.mint35.com" style="color:#777">www.mint35.com</a><br>You are receiving this email about your order or project with Mint 35.</p>`
-export const FOOTER_TEXT = '\n\n--\nMint 35 by Mint Media LLC · (732) 813-4222 · hello@mint35.com · https://www.mint35.com\nYou are receiving this email about your order or project with Mint 35.'
+export const FOOTER_HTML = `<hr style="border:0;border-top:1px solid #ddd;margin:24px 0 12px"><p style="color:#777;font-size:12px;line-height:1.5;margin:0">Mint 35 by Mint Media LLC · <a href="mailto:hello@mint35.com" style="color:#777">hello@mint35.com</a> · <a href="https://www.mint35.com" style="color:#777">www.mint35.com</a><br>You are receiving this email about your order or project with Mint 35.</p>`
+export const FOOTER_TEXT = '\n\n--\nMint 35 by Mint Media LLC · hello@mint35.com · https://www.mint35.com\nYou are receiving this email about your order or project with Mint 35.'
 
 // A readable plain-text copy of an email's HTML; links are written out as "text (address)".
 export function toText(html) {
