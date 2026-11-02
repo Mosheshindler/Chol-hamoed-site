@@ -57,6 +57,30 @@ export default async function CustomerPage({params}) {
           const legacySample = job.package === 'Momentum Pack' && !job.brief?.review_stage
           const reviewing = job.status === 'script_sent' ? w : job.status === 'first_cut_sent' ? 'first cut' : null
 
+          // Newest first everywhere, so what just happened is on top.
+          const newest = [...jobFiles].reverse()
+          const reviewKinds = ['script', 'sample', 'first_cut']
+          const reviewFile = reviewing ? newest.find(f => (job.status === 'first_cut_sent' ? f.kind === 'first_cut' : f.kind === 'script' || f.kind === 'sample')) : null
+          const finals = newest.filter(f => !reviewKinds.includes(f.kind))
+          const lastMsg = jobMessages.at(-1)
+          const confirmed = jobAddons.filter(a => a.status === 'accepted')
+          const taxRate = jobTaxRate(job)
+          const addonsTotal = confirmed.reduce((s, a) => s + withTax(job, a.price_cents || 0), 0)
+          const fileLabel = f => (f.kind === 'script' && legacySample ? 'Sample video' : KIND[f.kind])
+          const fileLink = f => f.body
+            ? <span className="cp-text-label">Read it below</span>
+            : f.shared
+              ? <a href={f.url} target="_blank" rel="noopener noreferrer">{openLabel(f, legacySample)} →</a>
+              : <a href={f.url} download>{f.name}</a>
+          const fileRow = f => (
+            <li key={f.id} className={f.body ? 'cp-file-text' : undefined}>
+              <span className="file-kind">{fileLabel(f)}</span>
+              {fileLink(f)}
+              <span className="muted">{formatDate(f.created_at)}</span>
+              {f.body && <div className="cp-text">{f.body}</div>}
+            </li>
+          )
+
           return (
             <article key={job.id} className="cp-job" id={projectRef(job.number)}>
               <div className="cp-job-head">
@@ -65,7 +89,6 @@ export default async function CustomerPage({params}) {
                   <h2>{job.package || 'Mint 35 project'}</h2>
                   <p className="muted">{job.promoting}</p>
                 </div>
-                {job.price_cents ? <b className="cp-price">{formatMoney(withTax(job, job.price_cents))}{jobTaxRate(job) > 0 && <small className="cp-tax">incl. sales tax</small>}</b> : null}
               </div>
 
               {!closed && (
@@ -78,89 +101,141 @@ export default async function CustomerPage({params}) {
                 </ol>
               )}
 
-              <p className={`cp-status${reviewing ? ' cp-status-action' : ''}`}>
-                {customerStatus(job)}
-                {job.status === 'in_production' && job.due_date && <> First cut due <b>{formatDate(job.due_date)}</b>.</>}
-              </p>
-
-              {jobFiles.length > 0 && (
-                <ul className="cp-files">
-                  {jobFiles.map(f => (
-                    <li key={f.id} className={f.body ? 'cp-file-text' : undefined}>
-                      <span className="file-kind">{f.kind === 'script' && legacySample ? 'Sample video' : KIND[f.kind]}</span>
-                      {f.body
-                        ? <span className="cp-text-label">Read it below</span>
-                        : f.shared
-                          ? <a href={f.url} target="_blank" rel="noopener noreferrer">{openLabel(f, legacySample)} →</a>
-                          : <a href={f.url} download>{f.name}</a>}
-                      <span className="muted">{formatDate(f.created_at)}</span>
-                      {f.body && <div className="cp-text">{f.body}</div>}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {reviewing && <Decision token={token} job={job.id} what={reviewing} />}
-              {job.status === 'delivered' && (() => {
-                // Dated from when the final was shared (the last final file on this job).
-                const finalAt = jobFiles.filter(f => f.kind === 'final').at(-1)?.created_at
-                return (
-                  <div className="cp-retention">
-                    <p><b>Please download your final videos.</b> They&rsquo;re available here for {FINAL_AVAILABLE_DAYS} days{finalAt ? <>, until <b>{formatDate(addDays(finalAt, FINAL_AVAILABLE_DAYS))}</b></> : ''}.</p>
-                    <p className="muted small">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted {CLIENT_FILE_DAYS} days after you receive all your final files{finalAt ? <>, on {formatDate(addDays(finalAt, CLIENT_FILE_DAYS))}</> : ''}.</p>
-                  </div>
-                )
-              })()}
-
-              {canAddFiles(job.status) && (
-                <section className="cp-addons" aria-label="Add photos and files">
-                  <h3>Add more photos &amp; files</h3>
-                  <p className="muted">{PRE_PRODUCTION_STATUSES.includes(job.status)
-                    ? 'Forgot something? Send more photos, videos or graphics, or share a Google Drive or Dropbox link.'
-                    : 'Your video is already in production, so we can’t promise new files will be included. You can still send them, or share a Google Drive or Dropbox link.'}</p>
-                  <AddFiles token={token} job={job.id} inProduction={!PRE_PRODUCTION_STATUSES.includes(job.status)} />
-                </section>
-              )}
-              {jobAdded.length > 0 && (
-                <p className="muted small cp-added">You&rsquo;ve added {jobAdded.length} file{jobAdded.length > 1 ? 's' : ''} since ordering: {jobAdded.map(f => f.name).join(', ')}</p>
-              )}
-
-              {ADDON_STATUSES.includes(job.status) && (
-                <section className="cp-addons" aria-label="Add-ons">
-                  <h3>Add more to this project</h3>
-                  <p className="muted">Request an extra and our team will confirm it with you before anything is charged.</p>
-                  <AddonForm token={token} job={job.id} orientation={job.orientation}
-                    addons={ADDONS.map(a => ({key: a.key, label: a.label, desc: a.desc, askOrientation: !!a.askOrientation, price: a.price != null ? formatPrice(a.price) + (a.perVideo ? ' per video' : '') : null}))} />
-                  {jobAddons.length > 0 && (
-                    <ul className="cp-addon-list">
-                      {jobAddons.map(a => (
-                        <li key={a.id}>
-                          <span>{a.label}{a.details ? ` · ${a.details}` : ''}</span>
-                          <span className={`pill pill-${a.status === 'accepted' ? 'go' : a.status === 'declined' ? 'off' : 'wait'}`}>{a.status === 'requested' ? 'Requested' : a.status === 'accepted' ? 'Confirmed' : 'Not available'}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </section>
-              )}
-
-              <section className="cp-thread" aria-label="Messages">
-                <h3>Messages</h3>
-                {jobMessages.length === 0
-                  ? <p className="muted">No messages yet. Questions about this project? Ask here and our team will reply by email.</p>
-                  : (
-                    <ol className="cp-messages">
-                      {jobMessages.map(m => (
-                        <li key={m.id} className={m.author === 'team' ? 'from-team' : 'from-you'}>
-                          <b>{m.author === 'team' ? 'Mint 35 team' : 'You'}</b>
-                          <p>{m.body}</p>
-                          <time>{formatDateTime(m.created_at)}</time>
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-                <MessageForm token={token} job={job.id} />
+              {/* What's happening now: the newest thing, with what to do about it. */}
+              <section className={`cp-now${reviewing ? ' cp-now-action' : job.status === 'delivered' ? ' cp-now-done' : ''}`} aria-label="Right now">
+                <p className="cp-now-label">{reviewing ? 'Your turn' : job.status === 'delivered' ? 'Delivered' : 'Right now'}</p>
+                <h3>{reviewing ? `Your ${reviewing} is ready for your review` : job.status === 'delivered' ? 'Your final videos are ready' : customerStatus(job)}</h3>
+                {job.status === 'in_production' && job.due_date && <p className="muted">First cut due <b>{formatDate(job.due_date)}</b>.</p>}
+                {reviewFile && <ul className="cp-files cp-now-files">{fileRow(reviewFile)}</ul>}
+                {reviewing && <Decision token={token} job={job.id} what={reviewing} />}
+                {job.status === 'delivered' && (() => {
+                  // Dated from when the final was shared (the last final file on this job).
+                  const finalAt = jobFiles.filter(f => f.kind === 'final').at(-1)?.created_at
+                  return (
+                    <>
+                      {finals.length > 0 && <ul className="cp-files cp-now-files">{finals.map(fileRow)}</ul>}
+                      <div className="cp-retention">
+                        <p><b>Please download your final videos.</b> They&rsquo;re available here for {FINAL_AVAILABLE_DAYS} days{finalAt ? <>, until <b>{formatDate(addDays(finalAt, FINAL_AVAILABLE_DAYS))}</b></> : ''}.</p>
+                        <p className="muted small">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted {CLIENT_FILE_DAYS} days after you receive all your final files{finalAt ? <>, on {formatDate(addDays(finalAt, CLIENT_FILE_DAYS))}</> : ''}.</p>
+                      </div>
+                    </>
+                  )
+                })()}
+                {lastMsg?.author === 'team' && !reviewing && (
+                  <p className="cp-now-msg"><span className="muted small">Latest from our team · {formatDateTime(lastMsg.created_at)}</span>{lastMsg.body.length > 220 ? lastMsg.body.slice(0, 220) + '…' : lastMsg.body}</p>
+                )}
               </section>
+
+              {/* Everything else: each tile shows the newest item and opens for the full history. */}
+              <div className="cp-tiles">
+                <details className="cp-tile">
+                  <summary>
+                    <span className="cp-tile-head"><b>Videos &amp; files</b>{jobFiles.length > 0 && <span className="cp-count">{jobFiles.length}</span>}</span>
+                    <span className="cp-tile-sum">{newest[0] ? <>{fileLabel(newest[0])} · {formatDate(newest[0].created_at)}</> : `Your ${w}, cuts and final videos will appear here.`}</span>
+                    <span className="cp-tile-more">{jobFiles.length ? 'See all' : 'Open'}</span>
+                  </summary>
+                  <div className="cp-tile-body">
+                    {jobFiles.length ? <ul className="cp-files">{newest.map(fileRow)}</ul> : <p className="muted">Nothing here yet. We&rsquo;ll email you when there&rsquo;s something to see.</p>}
+                  </div>
+                </details>
+
+                <details className="cp-tile">
+                  <summary>
+                    <span className="cp-tile-head"><b>Messages</b>{jobMessages.length > 0 && <span className="cp-count">{jobMessages.length}</span>}</span>
+                    <span className="cp-tile-sum">{lastMsg ? <>{lastMsg.author === 'team' ? 'Mint 35 team' : 'You'}: {lastMsg.body.length > 70 ? lastMsg.body.slice(0, 70) + '…' : lastMsg.body}</> : 'Questions? Message our team here.'}</span>
+                    <span className="cp-tile-more">{jobMessages.length ? 'Open conversation' : 'Write a message'}</span>
+                  </summary>
+                  <div className="cp-tile-body">
+                    {jobMessages.length > 0 && (
+                      <ol className="cp-messages">
+                        {jobMessages.map(m => (
+                          <li key={m.id} className={m.author === 'team' ? 'from-team' : 'from-you'}>
+                            <b>{m.author === 'team' ? 'Mint 35 team' : 'You'}</b>
+                            <p>{m.body}</p>
+                            <time>{formatDateTime(m.created_at)}</time>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                    <MessageForm token={token} job={job.id} />
+                  </div>
+                </details>
+
+                {ADDON_STATUSES.includes(job.status) && (
+                  <details className="cp-tile cp-tile-extras">
+                    <summary>
+                      <span className="cp-tile-head"><b>Extras</b>{jobAddons.length > 0 && <span className="cp-count">{jobAddons.length}</span>}</span>
+                      <span className="cp-tile-sum">Get more from your video: 15-second cutdowns, extra formats and subtitles, from {formatPrice(Math.min(...ADDONS.filter(a => a.price != null).map(a => a.price)))}.</span>
+                      <span className="cp-tile-more">See extras</span>
+                    </summary>
+                    <div className="cp-tile-body">
+                      <p className="muted">Pick an extra and our team will confirm it with you before anything is charged.</p>
+                      <AddonForm token={token} job={job.id} orientation={job.orientation}
+                        addons={ADDONS.map(a => ({key: a.key, label: a.label, desc: a.pitch || a.desc, askOrientation: !!a.askOrientation, price: a.price != null ? formatPrice(a.price) + (a.perVideo ? ' per video' : '') : null}))} />
+                      {jobAddons.length > 0 && (
+                        <ul className="cp-addon-list">
+                          {[...jobAddons].reverse().map(a => (
+                            <li key={a.id}>
+                              <span>{a.label}{a.details ? ` · ${a.details}` : ''}</span>
+                              <span className={`pill pill-${a.status === 'accepted' ? 'go' : a.status === 'declined' ? 'off' : 'wait'}`}>{a.status === 'requested' ? 'Requested' : a.status === 'accepted' ? 'Confirmed' : 'Not available'}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </details>
+                )}
+
+                {canAddFiles(job.status) && (
+                  <details className="cp-tile">
+                    <summary>
+                      <span className="cp-tile-head"><b>Your uploads</b>{jobAdded.length > 0 && <span className="cp-count">{jobAdded.length}</span>}</span>
+                      <span className="cp-tile-sum">{jobAdded.length ? <>Last added: {jobAdded.at(-1).name} · {formatDate(jobAdded.at(-1).created_at)}</> : 'Forgot something? Add photos, videos or a Google Drive / Dropbox link.'}</span>
+                      <span className="cp-tile-more">Add files</span>
+                    </summary>
+                    <div className="cp-tile-body">
+                      <p className="muted">{PRE_PRODUCTION_STATUSES.includes(job.status)
+                        ? 'Send more photos, videos or graphics, or share a Google Drive or Dropbox link.'
+                        : 'Your video is already in production, so we can’t promise new files will be included. You can still send them, or share a Google Drive or Dropbox link.'}</p>
+                      <AddFiles token={token} job={job.id} inProduction={!PRE_PRODUCTION_STATUSES.includes(job.status)} />
+                      {jobAdded.length > 0 && (
+                        <ul className="cp-files">
+                          {[...jobAdded].reverse().map(f => <li key={f.id}><span className="file-kind">Added</span><span>{f.name}</span><span className="muted">{formatDate(f.created_at)}</span></li>)}
+                        </ul>
+                      )}
+                    </div>
+                  </details>
+                )}
+
+                {job.price_cents ? (
+                  <details className="cp-tile">
+                    <summary>
+                      <span className="cp-tile-head"><b>Billing</b></span>
+                      <span className="cp-tile-sum">
+                        <b className="cp-tile-big">{formatMoney(withTax(job, job.price_cents) + addonsTotal)}</b>
+                        {' '}{job.charged_cents ? `· paid ${formatDate(job.charged_at)}` : '· charged when we start your project'}
+                      </span>
+                      <span className="cp-tile-more">See details</span>
+                    </summary>
+                    <div className="cp-tile-body">
+                      <table className="cp-bill">
+                        <tbody>
+                          <tr><th scope="row">{job.package || 'Your project'}</th><td>{formatMoney(job.price_cents)}</td></tr>
+                          {confirmed.map(a => <tr key={a.id}><th scope="row">Extra: {a.label}{a.details ? ` (${a.details})` : ''}</th><td>{formatMoney(a.price_cents)}</td></tr>)}
+                          {taxRate > 0 && <tr><th scope="row">Sales tax</th><td>{formatMoney(withTax(job, job.price_cents) + addonsTotal - job.price_cents - confirmed.reduce((s, a) => s + (a.price_cents || 0), 0))}</td></tr>}
+                          <tr className="cp-bill-total"><th scope="row">Total</th><td>{formatMoney(withTax(job, job.price_cents) + addonsTotal)}</td></tr>
+                        </tbody>
+                      </table>
+                      <ul className="cp-pay">
+                        {job.charged_cents
+                          ? <li>Paid {formatMoney(job.charged_cents)} on {formatDate(job.charged_at)}{job.card_last4 ? ` · ${job.card_brand || 'card'} ending ${job.card_last4}` : ''}</li>
+                          : <li className="muted">{job.card_last4 ? `Your ${job.card_brand || 'card'} ending ${job.card_last4} is charged when we start your project.` : 'Payment is due when we start your project.'}</li>}
+                        {confirmed.filter(a => a.charge_id).map(a => <li key={a.id}>Paid {formatMoney(withTax(job, a.price_cents))} for {a.label} on {formatDate(a.charged_at)}</li>)}
+                      </ul>
+                    </div>
+                  </details>
+                ) : null}
+              </div>
             </article>
           )
         })}

@@ -52,8 +52,11 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - No WhatsApp. Plan: shared admin Inbox fed by a website chat bubble, email (hello@mint35.com) and a customer
   job page thread; AI drafts every reply and learns from approved answers.
 
-- Customer project page `/p/[customer_token]` (no login; token per job, page shows the whole order):
-  progress, files (script/first_cut/final), approve/request changes, messages, add-on requests at any stage (order to delivery; homepage says extras can be added anytime).
+- Customer project page `/p/[customer_token]` (no login; token per job, page shows the whole order). Dashboard per job (owner, Nov 2):
+  progress bar, a "Right now" card (newest item + what to do: review file with Approve/Request changes, finals + retention note when
+  delivered, latest team message), then tiles (<details>, open spans full width): Videos & files (newest first), Messages (thread +
+  form), Extras (tempting `pitch` lines from lib/addons.js), Your uploads (AddFiles), Billing (package, confirmed extras, tax, payments,
+  card). Add-on requests at any stage (order to delivery; homepage says extras can be added anytime).
   Add-on list in `lib/addons.js`: extra format $450/video, 15-sec cutdown $175/video, subtitles $150/video;
   extra revision and rush are custom quotes. Team replies and confirms add-ons from the job page.
   Server actions startAddFiles/finishAddFiles (app/p/[token]/actions.js) hand out signed upload URLs under

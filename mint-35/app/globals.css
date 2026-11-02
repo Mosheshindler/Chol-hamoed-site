@@ -962,3 +962,43 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
   .work-row .work-item { flex: 1 1 100%; }
   .work-row .work-item-tall { flex: 0 1 min(220px, 58%); }
 }
+
+/* Client page dashboard: "Right now" card + tiles that open for the full history */
+.cp-now { display: grid; gap: 10px; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); }
+.cp-now h3 { margin: 0; font-size: 1.25rem; }
+.cp-now p { margin: 0; }
+.cp-now-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+.cp-now-action { border-color: rgba(240,196,106,.55); background: rgba(240,196,106,.07); }
+.cp-now-action .cp-now-label { color: #f0c46a; }
+.cp-now-done { border-color: rgba(136,192,64,.5); background: rgba(136,192,64,.07); }
+.cp-now-done .cp-now-label { color: var(--lime); }
+.cp-now-files { padding: 10px 12px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
+.cp-now-msg { display: grid; gap: 4px; padding: 10px 12px; border-radius: 12px; background: rgba(136,192,64,.08); border: 1px solid rgba(136,192,64,.3); white-space: pre-wrap; overflow-wrap: anywhere; }
+.cp-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; grid-auto-flow: row dense; }
+.cp-tile { border: 1px solid var(--line); border-radius: 14px; background: var(--bg); min-width: 0; }
+.cp-tile[open] { grid-column: 1 / -1; border-color: rgba(136,192,64,.45); }
+.cp-tile summary { list-style: none; cursor: pointer; display: grid; gap: 6px; padding: 14px 16px; }
+.cp-tile summary::-webkit-details-marker { display: none; }
+.cp-tile summary::after { display: none; }
+.cp-tile summary { font-weight: 400; font-size: 1rem; justify-content: initial; align-items: initial; }
+.cp-tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.cp-tile summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; border-radius: 14px; }
+.cp-tile:hover:not([open]) { border-color: rgba(136,192,64,.4); }
+.cp-tile-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cp-tile-head b { font-family: var(--display); font-size: 1.05rem; color: var(--lime); }
+.cp-count { min-width: 24px; padding: 1px 8px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--muted); font-size: .78rem; font-weight: 700; text-align: center; }
+.cp-tile-sum { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere; }
+.cp-tile-big { color: var(--text); font-family: var(--display); font-size: 1.15rem; }
+.cp-tile-more { color: var(--lime); font-weight: 700; font-size: .85rem; }
+.cp-tile-more::after { content: " →"; }
+.cp-tile[open] .cp-tile-more { display: none; }
+.cp-tile-body { display: grid; gap: 12px; padding: 0 16px 16px; }
+.cp-tile-body > p { margin: 0; }
+.cp-tile-extras { border-color: rgba(136,192,64,.35); background: linear-gradient(135deg, rgba(136,192,64,.1), rgba(16,120,56,.06)); }
+.cp-tile-extras .cp-tile-sum { color: var(--text); }
+.cp-bill { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.cp-bill th { text-align: left; font-weight: 400; color: var(--muted); padding: 6px 0; }
+.cp-bill td { text-align: right; padding: 6px 0; font-variant-numeric: tabular-nums; }
+.cp-bill-total th, .cp-bill-total td { color: var(--text); font-weight: 700; border-top: 1px solid var(--line); padding-top: 10px; }
+.cp-pay { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .9rem; }
+@media (max-width: 640px) { .cp-tiles { grid-template-columns: 1fr; } }

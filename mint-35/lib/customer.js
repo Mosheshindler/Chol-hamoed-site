@@ -2,7 +2,7 @@ import 'server-only'
 import {createAdminClient} from './supabase/admin'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const JOB_FIELDS = 'id, number, status, package, price_cents, due_date, name, email, company, promoting, orientation, order_id, order_item, order_size, customer_token, created_at, brief'
+const JOB_FIELDS = 'id, number, status, package, price_cents, due_date, name, email, company, promoting, orientation, order_id, order_item, order_size, customer_token, created_at, brief, charged_cents, charged_at, card_last4, card_brand'
 export const CUSTOMER_FILE_KINDS = ['script', 'sample', 'first_cut', 'final', 'cutdown', 'extra_format']
 
 // Everything a customer may see for the order their private link belongs to.
@@ -21,7 +21,7 @@ export async function loadOrderByToken(token, {withFiles = true} = {}) {
   const [{data: files}, {data: messages}, {data: addons}, {data: added}] = await Promise.all([
     withFiles ? db.from('project_files').select('id, project_id, kind, path, name, size, url, body, created_at').in('project_id', ids).in('kind', CUSTOMER_FILE_KINDS).order('created_at') : {data: []},
     db.from('project_messages').select('id, project_id, author, body, created_at').in('project_id', ids).order('created_at'),
-    db.from('project_addons').select('id, project_id, addon, label, details, price_cents, status, created_at').in('project_id', ids).order('created_at'),
+    db.from('project_addons').select('id, project_id, addon, label, details, price_cents, status, charge_id, charged_at, created_at').in('project_id', ids).order('created_at'),
     db.from('project_files').select('id, project_id, name, created_at').in('project_id', ids).like('path', '%/added/%').order('created_at'),
   ])
 
