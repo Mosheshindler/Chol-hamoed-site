@@ -5,7 +5,7 @@ export {esc, toText}
 
 // Sends mail through Resend's HTTP API (mint35.com is verified there). Without RESEND_API_KEY (local dev)
 // messages are logged instead of sent. mint35.com has no mailbox, so replies go to EMAIL_REPLY_TO
-// (default info@mintmediallc.com) unless a message sets its own replyTo.
+// (default hello@mint35.com) unless a message sets its own replyTo.
 // Every client email is also copied (BCC, so the client doesn't see it) to hello@mint35.com (EMAIL_COPY_TO overrides),
 // so the team can see exactly what clients get (owner, Oct 30). Pass copy: false for internal mail.
 export async function sendEmail({to, subject, html, replyTo, copy = true}) {
@@ -20,7 +20,7 @@ export async function sendEmail({to, subject, html, replyTo, copy = true}) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {Authorization: `Bearer ${key}`, 'Content-Type': 'application/json'},
-    body: JSON.stringify({from, to, subject, html: html + FOOTER_HTML, text: toText(html) + FOOTER_TEXT, reply_to: replyTo || process.env.EMAIL_REPLY_TO || 'info@mintmediallc.com', ...(bcc && {bcc})}),
+    body: JSON.stringify({from, to, subject, html: html + FOOTER_HTML, text: toText(html) + FOOTER_TEXT, reply_to: replyTo || process.env.EMAIL_REPLY_TO || 'hello@mint35.com', ...(bcc && {bcc})}),
   })
   if (res.ok) return {ok: true}
   const detail = (await res.text()).slice(0, 300)

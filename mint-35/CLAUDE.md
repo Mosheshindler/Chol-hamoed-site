@@ -43,7 +43,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   since Oct 29 the card token also carries the order's billing street/city/state when its ZIP matches the card ZIP (AVS).
   Owner is asking Intuit which rate API card-on-file charges qualify for; switching to QuickBooks invoices is the fallback.
 - Email: Resend, mint35.com verified (Oct 12); sent from hello@mint35.com. mint35.com has no mailbox (no MX), so replies go to
-  EMAIL_REPLY_TO (default info@mintmediallc.com).
+  EMAIL_REPLY_TO (set to hello@mint35.com in Vercel; that is also the default). Every public contact (site footer, project page,
+  Terms, Privacy, 404, email footer) shows hello@mint35.com (owner, Nov 2).
   A client flagged the first-cut email as phishing (Oct 26): sendEmail now adds a plain-text copy (toText) and a sender footer
   (Mint Media LLC, phone, email, site) to every email; customer emails show the project page address in plain text and "Questions? Just reply to this email." (owner: no call option there).
   Auth DNS is in place (DKIM resend._domainkey, SPF on send., DMARC p=quarantine). The From/Reply-To domain mismatch and the
