@@ -14,7 +14,7 @@ export default function Footer() {
         </div>
         <div className="footer-col">
           <p className="footer-head">Contact</p>
-          <a href="mailto:info@mintmediallc.com">info@mintmediallc.com</a>
+          <a href="mailto:hello@mint35.com">hello@mint35.com</a>
           <a href="tel:+17328134222">(732) 813-4222</a>
         </div>
       </div>

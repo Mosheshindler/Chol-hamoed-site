@@ -60,7 +60,7 @@ export default function TermsPage() {
       <p>These Terms are governed by the laws of the State of New Jersey. Any dispute will be handled in the state or federal courts located in New Jersey.</p>
 
       <h2>16. Changes and contact</h2>
-      <p>We may update these Terms. The version in effect when you place an order applies to that order. Questions: <a href="mailto:info@mintmediallc.com">info@mintmediallc.com</a> or <a href="tel:+17328134222">(732) 813-4222</a>.</p>
+      <p>We may update these Terms. The version in effect when you place an order applies to that order. Questions: <a href="mailto:hello@mint35.com">hello@mint35.com</a> or <a href="tel:+17328134222">(732) 813-4222</a>.</p>
     </LegalPage>
   )
 }

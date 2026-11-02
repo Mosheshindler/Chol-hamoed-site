@@ -165,7 +165,7 @@ export default async function CustomerPage({params}) {
       </main>
 
       <footer className="cp-foot container">
-        Questions? Email <a href="mailto:info@mintmediallc.com">info@mintmediallc.com</a> or call (732) 813-4222.
+        Questions? Email <a href="mailto:hello@mint35.com">hello@mint35.com</a> or call (732) 813-4222.
       </footer>
     </div>
   )
