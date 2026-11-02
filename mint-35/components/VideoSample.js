@@ -10,7 +10,7 @@ export default function VideoSample({id, title, kind, vertical}) {
   const [playing, setPlaying] = useState(false)
   const [loaded, setLoaded] = useState(false)
   return (
-    <figure className="work-item">
+    <figure className={`work-item${vertical ? ' work-item-tall' : ''}`} style={{'--ar': vertical ? 9 / 16 : 16 / 9}}>
       <div className={`work-frame${vertical ? ' work-frame-vertical' : ''}`}>
         {playing && (
           <iframe

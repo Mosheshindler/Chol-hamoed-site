@@ -5,9 +5,15 @@ import Yes from '@/components/Yes'
 import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
 
-// Wide (16:9) samples in the main grid; Shorts (9:16) in a row of their own below.
-const WIDE = SAMPLES.filter(s => !s.vertical)
-const TALL = SAMPLES.filter(s => s.vertical)
+// Samples sit in even rows: every video in a row is the same height, wide (16:9) and Shorts (9:16) side by side.
+// A row holds up to about four wide videos' worth of width.
+const ratio = s => (s.vertical ? 9 / 16 : 16 / 9)
+const SAMPLE_ROWS = SAMPLES.reduce((rows, s) => {
+  const row = rows.at(-1)
+  if (row && row.reduce((w, x) => w + ratio(x), 0) + ratio(s) <= 4.2) row.push(s)
+  else rows.push([s])
+  return rows
+}, [])
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
 import HowItWorks from '@/components/HowItWorks'
@@ -87,14 +93,13 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">Work</p>
             <h2>See what&rsquo;s possible.</h2>
-            <div className={`work-grid${WIDE.length > 2 ? ' work-grid-3' : ''}`}>
-              {WIDE.map(v => <VideoSample key={v.id} {...v} />)}
+            <div className="work-rows">
+              {SAMPLE_ROWS.map((row, n) => (
+                <div key={n} className="work-row">
+                  {row.map(v => <VideoSample key={v.id} {...v} />)}
+                </div>
+              ))}
             </div>
-            {TALL.length > 0 && (
-              <div className="work-grid-vertical">
-                {TALL.map(v => <VideoSample key={v.id} {...v} />)}
-              </div>
-            )}
           </div>
         </section>
 

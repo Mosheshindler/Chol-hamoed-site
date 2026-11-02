@@ -182,7 +182,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   (subject notes the stage when late).
 
 ## Planned (owner asked)
-- Homepage samples live in lib/samples.js; Shorts take `vertical: true` (own row, 9:16, YouTube oardefault cover). Owner is sending more
+- Homepage samples live in lib/samples.js; Shorts take `vertical: true` (9:16, YouTube oardefault cover). Rows are even-height (flex share =
+  aspect ratio, up to ~4.2 wide-video widths per row; app/page.js SAMPLE_ROWS); on phones wide ones stack and Shorts center. Owner is sending more
   (Nov 2: added Agudah Go Vote). Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).
 - Twilio texting / WhatsApp alerts (after launch): the form's alert choice is hidden and sends 'email'; restore it
