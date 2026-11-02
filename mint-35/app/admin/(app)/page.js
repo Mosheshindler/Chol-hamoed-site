@@ -20,7 +20,7 @@ export default async function JobsPage({searchParams}) {
   const view = VIEWS[v] ? v : 'us'
   const supabase = await createClient()
   const [{data: projects}, {data: team}, {data: recentMsgs}, {data: openAddons}] = await Promise.all([
-    supabase.from('projects').select('id, number, status, name, company, package, price_cents, assigned_to, due_date, created_at, order_item, order_size').order('created_at', {ascending: false}).limit(500),
+    supabase.from('projects').select('id, number, status, name, company, package, price_cents, assigned_to, due_date, created_at, order_item, order_size, brief').order('created_at', {ascending: false}).limit(500),
     supabase.from('team_members').select('id, name'),
     supabase.from('project_messages').select('project_id, author, created_at').order('created_at', {ascending: false}).limit(1000),
     supabase.from('project_addons').select('project_id').eq('status', 'requested'),
@@ -83,7 +83,7 @@ export default async function JobsPage({searchParams}) {
               <Link key={p.id} href={`/admin/projects/${p.id}`} className="job-row" role="row">
                 <span className="mono" role="cell">{projectRef(p.number)}{p.order_size > 1 && <small className="order-tag">{p.order_item}/{p.order_size} in order</small>}</span>
                 <span role="cell"><b>{p.company || p.name}</b>{p.company && <small>{p.name}</small>}</span>
-                <span role="cell"><StatusPill status={p.status} pkg={p.package} />{lastAuthor[p.id] === 'customer' && <small className="flag">New message</small>}{addonCount[p.id] > 0 && <small className="flag">Add-on request</small>}</span>
+                <span role="cell"><StatusPill status={p.status} job={p} />{lastAuthor[p.id] === 'customer' && <small className="flag">New message</small>}{addonCount[p.id] > 0 && <small className="flag">Add-on request</small>}</span>
                 <span role="cell" data-label="Package">{p.package || '—'}</span>
                 <span role="cell" className="num" data-label="Price">{formatMoney(p.price_cents)}</span>
                 <span role="cell" data-label="Assigned">{names[p.assigned_to] || <i className="muted">Unassigned</i>}</span>

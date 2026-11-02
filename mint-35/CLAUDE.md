@@ -118,8 +118,14 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Blocks fade up as they scroll in (`components/ScrollReveal.js`, homepage only, off for reduced motion); the site check scrolls
   through before its full-page shot.
 - Scope wording (owner, Oct 21): Single 35 and Campaign 3 list "Script approval" (Campaign 3: one per video); Momentum Pack:
-  1 sample video to approve, "1 revision round on the first video" (the other 3 follow the approved look; matches Terms §4).
-  Customer word is "video format" (not orientation/export). Admin labels say "sample video" for Momentum (`forPackage` in lib/status.js).
+  "Script and 1 sample video to approve first", "1 revision round on the first video" (the other 3 follow the approved look; matches Terms §4).
+  Customer word is "video format" (not orientation/export).
+- Momentum two-step approval (owner, Nov 2; migration 20261102000000_sample_files.sql adds file kind `sample`): new Momentum jobs get
+  brief.review_stage 'script' at order; both steps run in_progress -> script_sent. Approving the script (client or admin "Mark script
+  approved") goes back to in_progress with review_stage 'sample'; approving the sample goes to in_production. Progress has "Skip the
+  script for this job" (skipScriptStep). Helpers in lib/status.js: reviewStage(job), reviewKind(job) ('sample' file kind at the
+  sample step), scriptWord(job), forPackage(label, job); pass the job, not just the package. Momentum jobs ordered before Nov 2 have no
+  review_stage and keep the old flow (sample video only, shared as kind 'script') unless the team clicks "Add a script step" (addScriptStep).
 
 - Team sign-in (Oct 21): owner adds a teammate with name + email only; they get an invite email (Resend, `lib/passwordLink.js`)
   with a one-time link to /admin/set-password. Login has "Forgot password?" (/admin/forgot). Links come from
@@ -176,7 +182,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   (subject notes the stage when late).
 
 ## Planned (owner asked)
-- Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
+- Homepage samples live in lib/samples.js; Shorts take `vertical: true` (9:16, YouTube oardefault cover). Rows are even-height (flex share =
+  aspect ratio, up to ~4.2 wide-video widths per row; app/page.js SAMPLE_ROWS); on phones wide ones stack and Shorts center. Owner is sending more
+  (Nov 2: added Agudah Go Vote). Style samples still missing for "My own photos and videos only" and "Animated graphics & text" (owner will send);
   add the YouTube id as `sample` in STYLES (`lib/intake.js`).
 - Twilio texting / WhatsApp alerts (after launch): the form's alert choice is hidden and sends 'email'; restore it
   in ProjectForm step 1, then send alerts per `alert_channel` at each job step. Add SMS wording back to /terms and /privacy.

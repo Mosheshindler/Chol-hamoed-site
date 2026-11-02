@@ -319,3 +319,4 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .email-editor input, .email-editor textarea { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--text); padding: 10px 12px; font: inherit; font-weight: 400; }
 .email-editor input:focus, .email-editor textarea:focus { outline: none; border-color: var(--lime); box-shadow: 0 0 0 3px rgba(136,192,64,.15); }
 .email-reset { justify-self: start; font-size: .85rem; }
+.skip-script { margin: 0 0 8px; }

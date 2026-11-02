@@ -949,3 +949,16 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 @media (max-width: 560px) { .too-big .modal-body { padding: 26px 18px; } }
 .cp-retention { margin: 14px 0 0; padding: 12px 14px; border: 1px solid rgba(136,192,64,.35); border-radius: 12px; background: rgba(136,192,64,.06); display: grid; gap: 4px; }
 .cp-retention p { margin: 0; }
+
+/* Work samples: even rows. Each item's flex share is its aspect ratio, so every video in a row is the same height. */
+.work-rows { display: grid; gap: 28px; margin-top: 28px; }
+.work-row { display: flex; gap: 20px; align-items: flex-start; }
+.work-row .work-item { flex: var(--ar) 1 0; min-width: 0; }
+.work-frame-vertical { aspect-ratio: 9 / 16; }
+.work-item-tall figcaption { display: grid; gap: 2px; }
+.work-item-tall figcaption span { font-size: .82rem; white-space: nowrap; }
+@media (max-width: 720px) {
+  .work-row { flex-wrap: wrap; justify-content: center; gap: 24px 16px; }
+  .work-row .work-item { flex: 1 1 100%; }
+  .work-row .work-item-tall { flex: 0 1 min(220px, 58%); }
+}

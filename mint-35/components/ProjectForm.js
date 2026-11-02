@@ -905,7 +905,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <ul className="ticks">
             <li>Double-check names, prices, dates and phone numbers.</li>
             {lines.some(l => !l.pkg.orgOnly) && <li>Each video includes one approval step and one revision round.</li>}
-            {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes one sample video to approve and one revision round on the first video. The other 3 follow the approved look.</li>}
+            {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes a script and one sample video to approve, and one revision round on the first video. The other 3 follow the approved look.</li>}
             <li>Your card is saved now and charged in full when we start your project. Cancel free anytime before then.</li>
           </ul>
         </div>

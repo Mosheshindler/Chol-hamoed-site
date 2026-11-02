@@ -8,7 +8,7 @@ export const CLIENT_FILE_DAYS = 7
 export const CLIENT_FILE_KINDS = ['logo', 'brand_image', 'brand_material', 'design_file', 'media', 'reference']
 export const FINAL_AVAILABLE_DAYS = 60
 export const FINAL_DELETE_DAYS = 90
-export const DELIVERABLE_KINDS = ['script', 'first_cut', 'final', 'cutdown', 'extra_format']
+export const DELIVERABLE_KINDS = ['script', 'sample', 'first_cut', 'final', 'cutdown', 'extra_format']
 
 // The clock starts when the final is shared (the job's move to Delivered). Jobs delivered before retention
 // went live (e.g. Agudah) count from this date instead, so nothing is removed sooner than promised.

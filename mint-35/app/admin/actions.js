@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation'
 import {revalidatePath} from 'next/cache'
 import {createClient} from '@/lib/supabase/server'
 import {createAdminClient} from '@/lib/supabase/admin'
-import {TRANSITIONS, STATUSES, projectRef, formatMoney, forPackage} from '@/lib/status'
+import {TRANSITIONS, STATUSES, projectRef, formatMoney, forPackage, scriptWord, reviewStage, reviewKind} from '@/lib/status'
 import {addBusinessDays, LEAD_BUSINESS_DAYS} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
@@ -67,6 +67,12 @@ export async function moveStatus(formData) {
   const event = {from: p.status, to}
   // A card saved at checkout skips "Waiting for card".
   if (to === 'quoted' && p.qb_card_id) patch.status = event.to = 'card_saved'
+  // Momentum: approving the script leads to the sample video step, not straight to production.
+  if (p.status === 'script_sent' && to === 'in_production' && p.package === 'Momentum Pack' && reviewStage(p) === 'script') {
+    patch.status = event.to = 'in_progress'
+    patch.brief = {...p.brief, review_stage: 'sample'}
+    event.review = 'script approved'
+  }
 
   if (step.needs === 'price') {
     const dollars = Number(String(formData.get('price') || '').replace(/[$,\s]/g, ''))
@@ -92,10 +98,10 @@ export async function moveStatus(formData) {
     }
   }
   // Sending the script, first cut or final needs something shared first, or the client's page would be empty.
-  const deliver = {script_sent: 'script', first_cut_sent: 'first_cut', delivered: 'final'}[to]
+  const deliver = {script_sent: reviewKind(p), first_cut_sent: 'first_cut', delivered: 'final'}[to]
   if (deliver) {
     const {data: have} = await supabase.from('project_files').select('id').eq('project_id', id).eq('kind', deliver).limit(1)
-    if (!have?.length) return {error: `Share the ${deliver === 'first_cut' ? 'first cut' : deliver === 'final' ? 'final video' : forPackage('script', p.package)} first (add a link or upload the file and press Share), then send.`}
+    if (!have?.length) return {error: `Share the ${deliver === 'first_cut' ? 'first cut' : deliver === 'final' ? 'final video' : scriptWord(p)} first (add a link or upload the file and press Share), then send.`}
   }
   if (to === 'in_production') {
     patch.due_date = addBusinessDays(new Date(), LEAD_BUSINESS_DAYS, upcomingClosedDays())
@@ -118,6 +124,30 @@ export async function moveStatus(formData) {
   revalidatePath('/admin/projects/[id]', 'layout')
   revalidatePath('/admin')
   return {ok: true, label: STATUSES[patch.status].label, warning}
+}
+
+// Momentum jobs ordered before Nov 2 approve only a sample video; this adds the script step to one of them.
+export async function addScriptStep(formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const {data: p} = await supabase.from('projects').select('id, status, package, brief').eq('id', id).single()
+  if (!p || p.package !== 'Momentum Pack' || p.brief?.review_stage || !['quoted', 'card_saved', 'in_progress'].includes(p.status)) return {error: 'That step isn’t available any more. Refresh the page.'}
+  await supabase.from('projects').update({brief: {...p.brief, review_stage: 'script'}}).eq('id', id)
+  await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'note', data: {text: 'Added a script step before the sample video.'}})
+  revalidatePath('/admin/projects/[id]', 'layout')
+  return {ok: true}
+}
+
+// Momentum: skip the script and go straight to the sample video (for jobs that don't need a script).
+export async function skipScriptStep(formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const {data: p} = await supabase.from('projects').select('id, status, package, brief').eq('id', id).single()
+  if (!p || p.package !== 'Momentum Pack' || reviewStage(p) !== 'script' || p.status === 'script_sent') return {error: 'That step isn’t available any more. Refresh the page.'}
+  await supabase.from('projects').update({brief: {...p.brief, review_stage: 'sample'}}).eq('id', id)
+  await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'note', data: {text: 'Skipped the script step; going straight to the sample video.'}})
+  revalidatePath('/admin/projects/[id]', 'layout')
+  return {ok: true}
 }
 
 // The subject and message the team edited in an email preview (blank = the standard wording).
@@ -196,7 +226,7 @@ export async function recordFile({projectId, path, name, size, kind}) {
 // A deliverable shared as a link (Google Doc, Drive…) or as pasted text, with no file in storage.
 export async function recordShared({projectId, kind, url, body, label}) {
   const {supabase, me} = await requireMember()
-  if (!['script', 'first_cut', 'final', 'cutdown', 'extra_format', 'other'].includes(kind)) return {error: 'Choose what this is.'}
+  if (!['script', 'sample', 'first_cut', 'final', 'cutdown', 'extra_format', 'other'].includes(kind)) return {error: 'Choose what this is.'}
   let name
   if (url != null) {
     url = String(url).trim()

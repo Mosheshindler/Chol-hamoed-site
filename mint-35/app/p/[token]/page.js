@@ -12,10 +12,10 @@ import {Decision, MessageForm, AddonForm, AddFiles} from './CustomerForms'
 export const metadata = {title: 'Your project · Mint 35', robots: {index: false, follow: false}}
 export const dynamic = 'force-dynamic'
 
-const KIND = {script: 'Script', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format'}
+const KIND = {script: 'Script', sample: 'Sample video', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format'}
 // What a shared link opens, in plain words.
 const OPEN = {first_cut: 'Watch the first cut', final: 'Open your final video', cutdown: 'Open the 15-second cutdown'}
-const openLabel = (f, w) => f.kind === 'script' ? (w !== 'script' ? 'Watch the sample video' : f.name === 'Google Doc' ? 'Open the Google Doc' : 'Open the script')
+const openLabel = (f, legacySample) => f.kind === 'sample' || (f.kind === 'script' && legacySample) ? 'Watch the sample video' : f.kind === 'script' ? (f.name === 'Google Doc' ? 'Open the Google Doc' : 'Open the script')
   : f.kind === 'extra_format' ? `Open the ${f.name} version` : OPEN[f.kind] || `Open ${f.name}`
 
 export default async function CustomerPage({params}) {
@@ -52,7 +52,9 @@ export default async function CustomerPage({params}) {
           const jobAddons = addons.filter(a => a.project_id === job.id)
           const jobAdded = added.filter(f => f.project_id === job.id)
           const closed = !(job.status in STATUSES) || ['declined', 'cancelled'].includes(job.status)
-          const w = scriptWord(job.package)
+          const w = scriptWord(job)
+          // Momentum jobs ordered before Nov 2 shared their sample video as kind 'script'.
+          const legacySample = job.package === 'Momentum Pack' && !job.brief?.review_stage
           const reviewing = job.status === 'script_sent' ? w : job.status === 'first_cut_sent' ? 'first cut' : null
 
           return (
@@ -85,11 +87,11 @@ export default async function CustomerPage({params}) {
                 <ul className="cp-files">
                   {jobFiles.map(f => (
                     <li key={f.id} className={f.body ? 'cp-file-text' : undefined}>
-                      <span className="file-kind">{f.kind === 'script' && w !== 'script' ? 'Sample video' : KIND[f.kind]}</span>
+                      <span className="file-kind">{f.kind === 'script' && legacySample ? 'Sample video' : KIND[f.kind]}</span>
                       {f.body
                         ? <span className="cp-text-label">Read it below</span>
                         : f.shared
-                          ? <a href={f.url} target="_blank" rel="noopener noreferrer">{openLabel(f, w)} →</a>
+                          ? <a href={f.url} target="_blank" rel="noopener noreferrer">{openLabel(f, legacySample)} →</a>
                           : <a href={f.url} download>{f.name}</a>}
                       <span className="muted">{formatDate(f.created_at)}</span>
                       {f.body && <div className="cp-text">{f.body}</div>}
