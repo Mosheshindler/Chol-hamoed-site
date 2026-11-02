@@ -6,7 +6,7 @@ import {projectRef} from '@/lib/status'
 import {paymentsReady, saveCardFromToken} from '@/lib/qb'
 import {verifyHuman} from '@/lib/turnstile'
 import {DISCLAIMER_VERSION} from '@/lib/disclaimer'
-import {earliestDelivery, isClosedDay} from '@/lib/dates'
+import {earliestDelivery, isClosedDay, FINAL_LEAD_BUSINESS_DAYS} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {findDiscount, claimDiscount} from '@/lib/discountCodes'
 import {discountLines, describeDiscount} from '@/lib/discounts'
@@ -114,7 +114,7 @@ export async function POST(request) {
       })
       if (!brief.campaign_link || !brief.goal || !brief.launch_at) return bad(`Please fill in every required question${which}.`)
       const launch = brief.launch_at.slice(0, 10)
-      if (!isDate(launch) || launch < earliest) return bad(`The launch date${which} needs to be at least 6 business days out, so all 5 videos are ready in time.`)
+      if (!isDate(launch) || launch < earliest) return bad(`The launch date${which} needs to be at least ${FINAL_LEAD_BUSINESS_DAYS} business days out, so all 4 videos are ready in time.`)
       row.latest_date = launch
     } else {
       Object.assign(row, {
@@ -136,7 +136,7 @@ export async function POST(request) {
       if (!row.audience || !row.key_message) return bad(`Please fill in every required question${which}.`)
       if (!row.latest_date) return bad(`Please add the latest date you need the video in hand${which}.`)
       for (const d of [row.ideal_date, row.latest_date].filter(Boolean)) {
-        if (d < earliest) return bad(`Please pick dates at least 6 business days out${which} (orders after 5pm ET count from the next business day).`)
+        if (d < earliest) return bad(`Please pick dates at least ${FINAL_LEAD_BUSINESS_DAYS} business days out${which} (orders after 5pm ET count from the next business day).`)
         if (isClosedDay(d, closed)) return bad(`Please pick dates on business days (not weekends or holidays)${which}.`)
       }
       if (row.ideal_date && row.ideal_date > row.latest_date) return bad(`The ideal date can’t be after the latest date${which}.`)

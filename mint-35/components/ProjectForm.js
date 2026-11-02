@@ -701,7 +701,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         return (
           <fieldset key={l.id} className="wizard-step" data-step={n} hidden={step !== n}>
             <p className="step-intro">
-              {momentum ? 'Tell us about your fundraising campaign. All 5 milestone videos will be ready before launch.' : multi ? `Now tell us about your campaign. These answers apply to all ${multi} videos.` : 'Now tell us about the video you’re ordering.'}
+              {momentum ? 'Tell us about your fundraising campaign. All 4 milestone videos will be ready before launch.' : multi ? `Now tell us about your campaign. These answers apply to all ${multi} videos.` : 'Now tell us about the video you’re ordering.'}
             </p>
 
             {momentum ? (
@@ -715,7 +715,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 </div>
                 <label>Launch date and time
                   <input type="datetime-local" name={p('launch_at')} min={minDate ? `${minDate}T00:00` : undefined} required />
-                  {minDate && <span className="hint">Earliest launch: {formatDate(minDate)}, so all 5 videos are ready in time.</span>}
+                  {minDate && <span className="hint">Earliest launch: {formatDate(minDate)}, so all 4 videos are ready in time.</span>}
                 </label>
 
                 <h3 className="q-group">The message</h3>
@@ -757,11 +757,11 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             <h3 className="q-group">The look and sound</h3>
             <UploadCard name={p('media')} icon="image" multiple accept="image/*,video/*,.pdf,.ai,.eps,.psd" linkName={p('media_links')}
               title={momentum ? 'Campaign graphics, photos & videos' : 'Photos, videos & graphics to use'}
-              hint={momentum ? 'Campaign logo, artwork, flyers, footage. Different photos for each video? Number the files 1–5.' : 'Product photos, footage, its own logo, artwork. Need your product to look exact? Upload real photos or video of it.'}
+              hint={momentum ? 'Campaign logo, artwork, flyers, footage. Different photos for each video? Number the files 1–4.' : 'Product photos, footage, its own logo, artwork. Need your product to look exact? Upload real photos or video of it.'}
               required={!!watch.override && !w.mediaLinks} optional={!watch.override}>
               <span className="upload-warn">⚠️ Anything you upload here may appear in your video.</span>
             </UploadCard>
-            <Orientation name={p('orientation')} label={momentum ? 'Video format (one for all 5 videos)' : multi ? `Video format (one for all ${multi} videos)` : 'Video format'} pkg={l.pkg} chosen={watch.items?.[i]?.orientation} />
+            <Orientation name={p('orientation')} label={momentum ? 'Video format (one for all 4 videos)' : multi ? `Video format (one for all ${multi} videos)` : 'Video format'} pkg={l.pkg} chosen={watch.items?.[i]?.orientation} />
             <fieldset>
               <legend>What style do you want? <Tip>This sets the overall look. Not sure? Let us pick what fits your message best.</Tip></legend>
               <Choices name={p('style')} options={STYLES} onSample={setSample} />
@@ -803,7 +803,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
                 </label>
               </div>
             )}
-            {!momentum && minDate && <p className="hint">Earliest: {formatDate(minDate)}. Your first cut takes 3 business days once production starts; with your revision round, allow about 6 business days for the final. Weekends and holidays aren’t counted, and orders after 5pm ET count from the next business day.</p>}
+            {!momentum && minDate && <p className="hint">Earliest: {formatDate(minDate)}. Your first cut takes 5 business days once production starts; with your revision round, allow about 8 business days for the final. Weekends and holidays aren’t counted, and orders after 5pm ET count from the next business day.</p>}
             <Nav n={n} />
           </fieldset>
         )
@@ -905,7 +905,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <ul className="ticks">
             <li>Double-check names, prices, dates and phone numbers.</li>
             {lines.some(l => !l.pkg.orgOnly) && <li>Each video includes one approval step and one revision round.</li>}
-            {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes one sample video to approve and one revision round on the first video. The other 4 follow the approved look.</li>}
+            {lines.some(l => l.pkg.orgOnly) && <li>The Momentum Pack includes one sample video to approve and one revision round on the first video. The other 3 follow the approved look.</li>}
             <li>Your card is saved now and charged in full when we start your project. Cancel free anytime before then.</li>
           </ul>
         </div>

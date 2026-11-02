@@ -5,7 +5,7 @@ import {revalidatePath} from 'next/cache'
 import {createClient} from '@/lib/supabase/server'
 import {createAdminClient} from '@/lib/supabase/admin'
 import {TRANSITIONS, STATUSES, projectRef, formatMoney, forPackage} from '@/lib/status'
-import {addBusinessDays} from '@/lib/dates'
+import {addBusinessDays, LEAD_BUSINESS_DAYS} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
 import {siteOrigin, customerLink} from '@/lib/site'
@@ -98,7 +98,7 @@ export async function moveStatus(formData) {
     if (!have?.length) return {error: `Share the ${deliver === 'first_cut' ? 'first cut' : deliver === 'final' ? 'final video' : forPackage('script', p.package)} first (add a link or upload the file and press Share), then send.`}
   }
   if (to === 'in_production') {
-    patch.due_date = addBusinessDays(new Date(), 3, upcomingClosedDays())
+    patch.due_date = addBusinessDays(new Date(), LEAD_BUSINESS_DAYS, upcomingClosedDays())
     event.due_date = patch.due_date
   }
 

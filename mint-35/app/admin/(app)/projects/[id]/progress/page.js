@@ -35,7 +35,7 @@ export default async function Progress({params}) {
         const teamOnly = mine.filter(f => f.kind === 'other')
         const finalBy = neededBy(j)
         const dates = [
-          {label: 'First cut by', date: j.due_date, empty: 'Set when production starts (3 business days)', live: at <= 4},
+          {label: 'First cut by', date: j.due_date, empty: 'Set when production starts (5 business days)', live: at <= 4},
           {label: j.brief?.launch_at ? 'Final by (launch)' : 'Final by', date: finalBy, empty: 'Not set', live: at < 6},
         ]
         const sendLabels = {quoted: 'Accept & email client', script_sent: `Send ${w} to client`, first_cut_sent: 'Send first cut to client', delivered: 'Send final to client'}

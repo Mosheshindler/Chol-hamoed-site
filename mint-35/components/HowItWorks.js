@@ -10,7 +10,7 @@ const icon = {
 const STEPS = [
   {icon: 'form', title: 'Tell us.', text: 'One short form: what it’s for, who it’s for, your logo and images.'},
   {icon: 'approve', title: 'Approve the direction.', text: 'We send a script or a sample video. You sign off.'},
-  {icon: 'produce', title: 'We make it.', text: 'AI production with a Mint Media finish. First cut in 3 business days.*'},
+  {icon: 'produce', title: 'We make it.', text: 'AI production with a Mint Media finish. First cut in 5 business days.*'},
   {icon: 'notes', title: 'Send your notes.', text: 'Watch the first cut and send one round of notes.'},
   {icon: 'deliver', title: 'Get your final.', text: 'We make your revisions and deliver your finished video, ready to post.'},
 ]
@@ -30,7 +30,7 @@ export default function HowItWorks() {
           </li>
         ))}
       </ol>
-      <p id="how-note" className="how-note">*First cut in 3 business days, counted from when your order enters production, not including weekends and holidays.</p>
+      <p id="how-note" className="how-note">*First cut in 5 business days, counted from when your order enters production, not including weekends and holidays.</p>
     </>
   )
 }

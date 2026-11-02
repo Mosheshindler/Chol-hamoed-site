@@ -30,7 +30,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Hidden from search until `NEXT_PUBLIC_ALLOW_INDEXING=true`.
 
 ## Decisions so far
-- Packages and prices live in `lib/packages.js` (Single 35 $2,800, Campaign 3 $7,200, Momentum Pack $3,800 [slug online-campaign];
+- Packages and prices live in `lib/packages.js` (Single 35 $2,800, Campaign 3 $7,200, Momentum Pack $3,800 [slug online-campaign; 4 videos since Nov 2: Live, 50%, 75%, We made it! (was 5)];
   Momentum Pack is for online fundraisers (organizations), org name required).
 - Orders: visitors add packages (repeats allowed) to a browser-side cart, then fill one form: contact + brand
   once, a brief per package. Each package becomes its own job sharing `order_id`.
@@ -75,7 +75,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Business days skip weekends and closed holidays (`lib/holidays.js`, via @hebcal/core, diaspora): Yom Tov,
   all Chol Hamoed (incl. Hoshana Raba), Purim, Tisha B'Av, plus New Year's, Memorial Day, July 4, Labor Day,
   Thanksgiving, Christmas. Erev Yom Tov (RH, YK, Sukkot, Pesach, Shavuot) is closed; Chanukah, other fasts and other US holidays are working days. Orders at/after 5pm ET count
-  from the next business day; earliest in-hand date = 6 business days after that (`earliestDelivery`, FINAL_LEAD_BUSINESS_DAYS in lib/dates.js; first cut is 3).
+  from the next business day; earliest in-hand date = 8 business days after that (`earliestDelivery`, FINAL_LEAD_BUSINESS_DAYS in lib/dates.js; first cut is 5, LEAD_BUSINESS_DAYS; owner changed from 3/6 on Nov 2).
 
 - Order form v2 (`components/ProjectForm.js`): steps 1 You, 2 Your brand, 3 one page per video (classic vs
   Momentum Pack questions), 4 Review & pay. Option lists in `lib/intake.js`. One point of contact (name,
@@ -112,12 +112,12 @@ separate from the Mint Media video site at the repo root (don't touch root files
 
 - Homepage order (owner, Oct 20): hero, Work ("See what's possible", style captions), Why Mint 35 (3 icon benefits +
   "Perfect for" chips), Powered by Mint Media (real logo + link), How it works, What's included ("Fixed scope. Focused results."),
-  Packages (+ formats box, "First cut in 3 business days once production starts. Final video in about 6."), FAQ (incl. "What counts as a revision?"), final CTA repeats "Powerful video. Simplified." Mint 35 vs Mint Media stays a pop-up
+  Packages (+ formats box, "First cut in 5 business days once production starts. Final video in about 8."), FAQ (incl. "What counts as a revision?"), final CTA repeats "Powerful video. Simplified." Mint 35 vs Mint Media stays a pop-up
   (CompareModal), opened from How it works, What's included and Packages. Footer: Mint 35 logo + real Mint Media logo.
   Blocks fade up as they scroll in (`components/ScrollReveal.js`, homepage only, off for reduced motion); the site check scrolls
   through before its full-page shot.
 - Scope wording (owner, Oct 21): Single 35 and Campaign 3 list "Script approval" (Campaign 3: one per video); Momentum Pack:
-  1 sample video to approve, "1 revision round on the first video" (the other 4 follow the approved look; matches Terms §4).
+  1 sample video to approve, "1 revision round on the first video" (the other 3 follow the approved look; matches Terms §4).
   Customer word is "video format" (not orientation/export). Admin labels say "sample video" for Momentum (`forPackage` in lib/status.js).
 
 - Team sign-in (Oct 21): owner adds a teammate with name + email only; they get an invite email (Resend, `lib/passwordLink.js`)

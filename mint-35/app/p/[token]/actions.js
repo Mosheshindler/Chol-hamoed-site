@@ -2,7 +2,7 @@
 
 import {revalidatePath} from 'next/cache'
 import {loadOrderByToken} from '@/lib/customer'
-import {addBusinessDays} from '@/lib/dates'
+import {addBusinessDays, LEAD_BUSINESS_DAYS} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {addonByKey, ADDON_STATUSES} from '@/lib/addons'
 import {randomBytes} from 'node:crypto'
@@ -49,7 +49,7 @@ export async function customerDecision(formData) {
   if (decision === 'changes' && !notes) return {error: 'Tell us what you’d like changed.'}
 
   const patch = {status: to}
-  if (to === 'in_production') patch.due_date = addBusinessDays(new Date(), 3, upcomingClosedDays())
+  if (to === 'in_production') patch.due_date = addBusinessDays(new Date(), LEAD_BUSINESS_DAYS, upcomingClosedDays())
   const {data: updated, error} = await order.db.from('projects').update(patch).eq('id', job.id).eq('status', job.status).select('id')
   if (error || !updated?.length) return {error: 'Something changed while you were here. Refresh the page and try again.'}
 
