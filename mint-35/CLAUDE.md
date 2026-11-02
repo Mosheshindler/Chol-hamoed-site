@@ -46,7 +46,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
   EMAIL_REPLY_TO (set to hello@mint35.com in Vercel; that is also the default). Every public contact (site footer, project page,
   Terms, Privacy, 404, email footer) shows hello@mint35.com (owner, Nov 2).
   A client flagged the first-cut email as phishing (Oct 26): sendEmail now adds a plain-text copy (toText) and a sender footer
-  (Mint Media LLC, phone, email, site) to every email; customer emails show the project page address in plain text and "Questions? Just reply to this email." (owner: no call option there).
+  (Mint Media LLC, email, site; owner removed the phone Nov 2) to every email; customer emails show the project page address in plain text and "Questions? Just reply to this email." (owner: no call option there).
   Auth DNS is in place (DKIM resend._domainkey, SPF on send., DMARC p=quarantine). The From/Reply-To domain mismatch and the
   new domain's lack of reputation remain; owner-side fixes: turn off Resend click/open tracking, and ideally give mint35.com a mailbox.
 - No WhatsApp. Plan: shared admin Inbox fed by a website chat bubble, email (hello@mint35.com) and a customer
