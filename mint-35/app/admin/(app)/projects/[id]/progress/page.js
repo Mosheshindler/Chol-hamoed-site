@@ -1,10 +1,11 @@
-import {STATUSES, TRANSITIONS, projectRef, forPackage, scriptWord} from '@/lib/status'
+import {STATUSES, TRANSITIONS, projectRef, forPackage, scriptWord, reviewStage, reviewKind} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {customerNotice} from '@/lib/notices'
 import {withTax} from '@/lib/tax'
 import StatusPill from '../../../StatusPill'
 import StatusActions from '../StatusActions'
 import ResendEmail from '../ResendEmail'
+import SkipScript from '../SkipScript'
 import {MESSAGE_SLOT} from '@/lib/emailParts'
 import UpdateForm from '../UpdateForm'
 import FileUpload from '../FileUpload'
@@ -21,14 +22,17 @@ export default async function Progress({params}) {
   return (
     <div className="stack">
       {jobs.map(j => {
-        const w = scriptWord(j.package)
+        const w = scriptWord(j)
+        // Momentum jobs since Nov 2 approve a script, then a sample video (own file kind); older ones only a sample video.
+        const twoStep = j.package === 'Momentum Pack' && !!j.brief?.review_stage
         const stages = ['Received', 'Accepted', 'Started', w === 'script' ? 'Script' : 'Sample video', 'Production', 'First cut', 'Final']
         const at = STAGE_OF[j.status] ?? -1
         const shared = Object.fromEntries(DELIVERY_KINDS.map(k => [k, files.filter(f => f.project_id === j.id && f.kind === k)]))
         const mine = files.filter(f => f.project_id === j.id)
         const extras = deliverables(j, addons, files)
         const rows = [
-          {key: 'script', label: w === 'script' ? 'Script' : 'Sample video', kind: 'script', shared: mine.filter(f => f.kind === 'script')},
+          {key: 'script', label: twoStep || w === 'script' ? 'Script' : 'Sample video', kind: 'script', shared: mine.filter(f => f.kind === 'script')},
+          ...twoStep ? [{key: 'sample', label: 'Sample video', kind: 'sample', shared: mine.filter(f => f.kind === 'sample')}] : [],
           {key: 'first_cut', label: 'First cut', kind: 'first_cut', shared: mine.filter(f => f.kind === 'first_cut')},
           ...extras,
         ]
@@ -43,15 +47,15 @@ export default async function Progress({params}) {
           const charging = j.status === 'card_saved' && s.to === 'in_progress' && !s.skipCharge
           const to = s.to === 'quoted' && j.qb_card_id ? 'card_saved' : s.to
           const preview = customerNotice({status: to, p: j, link: custUrl, priceCents: j.price_cents, charge: charging ? {cents: withTax(j, j.price_cents), id: '(shown after charging)'} : null, message: MESSAGE_SLOT})
-          return {...s, label: forPackage(s.label, j.package), preview, delivers: DELIVERS[s.to] || null,
-            sendLabel: charging ? 'Charge card, start & email client' : sendLabels[s.to] || (preview ? `${forPackage(s.label, j.package)} & email client` : null)}
+          return {...s, label: forPackage(s.label, j), preview, delivers: s.to === 'script_sent' ? reviewKind(j) : DELIVERS[s.to] || null,
+            sendLabel: charging ? 'Charge card, start & email client' : sendLabels[s.to] || (preview ? `${forPackage(s.label, j)} & email client` : null)}
         })
         const log = events.filter(e => e.project_id === j.id)
         return (
           <section key={j.id} className="panel">
             <div className="panel-head">
               <h2>{multi ? `${projectRef(j.number)} · ` : ''}{j.package || 'This video'}</h2>
-              <StatusPill status={j.status} pkg={j.package} />
+              <StatusPill status={j.status} job={j} />
             </div>
             {at >= 0 && (
               <ol className="stages" aria-label="Progress">
@@ -75,6 +79,8 @@ export default async function Progress({params}) {
               })}
             </div>
 
+            {twoStep && reviewStage(j) === 'script' && ['quoted', 'card_saved', 'in_progress'].includes(j.status) && <SkipScript id={j.id} />}
+            {j.package === 'Momentum Pack' && !twoStep && ['quoted', 'card_saved', 'in_progress'].includes(j.status) && !mine.some(f => f.kind === 'script') && <SkipScript id={j.id} mode="add" />}
             <StatusActions id={j.id} status={j.status} steps={steps} price={j.price_cents} chargeTotal={withTax(j, j.price_cents)}
               card={j.card_last4 ? `${j.card_brand || 'card'} ending ${j.card_last4}` : null} shared={shared} scriptWord={w}
               alsoDue={extras.filter(r => r.kind && r.kind !== 'final').map(r => ({label: r.label, done: r.shared.length > 0}))} />
@@ -135,7 +141,7 @@ export default async function Progress({params}) {
                   <li key={e.id} className={e.type === 'note' ? 'is-note' : undefined}>
                     {e.type === 'note'
                       ? <><b>{names[e.actor] || 'Someone'}</b><p>{e.data.text}</p></>
-                      : <p>{describe(e, names, j.package)}</p>}
+                      : <p>{describe(e, names, twoStep ? {package: j.package, brief: {review_stage: 'script'}} : j.package)}</p>}
                     <time>{formatDateTime(e.created_at)}</time>
                   </li>
                 ))}

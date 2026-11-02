@@ -5,7 +5,7 @@ import {moveStatus} from '../../../actions'
 import FileUpload from './FileUpload'
 import EmailEditor from './EmailPreview'
 
-const KIND_NAME = {script: 'script', first_cut: 'first cut', final: 'final video'}
+const KIND_NAME = {script: 'script', sample: 'sample video', first_cut: 'first cut', final: 'final video'}
 
 // Next-step buttons for one job. Steps that email the client open a panel showing that exact email,
 // with room for a personal line; steps that deliver something also hold the box to share it.

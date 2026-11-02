@@ -6,10 +6,10 @@ import {upcomingClosedDays} from '@/lib/holidays'
 import {jobTaxRate, taxCents, exemptLabel, SALES_TAX_LABEL} from '@/lib/tax'
 import {STYLES, STORY, VOICES, TONES, MUSIC, labelOf} from '@/lib/intake'
 
-export const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', tax_exempt: 'Tax-exempt certificate', script: 'Script', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format', other: 'Other'}
+export const KIND_LABEL = {logo: 'Logo', brand_image: 'Brand image', brand_material: 'Brand material', design_file: 'Design file', media: 'Photo / video to use', reference: 'Character reference', tax_exempt: 'Tax-exempt certificate', script: 'Script', sample: 'Sample video', first_cut: 'First cut', final: 'Final', cutdown: '15-sec cutdown', extra_format: 'Extra format', other: 'Other'}
 // Files the customer sent with the order, and the ones we deliver.
 export const INTAKE_KINDS = ['logo', 'brand_image', 'brand_material', 'design_file', 'media', 'reference', 'tax_exempt']
-export const DELIVERY_KINDS = ['script', 'first_cut', 'final', 'cutdown', 'extra_format', 'other']
+export const DELIVERY_KINDS = ['script', 'sample', 'first_cut', 'final', 'cutdown', 'extra_format', 'other']
 // The step that sends each deliverable, and what that deliverable is.
 export const DELIVERS = {script_sent: 'script', first_cut_sent: 'first_cut', delivered: 'final'}
 
@@ -141,7 +141,7 @@ export function describe(e, names, pkg) {
   switch (e.type) {
     case 'submitted': return 'Submitted from the website'
     case 'disclaimer_accepted': return `Customer accepted the AI Production Disclaimer (version ${e.data.version})${e.data.points ? `, ticking each key point: ${e.data.points.join(' / ')}` : ''}`
-    case 'status': return `${who} moved it to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}`
+    case 'status': return `${who} moved it to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}${e.data.review === 'script approved' ? ' (script approved; sample video next)' : ''}`
     case 'price': return `${who} set the price to ${formatMoney(e.data.price_cents)}`
     case 'assigned': return e.data.to ? `${who} assigned it to ${names[e.data.to] || 'someone'}` : `${who} unassigned it`
     case 'due': return e.data.due_date ? `${who} set the due date to ${formatDate(e.data.due_date)}` : `${who} cleared the due date`

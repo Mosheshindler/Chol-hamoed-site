@@ -6,7 +6,7 @@ import {addBusinessDays, LEAD_BUSINESS_DAYS} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {addonByKey, ADDON_STATUSES} from '@/lib/addons'
 import {randomBytes} from 'node:crypto'
-import {projectRef, scriptWord, PRE_PRODUCTION_STATUSES, canAddFiles, STATUSES} from '@/lib/status'
+import {projectRef, scriptWord, reviewStage, PRE_PRODUCTION_STATUSES, canAddFiles, STATUSES} from '@/lib/status'
 import {sendEmail, esc} from '@/lib/email'
 import {MAX_UPLOAD_BYTES, MAX_UPLOAD_MB} from '@/lib/intake'
 import {siteOrigin} from '@/lib/site'
@@ -44,11 +44,15 @@ export async function customerDecision(formData) {
     script_sent: {approve: 'in_production', changes: 'in_progress'},
     first_cut_sent: {approve: 'approved', changes: 'revising'},
   }[job.status]
-  const to = moves?.[decision]
+  let to = moves?.[decision]
   if (!to) return {error: 'This step has already been completed. Refresh the page.'}
+  // A Momentum script approval leads to the sample video, not straight to production.
+  const scriptFirst = job.status === 'script_sent' && job.package === 'Momentum Pack' && reviewStage(job) === 'script'
+  if (scriptFirst && decision === 'approve') to = 'in_progress'
   if (decision === 'changes' && !notes) return {error: 'Tell us what you’d like changed.'}
 
   const patch = {status: to}
+  if (scriptFirst && decision === 'approve') patch.brief = {...job.brief, review_stage: 'sample'}
   if (to === 'in_production') patch.due_date = addBusinessDays(new Date(), LEAD_BUSINESS_DAYS, upcomingClosedDays())
   const {data: updated, error} = await order.db.from('projects').update(patch).eq('id', job.id).eq('status', job.status).select('id')
   if (error || !updated?.length) return {error: 'Something changed while you were here. Refresh the page and try again.'}
@@ -56,7 +60,7 @@ export async function customerDecision(formData) {
   await order.db.from('project_events').insert({project_id: job.id, type: 'customer', data: {from: job.status, to, decision, notes: notes || undefined}})
   if (notes) await order.db.from('project_messages').insert({project_id: job.id, author: 'customer', body: notes})
 
-  const what = job.status === 'script_sent' ? `the ${scriptWord(job.package)}` : 'the first cut'
+  const what = job.status === 'script_sent' ? `the ${scriptWord(job)}` : 'the first cut'
   await tellTeam(job, decision === 'approve' ? `Customer approved ${what}` : `Customer requested changes to ${what}`,
     `<p><b>${esc(job.name)}</b> ${decision === 'approve' ? 'approved' : 'requested changes to'} ${what}.</p>${notes ? `<blockquote>${esc(notes)}</blockquote>` : ''}`)
 

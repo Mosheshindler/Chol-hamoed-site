@@ -63,9 +63,9 @@ export default async function JobOverview({params}) {
             const next = (TRANSITIONS[j.status] || []).find(t => t.primary)
             return (
               <li key={j.id}>
-                <span className="tile-row"><b>{multi ? `${projectRef(j.number)} · ${j.package}` : j.package || 'This video'}</b><StatusPill status={j.status} pkg={j.package} /></span>
+                <span className="tile-row"><b>{multi ? `${projectRef(j.number)} · ${j.package}` : j.package || 'This video'}</b><StatusPill status={j.status} job={j} /></span>
                 <span className="muted">
-                  {STATUSES[j.status]?.waitingOn === 'customer' ? 'Waiting on the client' : next ? `Next: ${forPackage(next.label, j.package)}` : 'Nothing left to do'}
+                  {STATUSES[j.status]?.waitingOn === 'customer' ? 'Waiting on the client' : next ? `Next: ${forPackage(next.label, j)}` : 'Nothing left to do'}
                 </span>
                 {j.status !== 'delivered' && !['declined', 'cancelled'].includes(j.status) && (
                   <span className="tile-dates">

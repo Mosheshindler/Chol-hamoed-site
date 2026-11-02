@@ -7,7 +7,7 @@ import {recordFile, recordShared} from '../../../actions'
 
 const MODES = [['file', 'Upload a file'], ['link', 'Google Doc / link'], ['text', 'Paste text']]
 // Videos are usually shared as a link; scripts as a Google Doc or pasted text.
-const VIDEO_KINDS = ['first_cut', 'final', 'cutdown', 'extra_format']
+const VIDEO_KINDS = ['sample', 'first_cut', 'final', 'cutdown', 'extra_format']
 const LINK_HINT = {
   doc: 'Google Doc: set Share → General access to “Anyone with the link” (Viewer or Commenter) so the client can open it.',
   video: 'Google Drive, Dropbox, Vimeo or unlisted YouTube link. Make sure anyone with the link can view it.',
@@ -59,6 +59,7 @@ export default function FileUpload({projectId, kind: fixedKind, label, compact})
       {!fixedKind && (
         <select id="upload-kind" name="kind" defaultValue="script" aria-label="What is it">
           <option value="script">Script</option>
+          <option value="sample">Sample video (Momentum)</option>
           <option value="first_cut">First cut</option>
           <option value="final">Final video</option>
           <option value="cutdown">15-sec cutdown</option>

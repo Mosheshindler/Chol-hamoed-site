@@ -2,9 +2,9 @@ import Modal from './Modal'
 
 const rows = [
   ['How we start', 'Online questionnaire', 'Strategy meetings'],
-  ['Creative direction', 'Our team leads, you approve the script (or sample video)', 'Built together with you'],
+  ['Creative direction', 'Our team leads, you approve the script (and sample video for Momentum)', 'Built together with you'],
   ['Filming', 'No', 'Yes'],
-  ['Approval step', 'One script or sample video', 'Collaborative'],
+  ['Approval step', 'One script (plus a sample video for Momentum)', 'Collaborative'],
   ['Revision rounds', 'One', 'Multiple'],
   ['Price', 'Fixed package', 'Custom quote'],
   ['Best for', 'Short, focused videos', 'Custom films and campaigns'],

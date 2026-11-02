@@ -79,6 +79,8 @@ export async function POST(request) {
     const momentum = ORG_ONLY_NAMES.includes(pkg)
     const brief = {
       kind: momentum ? 'momentum' : 'classic',
+      // Momentum: the client approves a script, then a sample video (lib/status.js reviewStage).
+      ...momentum && {review_stage: 'script'},
       style: pick(STYLES, it?.style), story: pick(STORY, it?.story),
       voice: pick(VOICES, it?.voice), tone: pick(TONES, it?.tone), music: pick(MUSIC, it?.music),
       ...brand,

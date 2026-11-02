@@ -26,7 +26,7 @@ export function receipt({cents, taxCents: tax, brand, last4, chargeId, ref, item
 // The admin Progress page shows this same email as a preview before the step is taken.
 export function customerNotice({status, p, link, priceCents, charge, message, subject: subjectOverride}) {
   const ref = projectRef(p.number)
-  const w = scriptWord(p.package)
+  const w = scriptWord(p)
   let subject, body, fixed = ''
   switch (status) {
     case 'quoted':

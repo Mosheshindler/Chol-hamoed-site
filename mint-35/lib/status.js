@@ -49,16 +49,23 @@ export const CUSTOMER_STAGES = ['Received', 'Accepted', 'Script', 'Production', 
 const STAGE_OF = {submitted: 0, quoted: 1, card_saved: 1, in_progress: 2, script_sent: 2, in_production: 3, first_cut_sent: 4, revising: 4, approved: 4, delivered: 5}
 export const customerStage = status => STAGE_OF[status] ?? -1
 
-// Momentum Pack approves a sample video instead of a script.
-export const scriptWord = pkg => (pkg === 'Momentum Pack' ? 'sample video' : 'script')
+// Momentum Pack (owner, Nov 2): the client approves a script, then a sample video, before the rest are made.
+// Both go through the same statuses (in_progress -> script_sent); brief.review_stage says which: 'script' or 'sample'.
+// Jobs ordered before this have no review_stage and approve only a sample video (stored as file kind 'script').
+// Pass the job (or just a package name, which reads as the old sample-video flow).
+const pkgOf = j => (typeof j === 'string' ? j : j?.package)
+export const reviewStage = j => (pkgOf(j) !== 'Momentum Pack' ? 'script' : typeof j === 'object' && j?.brief?.review_stage === 'script' ? 'script' : 'sample')
+// The file kind the current review step shares: 'sample' for new Momentum jobs' sample videos, otherwise 'script'.
+export const reviewKind = j => (reviewStage(j) === 'sample' && typeof j === 'object' && j?.brief?.review_stage ? 'sample' : 'script')
+export const scriptWord = j => (reviewStage(j) === 'sample' ? 'sample video' : 'script')
 
-// Admin labels say "script"; Momentum jobs approve a sample video instead.
-export const forPackage = (label, pkg) => (pkg === 'Momentum Pack' && label
+// Admin labels say "script"; at the sample-video step of a Momentum job they say "sample video".
+export const forPackage = (label, j) => (reviewStage(j) === 'sample' && label
   ? label.replace('Writing script', 'Making sample video').replace(/Script/g, 'Sample video').replace(/script/g, 'sample video')
   : label)
 
 export function customerStatus(p) {
-  const w = scriptWord(p.package)
+  const w = scriptWord(p)
   switch (p.status) {
     case 'submitted': return 'We’re reviewing your project.'
     case 'quoted':

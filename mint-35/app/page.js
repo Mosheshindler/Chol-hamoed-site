@@ -4,6 +4,10 @@ import PackageCards from '@/components/PackageCards'
 import Yes from '@/components/Yes'
 import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
+
+// Wide (16:9) samples in the main grid; Shorts (9:16) in a row of their own below.
+const WIDE = SAMPLES.filter(s => !s.vertical)
+const TALL = SAMPLES.filter(s => s.vertical)
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
 import HowItWorks from '@/components/HowItWorks'
@@ -37,8 +41,8 @@ const uses = [
 ]
 
 const included = [
-  'Concept and script (or sample video)',
-  'Script approval (sample video for Momentum)',
+  'Concept and script (plus a sample video for Momentum)',
+  'Script approval (plus a sample video for Momentum)',
   'AI visuals, voice and music',
   'Pro edit and finish',
   'Your logo and brand',
@@ -83,9 +87,14 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">Work</p>
             <h2>See what&rsquo;s possible.</h2>
-            <div className={`work-grid${SAMPLES.length > 2 ? ' work-grid-3' : ''}`}>
-              {SAMPLES.map(v => <VideoSample key={v.id} {...v} />)}
+            <div className={`work-grid${WIDE.length > 2 ? ' work-grid-3' : ''}`}>
+              {WIDE.map(v => <VideoSample key={v.id} {...v} />)}
             </div>
+            {TALL.length > 0 && (
+              <div className="work-grid-vertical">
+                {TALL.map(v => <VideoSample key={v.id} {...v} />)}
+              </div>
+            )}
           </div>
         </section>
 
