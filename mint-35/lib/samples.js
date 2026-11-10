@@ -4,4 +4,5 @@ export const SAMPLES = [
   {id: 'K2B9m_QTuGA', title: 'AllFit', kind: '3D animated characters'},
   {id: 'ImL5bp028ns', title: 'Due 5', kind: 'AI realistic characters'},
   {id: 'T8xA5fHuLlU', title: 'Agudah: Go Vote', kind: 'AI realistic characters', vertical: true},
+  {id: 'Bswpp6_FOuo', title: 'Khal Hampshire Hills', kind: 'Your own photos & videos', vertical: true},
 ]

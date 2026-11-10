@@ -678,6 +678,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .sample-box h3 { margin: 0 0 14px; }
 .sample-frame { position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #000; }
 .sample-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.sample-frame-vertical { aspect-ratio: 9 / 16; height: min(70vh, 640px); width: auto; margin: 0 auto; }
 @media (max-width: 600px) {
   .name-row { grid-template-columns: 1fr 1fr; }
   .name-row label:first-child { grid-column: 1 / -1; }
@@ -956,7 +957,10 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .work-row .work-item { flex: var(--ar) 1 0; min-width: 0; }
 .work-frame-vertical { aspect-ratio: 9 / 16; }
 .work-item-tall figcaption { display: grid; gap: 2px; }
-.work-item-tall figcaption span { font-size: .82rem; white-space: nowrap; }
+.work-item-tall figcaption b { font-size: .92rem; line-height: 1.25; }
+.work-item-tall figcaption span { font-size: .76rem; line-height: 1.3; }
+@media (max-width: 720px) { .work-item-tall figcaption b { font-size: 1.05rem; } .work-item-tall figcaption span { font-size: .85rem; } }
+.work-row .work-item { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 720px) {
   .work-row { flex-wrap: wrap; justify-content: center; gap: 24px 16px; }
   .work-row .work-item { flex: 1 1 100%; }

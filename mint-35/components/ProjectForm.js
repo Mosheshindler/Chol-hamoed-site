@@ -953,7 +953,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
             <button type="button" className="modal-close" onClick={() => setSample(null)} aria-label="Close">✕</button>
             <p className="eyebrow">Sample</p>
             <h3>{sample.label}</h3>
-            <div className="sample-frame">
+            <div className={`sample-frame${sample.sampleVertical ? ' sample-frame-vertical' : ''}`}>
               <iframe src={`https://www.youtube-nocookie.com/embed/${sample.sample}?autoplay=1&rel=0`} title={`${sample.label} sample`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
             </div>
           </div>
