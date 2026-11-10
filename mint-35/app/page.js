@@ -6,11 +6,11 @@ import VideoSample from '@/components/VideoSample'
 import {SAMPLES} from '@/lib/samples'
 
 // Samples sit in even rows: every video in a row is the same height, wide (16:9) and Shorts (9:16) side by side.
-// A row holds up to about four wide videos' worth of width.
+// A row holds up to about 4.8 wide videos' worth of width (two wide + two Shorts).
 const ratio = s => (s.vertical ? 9 / 16 : 16 / 9)
 const SAMPLE_ROWS = SAMPLES.reduce((rows, s) => {
   const row = rows.at(-1)
-  if (row && row.reduce((w, x) => w + ratio(x), 0) + ratio(s) <= 4.2) row.push(s)
+  if (row && row.reduce((w, x) => w + ratio(x), 0) + ratio(s) <= 4.8) row.push(s)
   else rows.push([s])
   return rows
 }, [])
