@@ -10,6 +10,7 @@ import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
 import {siteOrigin, customerLink} from '@/lib/site'
 import {chargeCard, paymentsReady, disconnect as qbDisconnect} from '@/lib/qb'
+import {syncCharge} from '@/lib/qbBooks'
 import {currentOwner} from '@/lib/owner'
 import {customerNotice, receipt} from '@/lib/notices'
 import {withTax, jobTaxRate, taxCents} from '@/lib/tax'
@@ -111,6 +112,8 @@ export async function moveStatus(formData) {
   const {error} = await supabase.from('projects').update(patch).eq('id', id).eq('status', p.status)
   if (error) return {error: patch.charge_id ? `The card was charged (${patch.charge_id}) but the job didn’t update. Refresh and check before trying again.` : 'Couldn’t update the job. Try again.'}
   await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'status', data: event})
+  // Bookkeeping: the charge becomes a QuickBooks sales receipt (a failure is logged on Billing, never blocks the job).
+  if (patch.charge_id) await syncCharge({projectId: id, kind: 'job', actor: me.id})
 
   const link = customerLink(await siteOrigin(), p.customer_token)
   // The team may have rewritten the email's subject and message in the preview before sending.
@@ -371,6 +374,7 @@ export async function decideAddon(formData) {
   const {data: a, error} = await supabase.from('project_addons').update(patch).eq('id', addonId).eq('status', 'requested').select('project_id, label, details, price_cents').single()
   if (error || !a) return {error: charged ? `The card was charged (${patch.charge_id}) but the add-on didn’t update. Refresh and check before trying again.` : 'That request was already handled. Refresh the page.'}
   await supabase.from('project_events').insert({project_id: a.project_id, actor: me.id, type: 'addon_' + decision, data: {label: a.label, price_cents: a.price_cents}})
+  if (charged) await syncCharge({projectId: a.project_id, kind: 'addon', addonId, actor: me.id})
 
   const {data: p} = await supabase.from('projects').select('number, name, email, customer_token').eq('id', a.project_id).single()
   const link = customerLink(await siteOrigin(), p.customer_token)
@@ -382,6 +386,20 @@ export async function decideAddon(formData) {
   await sendEmail({to: p.email, subject: subject.trim() || mail.subject, html: mail.html})
   revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
+}
+
+// Billing → "Try again" on a charge that didn't reach QuickBooks bookkeeping.
+export async function retryQbSync(formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const addonId = formData.get('addon') ? String(formData.get('addon')) : null
+  const {data: p} = addonId
+    ? await supabase.from('project_addons').select('project_id, charge_id').eq('id', addonId).single()
+    : await supabase.from('projects').select('id, charge_id').eq('id', id).single()
+  if (!p?.charge_id) return {error: 'There’s no card charge to record.'}
+  const r = await syncCharge({projectId: addonId ? p.project_id : id, kind: addonId ? 'addon' : 'job', addonId, actor: me.id})
+  revalidatePath('/admin/projects/[id]', 'layout')
+  return r.ok ? {ok: true} : {error: r.error || 'QuickBooks isn’t connected.'}
 }
 
 export async function disconnectQuickBooks() {

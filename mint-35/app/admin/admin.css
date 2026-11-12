@@ -214,6 +214,8 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .pay-list { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 8px; }
 .pay-list li { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; }
 .pay-list small { grid-column: 1 / -1; }
+.qb-sync.ok { color: #88c040; }
+.qb-sync.warn { color: #f0c46a; }
 .inline-form { grid-template-columns: 1fr auto; align-items: end; }
 .inline-form .form-error, .inline-form .form-ok { grid-column: 1 / -1; }
 
