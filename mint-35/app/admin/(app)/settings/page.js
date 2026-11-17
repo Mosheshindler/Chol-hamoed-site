@@ -8,6 +8,7 @@ const NOTICES = {
   cancelled: ['warn', 'Connecting was cancelled in QuickBooks.'],
   'bad-state': ['warn', 'That connection attempt expired. Please try again.'],
   failed: ['warn', 'QuickBooks didn’t accept the connection. Check the app keys and the redirect URL, then try again.'],
+  'books-failed': ['warn', 'QuickBooks didn’t accept the connection with bookkeeping access. Use “Connect for payments only” below to keep taking cards, and check that the app has the Accounting API turned on at developer.intuit.com.'],
   'missing-keys': ['warn', 'Add QB_CLIENT_ID and QB_CLIENT_SECRET in Vercel first.'],
 }
 
@@ -23,7 +24,7 @@ export default async function SettingsPage({searchParams}) {
       <div className="project-grid">
         <div className="col-main">
           <section className="panel">
-            <h2>QuickBooks Payments</h2>
+            <h2>QuickBooks</h2>
             {notice && <p className={notice[0] === 'ok' ? 'form-ok' : 'form-error'} role="status">{notice[1]}</p>}
             <dl className="kv">
               <dt>Mode</dt><dd>{QB_ENV === 'production' ? 'Live payments' : 'Sandbox (test cards only)'}</dd>
@@ -36,9 +37,15 @@ export default async function SettingsPage({searchParams}) {
                 ? 'Checkout saves each customer’s card in QuickBooks. “Start job” charges the job’s price, and confirmed add-ons are charged too.'
                 : 'Until QuickBooks is connected, checkout takes orders without a card and you collect payment another way.'}
             </p>
+            <p className="hint">
+              Bookkeeping: each card charge is also recorded in QuickBooks as a sales receipt (customer, package and add-on items,
+              NJ sales tax), matched to the deposit automatically. If a job’s Billing tab says a charge isn’t in QuickBooks yet,
+              reconnect here (connections made before Nov 12 2026 cover payments only), then press Try again on that charge.
+            </p>
             {owner ? (
               <div className="actions-row" style={{marginTop: 16}}>
                 {qbConfigured() && <a className="btn btn-primary btn-sm" href="/api/qb/connect">{conn ? 'Reconnect QuickBooks' : 'Connect QuickBooks'}</a>}
+                {qbConfigured() && <a className="btn btn-ghost btn-sm" href="/api/qb/connect?payments=only">Connect for payments only</a>}
                 {conn && <form action={disconnectQuickBooks}><button className="btn btn-danger btn-sm">Disconnect</button></form>}
               </div>
             ) : <p className="hint">Only an owner can connect or disconnect QuickBooks.</p>}

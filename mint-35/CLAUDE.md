@@ -193,9 +193,12 @@ separate from the Mint Media video site at the repo root (don't touch root files
 - Twilio texting / WhatsApp alerts (after launch): the form's alert choice is hidden and sends 'email'; restore it
   in ProjectForm step 1, then send alerts per `alert_channel` at each job step. Add SMS wording back to /terms and /privacy.
 - Automated customer emails at each job step, once the site is confirmed.
-- QuickBooks accounting sync (owner asked Oct 22; waiting on the bookkeeper): on each charge, find/create the QBO customer,
-  a project (or sub-customer) per job "M35-#### · Package", and a sales receipt linked to the Payments charge, one line per item.
-  Items live under Products & services category "Mint 35" > "Packages" (Single 35, Campaign 3, Momentum Pack) and "Add-ons"
-  (Extra format, 15-second cutdown, Subtitles, Extra revision round, Rush delivery, Price adjustment); match by exact name.
-  Needs the accounting scope added (reconnect; check Intuit's rules first). Items non-taxable until the owner's tax advisor answers.
-  First real charge: Agudah, $2,975 (Single 35 + 15-second cutdown), before the sync; bookkeeper may enter it by hand.
+- QuickBooks bookkeeping sync (built Nov 12 2026 with the bookkeeper's answers; `lib/qbBooks.js`): every admin card charge (Start job,
+  confirmed add-on) also creates a QBO sales receipt. One customer per client (company, else the person; no sub-customers), DocNumber
+  M35-#### (add-ons M35-####-A<id4>, also the duplicate guard), lines = the bookkeeper's items by exact name (packages, Extra format,
+  15-second cutdown, Subtitles, Extra revision round, Rush delivery; discounts/team price changes on "Price adjustment"). Tax "like a
+  regular invoice": lines TAX + TxnTaxDetail.TotalTax override with the tax we charged (exempt/out of state: NON). CreditCardPayment
+  CCTransId = Payments charge id + TxnSource IntuitPayment so QBO matches the deposit and fee itself (Intuit eCommerce guide).
+  Logged as `qb_sync` events; Billing shows the status per charge with Try again (retryQbSync). Never blocks a charge.
+  Needs the accounting scope: the owner reconnects QuickBooks in Settings once; "Connect for payments only" is the fallback.
+  Charges before Nov 12 (e.g. Agudah, Chasdei Chashi L'Kallah Nov 2) were entered by hand and are not synced.

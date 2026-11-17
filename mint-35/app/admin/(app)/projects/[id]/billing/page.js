@@ -6,10 +6,13 @@ import {loadOrder} from '../_lib/order'
 import {billing} from '../_lib/text'
 import {jobTaxRate} from '@/lib/tax'
 import {paymentsReady} from '@/lib/qb'
+import QbSync from '../QbSync'
 
 export default async function Billing({params}) {
   const {id} = await params
-  const {p, jobs, multi, addons, custUrl} = await loadOrder(id)
+  const {p, jobs, multi, addons, events, custUrl} = await loadOrder(id)
+  // Latest bookkeeping sync per charge (events come newest first).
+  const syncOf = (jobId, addonId = null) => events.find(e => e.type === 'qb_sync' && e.project_id === jobId && (e.data.addon_id || null) === addonId)?.data
   const canCharge = await paymentsReady()
   const bills = jobs.map(j => ({j, b: billing(j, addons)}))
   const total = bills.reduce((s, x) => s + x.b.total, 0)
@@ -55,10 +58,10 @@ export default async function Billing({params}) {
             <h3 className="sub-head">Payments</h3>
             <ul className="pay-list">
               {j.charge_id
-                ? <li><span>Job charged · {formatDateTime(j.charged_at)}</span><b>{formatMoney(j.charged_cents)}</b><small className="mono muted">{j.charge_id}</small></li>
+                ? <li><span>Job charged · {formatDateTime(j.charged_at)}</span><b>{formatMoney(j.charged_cents)}</b><small className="mono muted">{j.charge_id}</small><QbSync id={j.id} sync={syncOf(j.id)} /></li>
                 : <li className="muted">Job not charged yet. The card is charged when you start the job.</li>}
               {b.later.filter(a => a.charge_id).map(a => (
-                <li key={a.id}><span>{a.label} · {formatDateTime(a.charged_at)}</span><b>{formatMoney(a.price_cents)}</b><small className="mono muted">{a.charge_id}</small></li>
+                <li key={a.id}><span>{a.label} · {formatDateTime(a.charged_at)}</span><b>{formatMoney(a.price_cents)}</b><small className="mono muted">{a.charge_id}</small><QbSync id={j.id} addonId={a.id} sync={syncOf(j.id, a.id)} /></li>
               ))}
             </ul>
             <PriceForm id={j.id} price={j.price_cents} />

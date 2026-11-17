@@ -10,13 +10,19 @@ export const QB_ENV = process.env.QB_ENVIRONMENT === 'production' ? 'production'
 const API_BASE = process.env.QB_API_BASE || (QB_ENV === 'production' ? 'https://api.intuit.com' : 'https://sandbox.api.intuit.com')
 const AUTH_URL = process.env.QB_AUTH_URL || 'https://appcenter.intuit.com/connect/oauth2'
 const TOKEN_URL = process.env.QB_TOKEN_URL || 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
-const SCOPE = 'com.intuit.quickbooks.payment'
+// Payments (cards) plus Accounting (sales receipts for the bookkeeping sync, lib/qbBooks.js). Adding a scope
+// means reconnecting QuickBooks once in Settings so the owner can approve it.
+const SCOPE = 'com.intuit.quickbooks.payment com.intuit.quickbooks.accounting'
+const PAYMENTS_SCOPE = 'com.intuit.quickbooks.payment'
+const ACCOUNTING_BASE = process.env.QB_ACCOUNTING_BASE || (QB_ENV === 'production' ? 'https://quickbooks.api.intuit.com' : 'https://sandbox-quickbooks.api.intuit.com')
+const MINOR_VERSION = '75'
 
 export const qbConfigured = () => !!(process.env.QB_CLIENT_ID && process.env.QB_CLIENT_SECRET)
 export const tokenizeUrl = () => `${API_BASE}/quickbooks/v4/payments/tokens`
 
-export function authorizeUrl(state, redirectUri) {
-  const q = new URLSearchParams({client_id: process.env.QB_CLIENT_ID, response_type: 'code', scope: SCOPE, redirect_uri: redirectUri, state})
+// `paymentsOnly` asks for cards alone (a fallback if Intuit won't grant bookkeeping access).
+export function authorizeUrl(state, redirectUri, {paymentsOnly = false} = {}) {
+  const q = new URLSearchParams({client_id: process.env.QB_CLIENT_ID, response_type: 'code', scope: paymentsOnly ? PAYMENTS_SCOPE : SCOPE, redirect_uri: redirectUri, state})
   return `${AUTH_URL}?${q}`
 }
 
@@ -107,23 +113,24 @@ async function accessToken(force = false) {
   return remember(t)
 }
 
-async function qbFetch(path, body, retried = false) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
+async function qbFetch(path, body, retried = false, base = API_BASE) {
+  const res = await fetch(`${base}${path}`, {
+    method: body === undefined ? 'GET' : 'POST',
     headers: {
       Authorization: `Bearer ${await accessToken(retried)}`,
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'request-Id': randomUUID(),
     },
-    body: JSON.stringify(body),
+    body: body === undefined ? undefined : JSON.stringify(body),
   })
-  if (res.status === 401 && !retried) return qbFetch(path, body, true)
+  if (res.status === 401 && !retried) return qbFetch(path, body, true, base)
   // Intuit's transaction id for this request; their support asks for it when troubleshooting.
   const tid = res.headers.get('intuit_tid')
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const msg = data?.errors?.[0]?.message || data?.errors?.[0]?.moreInfo || `QuickBooks error (${res.status})`
+    const f = data?.Fault?.Error?.[0] // Accounting API errors
+    const msg = data?.errors?.[0]?.message || data?.errors?.[0]?.moreInfo || (f && [f.Message, f.Detail].filter(Boolean).join(': ')) || `QuickBooks error (${res.status})`
     console.error('QuickBooks API error', {path, status: res.status, intuit_tid: tid, message: msg})
     const err = new Error(msg)
     err.status = res.status
@@ -156,4 +163,16 @@ export async function chargeCard({cardId, amountCents, description}) {
     throw err
   }
   return charge
+}
+
+// QuickBooks Online Accounting API (the bookkeeping sync), on the same connected company as Payments.
+async function accountingPath(path) {
+  const conn = await getConnection()
+  if (!conn?.realm_id) throw new Error('QuickBooks isn’t connected.')
+  const sep = path.includes('?') ? '&' : '?'
+  return `/v3/company/${encodeURIComponent(conn.realm_id)}/${path}${sep}minorversion=${MINOR_VERSION}`
+}
+export const qbAccounting = {
+  query: async sql => qbFetch(await accountingPath(`query?query=${encodeURIComponent(sql)}`), undefined, false, ACCOUNTING_BASE),
+  create: async (entity, body) => qbFetch(await accountingPath(entity), body, false, ACCOUNTING_BASE),
 }

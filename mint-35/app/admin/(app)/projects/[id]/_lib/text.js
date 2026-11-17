@@ -148,6 +148,7 @@ export function describe(e, names, pkg) {
     case 'file': return `${who} shared ${KIND_LABEL[e.data.kind]?.toLowerCase() || 'a file'}: ${e.data.name}`
     case 'note': return null
     case 'charge_failed': return `Charge failed: ${e.data.message}`
+    case 'qb_sync': return e.data.ok ? `Recorded in QuickBooks as sales receipt ${e.data.doc_number}` : `Couldn’t record the charge in QuickBooks: ${e.data.message}`
     case 'customer': return `Customer ${e.data.decision === 'approve' ? 'approved' : 'requested changes'}, moved to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”`
     case 'deliverables_deleted': return `${e.data.count} delivered file${e.data.count > 1 ? 's' : ''} (script, cuts, final) deleted automatically, ${e.data.days} days after delivery`
     case 'email': return e.data.ok ? `Emailed the client: “${e.data.subject}”` : `Email to the client FAILED: “${e.data.subject}” (${e.data.error || 'unknown error'})`

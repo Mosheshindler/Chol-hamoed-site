@@ -13,7 +13,8 @@ export async function GET(request) {
   }
   const owner = await currentOwner()
   if (!owner) return NextResponse.redirect(`${origin}/admin/login`)
-  if (url.searchParams.get('error')) return back('cancelled')
+  const err = url.searchParams.get('error')
+  if (err) return back(err === 'access_denied' ? 'cancelled' : 'books-failed')
   const state = url.searchParams.get('state')
   if (!state || state !== request.cookies.get('qb_state')?.value) return back('bad-state')
   const code = url.searchParams.get('code')
