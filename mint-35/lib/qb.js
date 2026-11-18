@@ -1,0 +1,178 @@
+import 'server-only'
+import {randomUUID, randomBytes, createHash, createCipheriv, createDecipheriv} from 'node:crypto'
+import {createAdminClient} from './supabase/admin'
+
+// QuickBooks Payments API. Cards are tokenized in the customer's browser (card numbers never
+// reach this server), saved to QuickBooks as a "card on file", and charged later by id.
+// The QB_*_URL overrides exist only so the flow can be tested against a local stand-in.
+
+export const QB_ENV = process.env.QB_ENVIRONMENT === 'production' ? 'production' : 'sandbox'
+const API_BASE = process.env.QB_API_BASE || (QB_ENV === 'production' ? 'https://api.intuit.com' : 'https://sandbox.api.intuit.com')
+const AUTH_URL = process.env.QB_AUTH_URL || 'https://appcenter.intuit.com/connect/oauth2'
+const TOKEN_URL = process.env.QB_TOKEN_URL || 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
+// Payments (cards) plus Accounting (sales receipts for the bookkeeping sync, lib/qbBooks.js). Adding a scope
+// means reconnecting QuickBooks once in Settings so the owner can approve it.
+const SCOPE = 'com.intuit.quickbooks.payment com.intuit.quickbooks.accounting'
+const PAYMENTS_SCOPE = 'com.intuit.quickbooks.payment'
+const ACCOUNTING_BASE = process.env.QB_ACCOUNTING_BASE || (QB_ENV === 'production' ? 'https://quickbooks.api.intuit.com' : 'https://sandbox-quickbooks.api.intuit.com')
+const MINOR_VERSION = '75'
+
+export const qbConfigured = () => !!(process.env.QB_CLIENT_ID && process.env.QB_CLIENT_SECRET)
+export const tokenizeUrl = () => `${API_BASE}/quickbooks/v4/payments/tokens`
+
+// `paymentsOnly` asks for cards alone (a fallback if Intuit won't grant bookkeeping access).
+export function authorizeUrl(state, redirectUri, {paymentsOnly = false} = {}) {
+  const q = new URLSearchParams({client_id: process.env.QB_CLIENT_ID, response_type: 'code', scope: paymentsOnly ? PAYMENTS_SCOPE : SCOPE, redirect_uri: redirectUri, state})
+  return `${AUTH_URL}?${q}`
+}
+
+async function tokenRequest(params) {
+  const basic = Buffer.from(`${process.env.QB_CLIENT_ID}:${process.env.QB_CLIENT_SECRET}`).toString('base64')
+  const res = await fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: {Authorization: `Basic ${basic}`, Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'},
+    body: new URLSearchParams(params),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok || !data.access_token) throw new Error(data.error_description || data.error || `QuickBooks sign-in failed (${res.status})`)
+  return data
+}
+
+// Access tokens live only in this server's memory (never stored); a fresh one is fetched with the
+// refresh token when needed. The refresh token is encrypted (AES-256-GCM) before it's stored. The key comes from QB_TOKEN_KEY,
+// or from the QuickBooks client secret when that isn't set, so a copy of the database alone can't be used.
+// Switching to new QuickBooks keys means reconnecting QuickBooks, which stores fresh tokens.
+const tokenKey = () => createHash('sha256').update(`mint35-qb-tokens:${process.env.QB_TOKEN_KEY || process.env.QB_CLIENT_SECRET || ''}`).digest()
+
+function seal(text) {
+  const iv = randomBytes(12)
+  const c = createCipheriv('aes-256-gcm', tokenKey(), iv)
+  const body = Buffer.concat([c.update(text, 'utf8'), c.final()])
+  return 'v1:' + Buffer.concat([iv, c.getAuthTag(), body]).toString('base64')
+}
+
+function unseal(value) {
+  if (!value?.startsWith('v1:')) return value // stored before encryption was added; re-saved sealed on next refresh
+  const raw = Buffer.from(value.slice(3), 'base64')
+  const d = createDecipheriv('aes-256-gcm', tokenKey(), raw.subarray(0, 12))
+  d.setAuthTag(raw.subarray(12, 28))
+  return Buffer.concat([d.update(raw.subarray(28)), d.final()]).toString('utf8')
+}
+
+let memToken = null // {token, exp, env}
+
+function remember(t) {
+  memToken = {token: t.access_token, exp: Date.now() + (Number(t.expires_in) || 3600) * 1000, env: QB_ENV}
+  return t.access_token
+}
+
+const expiresAt = secs => new Date(Date.now() + (Number(secs) || 3600) * 1000).toISOString()
+
+async function saveTokens(t, extra = {}) {
+  const row = {
+    id: 1, environment: QB_ENV,
+    access_token: '', // kept in memory only, see remember()
+    refresh_token: seal(t.refresh_token),
+    access_expires_at: expiresAt(t.expires_in),
+    refresh_expires_at: t.x_refresh_token_expires_in ? expiresAt(t.x_refresh_token_expires_in) : null,
+    updated_at: new Date().toISOString(), ...extra,
+  }
+  const {error} = await createAdminClient().from('qb_connection').upsert(row)
+  if (error) throw new Error('Could not save the QuickBooks connection.')
+}
+
+export async function connectWithCode({code, realmId, redirectUri, memberId}) {
+  const t = await tokenRequest({grant_type: 'authorization_code', code, redirect_uri: redirectUri})
+  await saveTokens(t, {realm_id: realmId, connected_by: memberId})
+  remember(t)
+}
+
+export async function getConnection() {
+  const {data} = await createAdminClient().from('qb_connection').select('environment, realm_id, access_expires_at, refresh_expires_at, updated_at').eq('id', 1).maybeSingle()
+  return data && data.environment === QB_ENV ? data : null
+}
+
+export async function disconnect() {
+  memToken = null
+  await createAdminClient().from('qb_connection').delete().eq('id', 1)
+}
+
+export async function paymentsReady() {
+  return qbConfigured() && !!(await getConnection())
+}
+
+async function accessToken(force = false) {
+  if (!force && memToken?.env === QB_ENV && memToken.exp - Date.now() > 120000) return memToken.token
+  const db = createAdminClient()
+  const {data: c} = await db.from('qb_connection').select('*').eq('id', 1).maybeSingle()
+  if (!c || c.environment !== QB_ENV) throw new Error('QuickBooks isn’t connected.')
+  let refresh
+  try { refresh = unseal(c.refresh_token) } catch { throw new Error('QuickBooks needs to be reconnected in Settings.') }
+  const t = await tokenRequest({grant_type: 'refresh_token', refresh_token: refresh})
+  await saveTokens(t, {realm_id: c.realm_id, connected_by: c.connected_by})
+  return remember(t)
+}
+
+async function qbFetch(path, body, retried = false, base = API_BASE) {
+  const res = await fetch(`${base}${path}`, {
+    method: body === undefined ? 'GET' : 'POST',
+    headers: {
+      Authorization: `Bearer ${await accessToken(retried)}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'request-Id': randomUUID(),
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  if (res.status === 401 && !retried) return qbFetch(path, body, true, base)
+  // Intuit's transaction id for this request; their support asks for it when troubleshooting.
+  const tid = res.headers.get('intuit_tid')
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const f = data?.Fault?.Error?.[0] // Accounting API errors
+    const msg = data?.errors?.[0]?.message || data?.errors?.[0]?.moreInfo || (f && [f.Message, f.Detail].filter(Boolean).join(': ')) || `QuickBooks error (${res.status})`
+    console.error('QuickBooks API error', {path, status: res.status, intuit_tid: tid, message: msg})
+    const err = new Error(msg)
+    err.status = res.status
+    err.intuitTid = tid
+    throw err
+  }
+  return data
+}
+
+// Saves a browser-made card token to QuickBooks under `customerId` (our order id).
+export async function saveCardFromToken(customerId, token) {
+  const card = await qbFetch(`/quickbooks/v4/customers/${encodeURIComponent(customerId)}/cards/createFromToken`, {value: token})
+  return {id: card.id, last4: String(card.number || '').slice(-4) || null, brand: card.cardType || null}
+}
+
+// Charges a saved card. Returns the QuickBooks charge; throws if it isn't captured.
+export async function chargeCard({cardId, amountCents, description}) {
+  const charge = await qbFetch('/quickbooks/v4/payments/charges', {
+    amount: (amountCents / 100).toFixed(2),
+    currency: 'USD',
+    cardOnFile: cardId,
+    capture: true,
+    description: description?.slice(0, 4000),
+    context: {mobile: false, isEcommerce: true},
+  })
+  if (charge.status !== 'CAPTURED') {
+    const err = new Error(charge.status === 'DECLINED' ? 'The card was declined.' : `The charge wasn’t completed (${charge.status || 'unknown status'}).`)
+    err.charge = charge
+    console.error('QuickBooks charge not captured', {status: charge.status, charge_id: charge.id})
+    throw err
+  }
+  return charge
+}
+
+// QuickBooks Online Accounting API (the bookkeeping sync), on the same connected company as Payments.
+async function accountingPath(path) {
+  const conn = await getConnection()
+  if (!conn?.realm_id) throw new Error('QuickBooks isn’t connected.')
+  const sep = path.includes('?') ? '&' : '?'
+  return `/v3/company/${encodeURIComponent(conn.realm_id)}/${path}${sep}minorversion=${MINOR_VERSION}`
+}
+export const qbAccounting = {
+  query: async sql => qbFetch(await accountingPath(`query?query=${encodeURIComponent(sql)}`), undefined, false, ACCOUNTING_BASE),
+  create: async (entity, body) => qbFetch(await accountingPath(entity), body, false, ACCOUNTING_BASE),
+}

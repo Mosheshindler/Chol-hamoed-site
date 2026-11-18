@@ -1,0 +1,82 @@
+// Job pipeline. `waitingOn` says who has the next move, which drives the dashboard.
+export const STATUSES = {
+  submitted:      {label: 'New request',          waitingOn: 'team',     tone: 'new'},
+  quoted:         {label: 'Waiting for card',     waitingOn: 'customer', tone: 'wait'},
+  card_saved:     {label: 'Ready to start (card on file)', waitingOn: 'team', tone: 'go'},
+  in_progress:    {label: 'Writing script',       waitingOn: 'team',     tone: 'work'},
+  script_sent:    {label: 'Script with customer', waitingOn: 'customer', tone: 'wait'},
+  in_production:  {label: 'In production',        waitingOn: 'team',     tone: 'work'},
+  first_cut_sent: {label: 'First cut with customer', waitingOn: 'customer', tone: 'wait'},
+  approved:       {label: 'Approved, finalizing', waitingOn: 'team',     tone: 'go'},
+  revising:       {label: 'Revising',             waitingOn: 'team',     tone: 'work'},
+  delivered:      {label: 'Delivered',            waitingOn: null,       tone: 'done'},
+  declined:       {label: 'Declined',             waitingOn: null,       tone: 'off'},
+  cancelled:      {label: 'Cancelled',            waitingOn: null,       tone: 'off'},
+}
+
+export const ACTIVE = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent', 'in_production', 'first_cut_sent', 'approved', 'revising']
+
+// Customers can add photos, videos and links from their project page at any stage (not on declined or
+// cancelled jobs). Once production has started they're warned first that new files may not make it in.
+export const PRE_PRODUCTION_STATUSES = ['submitted', 'quoted', 'card_saved', 'in_progress', 'script_sent']
+export const canAddFiles = status => !['declined', 'cancelled'].includes(status)
+
+export const projectRef = n => `M35-${n}`
+
+export function formatMoney(cents) {
+  if (cents == null) return '—'
+  return (cents / 100).toLocaleString('en-US', {style: 'currency', currency: 'USD'})
+}
+
+// Next-step buttons per status. `needs` marks steps that collect extra input.
+export const TRANSITIONS = {
+  submitted:      [{to: 'quoted', label: 'Accept & set price', primary: true, needs: 'price'}, {to: 'declined', label: 'Decline', danger: true}],
+  quoted:         [{to: 'in_progress', label: 'Start job (paid another way)', needs: 'confirm'}, {to: 'cancelled', label: 'Cancel', danger: true}],
+  card_saved:     [{to: 'in_progress', label: 'Start job & charge card', primary: true, needs: 'confirm'}, {to: 'in_progress', label: 'Start without charging', needs: 'confirm', skipCharge: true}, {to: 'cancelled', label: 'Cancel', danger: true}],
+  in_progress:    [{to: 'script_sent', label: 'Share the script', primary: true}, {to: 'cancelled', label: 'Cancel', danger: true}],
+  script_sent:    [{to: 'in_production', label: 'Mark script approved', primary: true}, {to: 'in_progress', label: 'Mark changes requested'}],
+  in_production:  [{to: 'first_cut_sent', label: 'Share the first cut', primary: true}],
+  first_cut_sent: [{to: 'approved', label: 'Mark first cut approved', primary: true}, {to: 'revising', label: 'Mark revision notes received'}],
+  approved:       [{to: 'delivered', label: 'Share the final', primary: true}],
+  revising:       [{to: 'delivered', label: 'Share the final', primary: true}],
+  delivered: [],
+  declined: [{to: 'submitted', label: 'Reopen'}],
+  cancelled: [{to: 'submitted', label: 'Reopen'}],
+}
+
+// What the customer sees on their project page.
+export const CUSTOMER_STAGES = ['Received', 'Accepted', 'Script', 'Production', 'First cut', 'Delivered']
+const STAGE_OF = {submitted: 0, quoted: 1, card_saved: 1, in_progress: 2, script_sent: 2, in_production: 3, first_cut_sent: 4, revising: 4, approved: 4, delivered: 5}
+export const customerStage = status => STAGE_OF[status] ?? -1
+
+// Momentum Pack (owner, Nov 2): the client approves a script, then a sample video, before the rest are made.
+// Both go through the same statuses (in_progress -> script_sent); brief.review_stage says which: 'script' or 'sample'.
+// Jobs ordered before this have no review_stage and approve only a sample video (stored as file kind 'script').
+// Pass the job (or just a package name, which reads as the old sample-video flow).
+const pkgOf = j => (typeof j === 'string' ? j : j?.package)
+export const reviewStage = j => (pkgOf(j) !== 'Momentum Pack' ? 'script' : typeof j === 'object' && j?.brief?.review_stage === 'script' ? 'script' : 'sample')
+// The file kind the current review step shares: 'sample' for new Momentum jobs' sample videos, otherwise 'script'.
+export const reviewKind = j => (reviewStage(j) === 'sample' && typeof j === 'object' && j?.brief?.review_stage ? 'sample' : 'script')
+export const scriptWord = j => (reviewStage(j) === 'sample' ? 'sample video' : 'script')
+
+// Admin labels say "script"; at the sample-video step of a Momentum job they say "sample video".
+export const forPackage = (label, j) => (reviewStage(j) === 'sample' && label
+  ? label.replace('Writing script', 'Making sample video').replace(/Script/g, 'Sample video').replace(/script/g, 'sample video')
+  : label)
+
+export function customerStatus(p) {
+  const w = scriptWord(p)
+  switch (p.status) {
+    case 'submitted': return 'We’re reviewing your project.'
+    case 'quoted':
+    case 'card_saved': return 'Accepted. Your project will start soon.'
+    case 'in_progress': return `We’re working on your ${w}.`
+    case 'script_sent': return `Your ${w} is ready for your review.`
+    case 'in_production': return 'In production.'
+    case 'first_cut_sent': return 'Your first cut is ready for your review.'
+    case 'revising': return 'We’re making your revisions.'
+    case 'approved': return 'Approved! We’re preparing your final files.'
+    case 'delivered': return 'Delivered. Your final files are below.'
+    default: return 'This project is closed.'
+  }
+}
