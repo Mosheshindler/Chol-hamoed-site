@@ -184,6 +184,15 @@ separate from the Mint Media video site at the repo root (don't touch root files
   PRE_PRODUCTION_STATUSES a pop-up warns that new files may not be included; the team is emailed for every upload or link
   (subject notes the stage when late).
 
+- Custom offers (owner, Nov 25; migration 20261125000000_custom_offers.sql, table `custom_offers`): Admin → Offers (owner only) makes a
+  package for one client (name, email, org, package name, what's included, videos 1–20, price, note, last day; default 30 days,
+  OFFER_DAYS) and emails a private link /start?offer=<token> (offerEmail in lib/offerEmail.js, BCC hello@ as usual; Copy link too).
+  The link skips the cart: an offer card (OfferFlow in app/start/StartFlow.js) + the usual ProjectForm (offerToken, prefill), classic
+  questions, extras priced per offer video, no discount codes. The order API (findOffer in lib/offerServer.js) uses the offer's title as
+  `package`, saves brief.offer {id, title, items, videos, price_cents}, and claims the offer (status 'ordered', order_id) so each link
+  orders once. jobPackage(j) in lib/offers.js prices custom jobs for Billing and QuickBooks (item "Custom package", OFFER_ITEM;
+  the bookkeeper needs that product/service). Withdraw / Reopen / Email again on the Offers page. Momentum-style (fundraiser) offers aren't supported.
+
 ## Planned (owner asked)
 - Homepage samples live in lib/samples.js; Shorts take `vertical: true` (9:16, YouTube oardefault cover). Rows are even-height (flex share =
   aspect ratio; app/page.js SAMPLE_ROWS); on phones wide ones stack and Shorts center. Owner is sending more

@@ -388,6 +388,11 @@ details[open] summary::after { transform: rotate(45deg); }
 .chosen-label { color: var(--muted); font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
 .chosen b { font-family: var(--display); font-size: 1.15rem; flex: 1; }
 .chosen-change { color: var(--lime); font-weight: 700; }
+/* Custom offer link (/start?offer=…): the package the team prepared, above the order form. */
+.offer-card { display: grid; gap: 8px; padding: 20px 22px; border: 1px solid rgba(136,192,64,.45); background: rgba(136,192,64,.08); border-radius: 14px; }
+.offer-card h1 { margin: 0; font-size: 1.7rem; }
+.offer-card p { margin: 0; }
+.offer-message { white-space: pre-line; border-left: 3px solid var(--lime); padding-left: 12px; }
 .chosen-change:hover { text-decoration: underline; }
 @media (max-width: 600px) {
   .chosen-label { flex: 1; }
