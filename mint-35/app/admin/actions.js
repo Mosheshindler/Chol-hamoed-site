@@ -15,7 +15,7 @@ import {currentOwner} from '@/lib/owner'
 import {customerNotice, receipt} from '@/lib/notices'
 import {withTax, jobTaxRate, taxCents} from '@/lib/tax'
 import {sendPasswordLink} from '@/lib/passwordLink'
-import {addonEmail} from '@/lib/emailParts'
+import {addonEmail, greetName} from '@/lib/emailParts'
 import {normalizeCode} from '@/lib/discounts'
 import {PACKAGES} from '@/lib/packages'
 import {offerEmail} from '@/lib/offerEmail'
@@ -359,7 +359,7 @@ export async function replyToCustomer(formData) {
   await sendEmail({
     to: p.email,
     subject: `New message about your Mint 35 project (${projectRef(p.number)})`,
-    html: `<p>Hi ${esc(p.name.split(' ')[0])},</p><blockquote>${esc(body).replace(/\n/g, '<br>')}</blockquote><p><a href="${link}">Reply on your project page</a></p><p>— ${esc(me.name)}, Mint 35</p>`,
+    html: `<p>Hi ${esc(greetName(p.name))},</p><blockquote>${esc(body).replace(/\n/g, '<br>')}</blockquote><p><a href="${link}">Reply on your project page</a></p><p>— ${esc(me.name)}, Mint 35</p>`,
   })
   revalidatePath('/admin/projects/[id]', 'layout')
   return {ok: true}
@@ -399,7 +399,7 @@ export async function decideAddon(formData) {
   const link = customerLink(await siteOrigin(), p.customer_token)
 
   const {subject, message} = editedEmail(formData)
-  const mail = addonEmail({firstName: p.name.split(' ')[0], label: a.label, details: a.details, accepted: decision === 'accepted', priceCents: a.price_cents, taxCents: tax,
+  const mail = addonEmail({firstName: greetName(p.name), label: a.label, details: a.details, accepted: decision === 'accepted', priceCents: a.price_cents, taxCents: tax,
     charged, cardBrand: job.card_brand, last4: job.card_last4, message, link, ref: projectRef(p.number),
     receiptHtml: charged ? receipt({cents: a.price_cents + tax, taxCents: tax, brand: job.card_brand, last4: job.card_last4, chargeId: patch.charge_id, ref: projectRef(p.number), item: `Add-on: ${a.label}`}) : ''})
   await sendEmail({to: p.email, subject: subject.trim() || mail.subject, html: mail.html})

@@ -6,6 +6,7 @@ import {loadOrder} from '../_lib/order'
 import {billing} from '../_lib/text'
 import {jobTaxRate} from '@/lib/tax'
 import {paymentsReady} from '@/lib/qb'
+import {greetName} from '@/lib/emailParts'
 import QbSync from '../QbSync'
 
 export default async function Billing({params}) {
@@ -47,7 +48,7 @@ export default async function Billing({params}) {
                     <li key={a.id}>
                       <div><b>{a.label}</b>{a.details && <span className="muted"> · {a.details}</span>}<small className="muted"> · {formatDateTime(a.created_at)}</small></div>
                       <AddonDecision addonId={a.id} suggested={a.price_cents != null ? a.price_cents / 100 : null}
-                        mail={{firstName: (j.name || '').split(' ')[0], label: a.label, details: a.details, ref: projectRef(j.number), link: custUrl,
+                        mail={{firstName: greetName(j.name), label: a.label, details: a.details, ref: projectRef(j.number), link: custUrl,
                           taxRate: jobTaxRate(j), willCharge: !!(canCharge && j.qb_card_id), cardBrand: j.card_brand, last4: j.card_last4}} />
                     </li>
                   ))}

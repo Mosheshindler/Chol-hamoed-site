@@ -2,6 +2,7 @@ import {NextResponse} from 'next/server'
 import {taxCents, jobTaxRate, exemptLabel} from '@/lib/tax'
 import {createAdminClient} from '@/lib/supabase/admin'
 import {sendEmail, esc} from '@/lib/email'
+import {greetName} from '@/lib/emailParts'
 import {projectRef, formatMoney} from '@/lib/status'
 import {customerLink} from '@/lib/site'
 import {UPLOAD_KINDS, MAX_UPLOAD_MB} from '@/lib/intake'
@@ -78,7 +79,7 @@ export async function POST(request, ctx) {
     sendEmail({
       to: c.email,
       subject: `We got your Mint 35 order (${refs.join(', ')})`,
-      html: `<p>Hi ${esc(c.first_name || c.name.split(' ')[0])},</p>
+      html: `<p>Hi ${esc(greetName(c.name))},</p>
 <p>Thanks for your order. Here's what we received:</p><ul>${lines}</ul>
 ${tax || exempt ? `<p><b>Subtotal:</b> ${formatMoney(total)}</p>${taxLine}` : ''}<p><b>Total:</b> ${formatMoney(total + tax)}</p>
 <p>Our team will review it and email you next steps. Your card will be charged in full when we start your project. You can cancel free before then; once we start, all sales are final.</p>

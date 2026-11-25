@@ -1,7 +1,7 @@
 import 'server-only'
 import {projectRef, formatMoney, scriptWord} from '@/lib/status'
 import {formatDate} from '@/lib/dates'
-import {esc, toText, messagePart} from '@/lib/emailParts'
+import {esc, toText, messagePart, greetName} from '@/lib/emailParts'
 import {jobTaxRate, taxCents} from '@/lib/tax'
 import {CLIENT_FILE_DAYS, FINAL_AVAILABLE_DAYS} from './retention'
 
@@ -60,7 +60,7 @@ export function customerNotice({status, p, link, priceCents, charge, message, su
     default:
       return null
   }
-  const standard = `<p>Hi ${esc((p.name || '').split(' ')[0])},</p>` + body
+  const standard = `<p>Hi ${esc(greetName(p.name))},</p>` + body
   const html = messagePart(standard, message) + fixed
     + `<p><a href="${link}">Open your project page</a></p>`
     // The full address in plain sight, so the link isn't hidden behind button text (a phishing signal for spam filters).
