@@ -11,7 +11,7 @@ export const WORK = [
     title: 'Orlando Torah Academy',
     kind: 'Momentum Pack series',
     videos: [
-      {id: 't5hypa-rZT0', label: 'Campaign launch'},
+      {id: 't5hypa-rZT0', label: '50% there'},
       {id: '-cZfgsGZOPA', label: 'Goal reached!'},
     ],
   },
