@@ -201,14 +201,13 @@ separate from the Mint Media video site at the repo root (don't touch root files
   final files are shared.
 
 ## Planned (owner asked)
-- Momentum Pack series (owner, Nov 25): SERIES in lib/samples.js renders as one card under the samples (components/VideoSeries.js):
-  title, the pack's 4 milestones as chips (shown ones highlighted), and the milestone Shorts side by side. First: Orlando Torah Academy
-  (Live t5hypa-rZT0, We made it! -cZfgsGZOPA). Add a milestone video by adding {id, milestone, label} to its `videos`.
-- Homepage samples live in lib/samples.js; Shorts take `vertical: true` (9:16, YouTube oardefault cover). Rows are even-height (flex share =
-  aspect ratio; app/page.js SAMPLE_ROWS); on phones wide ones stack and Shorts center. Owner is sending more
-  (Nov 2: Agudah Go Vote; Nov 10: Khal Hampshire Hills, also the "My own photos and videos only" style sample). Rows fit up to ~4.8
-  wide-video widths. Style sample still missing for "Animated graphics & text" (owner will send);
-  add the YouTube id as `sample` in STYLES (`lib/intake.js`).
+- Homepage samples (owner, Nov 25 redesign: "taking up too much room"): one swipeable row (components/WorkStrip.js) from WORK in
+  lib/samples.js, in display order. Every card the same height (--wh 320px, 280px on phones), title + style over the bottom of the
+  video, arrows on desktop, swipe on phones (wide videos trimmed at the sides on phones until played); videos play in place.
+  Shorts take `vertical: true` (9:16, YouTube oardefault cover). A Momentum Pack shows as one series card ({series: true, title, kind,
+  videos: [{id, label}]}) with a short label under each video and no "1 of 4" numbering (owner: Orlando Torah Academy only made 2:
+  "50% there" t5hypa-rZT0, "Goal reached!" -cZfgsGZOPA). Add a video to its `videos`. ScrollReveal fades the whole row, not each card.
+  Style sample still missing for "Animated graphics & text" (owner will send); add the YouTube id as `sample` in STYLES (`lib/intake.js`).
 - Twilio texting / WhatsApp alerts (after launch): the form's alert choice is hidden and sends 'email'; restore it
   in ProjectForm step 1, then send alerts per `alert_channel` at each job step. Add SMS wording back to /terms and /privacy.
 - Automated customer emails at each job step, once the site is confirmed.

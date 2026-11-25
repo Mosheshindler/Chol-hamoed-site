@@ -2,16 +2,17 @@
 
 import {useState} from 'react'
 
-// Shows the YouTube thumbnail and only loads the player when clicked, to keep the page fast.
-// The thumbnail stays on top until the player has loaded, so there's no black box while it starts.
-export default function VideoSample({id, title, kind, vertical, caption = true}) {
+// One sample video card in the homepage strip. Shows the YouTube thumbnail with the caption over it and only loads the
+// player when clicked, to keep the page fast. The thumbnail stays on top until the player has loaded, so there's no
+// black box while it starts.
+export default function VideoSample({id, title, kind, vertical}) {
   // Shorts use YouTube's tall cover image; wide videos the 16:9 one.
   const thumb = vertical ? 'oardefault' : 'maxresdefault'
   const [playing, setPlaying] = useState(false)
   const [loaded, setLoaded] = useState(false)
   return (
-    <figure className={`work-item${vertical ? ' work-item-tall' : ''}`} style={{'--ar': vertical ? 9 / 16 : 16 / 9}}>
-      <div className={`work-frame${vertical ? ' work-frame-vertical' : ''}`}>
+    <figure className={`work-item${vertical ? ' work-item-tall' : ''}${playing ? ' is-playing' : ''}`}>
+      <div className="work-frame">
         {playing && (
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1&cc_load_policy=0`}
@@ -30,8 +31,8 @@ export default function VideoSample({id, title, kind, vertical, caption = true})
             <span className="play" aria-hidden="true" />
           </button>
         )}
+        {!playing && <figcaption><b>{title}</b>{kind && <span>{kind}</span>}</figcaption>}
       </div>
-      {caption && <figcaption><b>{title}</b>{kind && <span>{kind}</span>}</figcaption>}
     </figure>
   )
 }

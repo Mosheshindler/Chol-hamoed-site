@@ -4,7 +4,7 @@ import {useEffect} from 'react'
 
 // Fades homepage blocks up as they scroll into view. Without JS, or with reduced motion, everything just shows.
 const TARGETS = [
-  '.section .eyebrow', '.section h2', '.work-item', '.benefit', '.uses', '.mm-band > *', '.timeline > li',
+  '.section .eyebrow', '.section h2', '.work-strip-wrap', '.benefit', '.uses', '.mm-band > *', '.timeline > li',
   '.yesno > .card', '.tell-more', '.package', '.packages-note', '.formats-band', '.compare-hint', '.faqs > details', '.start-band > *',
 ].join(', ')
 

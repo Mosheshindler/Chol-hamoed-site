@@ -2,19 +2,7 @@ import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import PackageCards from '@/components/PackageCards'
 import Yes from '@/components/Yes'
-import VideoSample from '@/components/VideoSample'
-import VideoSeries from '@/components/VideoSeries'
-import {SAMPLES, SERIES} from '@/lib/samples'
-
-// Samples sit in even rows: every video in a row is the same height, wide (16:9) and Shorts (9:16) side by side.
-// A row holds up to about 4.8 wide videos' worth of width (two wide + two Shorts).
-const ratio = s => (s.vertical ? 9 / 16 : 16 / 9)
-const SAMPLE_ROWS = SAMPLES.reduce((rows, s) => {
-  const row = rows.at(-1)
-  if (row && row.reduce((w, x) => w + ratio(x), 0) + ratio(s) <= 4.8) row.push(s)
-  else rows.push([s])
-  return rows
-}, [])
+import WorkStrip from '@/components/WorkStrip'
 import Footer from '@/components/Footer'
 import CompareModal from '@/components/CompareModal'
 import HowItWorks from '@/components/HowItWorks'
@@ -94,14 +82,8 @@ export default function Home() {
           <div className="container">
             <p className="eyebrow">Work</p>
             <h2>See what&rsquo;s possible.</h2>
-            <div className="work-rows">
-              {SAMPLE_ROWS.map((row, n) => (
-                <div key={n} className="work-row">
-                  {row.map(v => <VideoSample key={v.id} {...v} />)}
-                </div>
-              ))}
-              {SERIES.map(x => <VideoSeries key={x.title} {...x} />)}
-            </div>
+            <p className="work-lead">Real projects. Tap any video to play it.</p>
+            <WorkStrip />
           </div>
         </section>
 
