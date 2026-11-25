@@ -1,10 +1,11 @@
-import {STATUSES, TRANSITIONS, projectRef, forPackage, scriptWord, reviewStage, reviewKind} from '@/lib/status'
+import {STATUSES, TRANSITIONS, ACTIVE, projectRef, forPackage, scriptWord, reviewStage, reviewKind} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {customerNotice} from '@/lib/notices'
 import {withTax} from '@/lib/tax'
 import StatusPill from '../../../StatusPill'
 import StatusActions from '../StatusActions'
 import ResendEmail from '../ResendEmail'
+import MarkCompleted from '../MarkCompleted'
 import SkipScript from '../SkipScript'
 import {MESSAGE_SLOT} from '@/lib/emailParts'
 import UpdateForm from '../UpdateForm'
@@ -84,6 +85,7 @@ export default async function Progress({params}) {
             <StatusActions id={j.id} status={j.status} steps={steps} price={j.price_cents} chargeTotal={withTax(j, j.price_cents)}
               card={j.card_last4 ? `${j.card_brand || 'card'} ending ${j.card_last4}` : null} shared={shared} scriptWord={w}
               alsoDue={extras.filter(r => r.kind && r.kind !== 'final').map(r => ({label: r.label, done: r.shared.length > 0}))} />
+            {ACTIVE.includes(j.status) && <MarkCompleted id={j.id} uncharged={!!j.qb_card_id && !j.charge_id} />}
             {['quoted', 'card_saved', 'script_sent', 'first_cut_sent', 'delivered'].includes(j.status) && (() => {
               const e = log.find(x => x.type === 'email')
               return <ResendEmail id={j.id} preview={customerNotice({status: j.status, p: j, link: custUrl, priceCents: j.price_cents, message: MESSAGE_SLOT})} last={e ? {ok: e.data.ok, subject: e.data.subject, to: e.data.to, when: formatDateTime(e.created_at)} : null} />

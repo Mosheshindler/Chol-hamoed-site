@@ -104,7 +104,7 @@ export default async function CustomerPage({params}) {
               {/* What's happening now: the newest thing, with what to do about it. */}
               <section className={`cp-now${reviewing ? ' cp-now-action' : job.status === 'delivered' ? ' cp-now-done' : ''}`} aria-label="Right now">
                 <p className="cp-now-label">{reviewing ? 'Your turn' : job.status === 'delivered' ? 'Delivered' : 'Right now'}</p>
-                <h3>{reviewing ? `Your ${reviewing} is ready for your review` : job.status === 'delivered' ? 'Your final videos are ready' : customerStatus(job)}</h3>
+                <h3>{reviewing ? `Your ${reviewing} is ready for your review` : job.status === 'delivered' ? (finals.length ? 'Your final videos are ready' : 'Your project is complete') : customerStatus(job)}</h3>
                 {job.status === 'in_production' && job.due_date && <p className="muted">First cut due <b>{formatDate(job.due_date)}</b>.</p>}
                 {reviewFile && <ul className="cp-files cp-now-files">{fileRow(reviewFile)}</ul>}
                 {reviewing && <Decision token={token} job={job.id} what={reviewing} />}
@@ -115,7 +115,8 @@ export default async function CustomerPage({params}) {
                     <>
                       {finals.length > 0 && <ul className="cp-files cp-now-files">{finals.map(fileRow)}</ul>}
                       <div className="cp-retention">
-                        <p><b>Please download your final videos.</b> They&rsquo;re available here for {FINAL_AVAILABLE_DAYS} days{finalAt ? <>, until <b>{formatDate(addDays(finalAt, FINAL_AVAILABLE_DAYS))}</b></> : ''}.</p>
+                        {/* Jobs marked completed by the team (finished outside the system) may have no final files here. */}
+                        {finals.length > 0 && <p><b>Please download your final videos.</b> They&rsquo;re available here for {FINAL_AVAILABLE_DAYS} days{finalAt ? <>, until <b>{formatDate(addDays(finalAt, FINAL_AVAILABLE_DAYS))}</b></> : ''}.</p>}
                         <p className="muted small">For your privacy, the files you sent us (logos, photos, videos and graphics) are deleted {CLIENT_FILE_DAYS} days after you receive all your final files{finalAt ? <>, on {formatDate(addDays(finalAt, CLIENT_FILE_DAYS))}</> : ''}.</p>
                       </div>
                     </>
