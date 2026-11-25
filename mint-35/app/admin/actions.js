@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation'
 import {revalidatePath} from 'next/cache'
 import {createClient} from '@/lib/supabase/server'
 import {createAdminClient} from '@/lib/supabase/admin'
-import {TRANSITIONS, STATUSES, projectRef, formatMoney, forPackage, scriptWord, reviewStage, reviewKind} from '@/lib/status'
+import {TRANSITIONS, STATUSES, ACTIVE, projectRef, formatMoney, forPackage, scriptWord, reviewStage, reviewKind} from '@/lib/status'
 import {addBusinessDays, LEAD_BUSINESS_DAYS} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {sendEmail, esc} from '@/lib/email'
@@ -153,6 +153,22 @@ export async function skipScriptStep(formData) {
   await supabase.from('projects').update({brief: {...p.brief, review_stage: 'sample'}}).eq('id', id)
   await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'note', data: {text: 'Skipped the script step; going straight to the sample video.'}})
   revalidatePath('/admin/projects/[id]', 'layout')
+  return {ok: true}
+}
+
+// Mark a job completed when the work was handled outside the system (owner, Nov 25): moves it straight to Delivered
+// from any active step. No email to the client, no card charge, and no final file needed. Logged with the team's note.
+export async function markCompleted(formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const note = String(formData.get('note') || '').trim().slice(0, 1000) || null
+  const {data: p} = await supabase.from('projects').select('id, status').eq('id', id).single()
+  if (!p || !ACTIVE.includes(p.status)) return {error: 'This job can’t be marked completed. Refresh the page.'}
+  const {error} = await supabase.from('projects').update({status: 'delivered'}).eq('id', id).eq('status', p.status)
+  if (error) return {error: 'Couldn’t update the job. Try again.'}
+  await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'status', data: {from: p.status, to: 'delivered', offline: true, note}})
+  revalidatePath('/admin/projects/[id]', 'layout')
+  revalidatePath('/admin')
   return {ok: true}
 }
 

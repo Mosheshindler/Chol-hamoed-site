@@ -142,7 +142,7 @@ export function describe(e, names, pkg) {
   switch (e.type) {
     case 'submitted': return 'Submitted from the website'
     case 'disclaimer_accepted': return `Customer accepted the AI Production Disclaimer (version ${e.data.version})${e.data.points ? `, ticking each key point: ${e.data.points.join(' / ')}` : ''}`
-    case 'status': return `${who} moved it to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}${e.data.review === 'script approved' ? ' (script approved; sample video next)' : ''}`
+    case 'status': return `${who} moved it to “${forPackage(STATUSES[e.data.to]?.label, pkg)}”${e.data.price_cents != null ? ` at ${formatMoney(e.data.price_cents)}` : ''}${e.data.charged_cents ? ` and charged ${formatMoney(e.data.charged_cents)}` : ''}${e.data.due_date ? `, due ${formatDate(e.data.due_date)}` : ''}${e.data.review === 'script approved' ? ' (script approved; sample video next)' : ''}${e.data.offline ? ` (marked completed; handled outside the system, client not emailed${e.data.note ? `: ${e.data.note}` : ''})` : ''}`
     case 'price': return `${who} set the price to ${formatMoney(e.data.price_cents)}`
     case 'assigned': return e.data.to ? `${who} assigned it to ${names[e.data.to] || 'someone'}` : `${who} unassigned it`
     case 'due': return e.data.due_date ? `${who} set the due date to ${formatDate(e.data.due_date)}` : `${who} cleared the due date`

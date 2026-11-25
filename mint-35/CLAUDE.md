@@ -193,6 +193,12 @@ separate from the Mint Media video site at the repo root (don't touch root files
   orders once. jobPackage(j) in lib/offers.js prices custom jobs for Billing and QuickBooks (item "Custom package", OFFER_ITEM;
   the bookkeeper needs that product/service). Withdraw / Reopen / Email again on the Offers page. Momentum-style (fundraiser) offers aren't supported.
 
+- Mark completed (owner, Nov 25): some work happens outside the system, so Progress has "Finished outside the system? Mark completed"
+  (MarkCompleted.js -> markCompleted in app/admin/actions.js) on any ACTIVE job: moves it to Delivered with no client email, no card
+  charge (warns when a saved card wasn't charged) and no final file needed; logged as a status event {offline: true, note}. Retention
+  treats it like any delivery (client files deleted 7 days later). The client's page then says "Your project is complete" when no
+  final files are shared.
+
 ## Planned (owner asked)
 - Homepage samples live in lib/samples.js; Shorts take `vertical: true` (9:16, YouTube oardefault cover). Rows are even-height (flex share =
   aspect ratio; app/page.js SAMPLE_ROWS); on phones wide ones stack and Shorts center. Owner is sending more
