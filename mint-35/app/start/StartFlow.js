@@ -7,8 +7,10 @@ import {useCart, addToCart} from '@/lib/cart'
 import {PACKAGES, NOT_SURE, packageBySlug, formatPrice} from '@/lib/packages'
 import Yes from '@/components/Yes'
 import ProjectForm from '@/components/ProjectForm'
+import {offerPackage} from '@/lib/offers'
+import {formatDate} from '@/lib/dates'
 
-export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
+export default function StartFlow({step, legacyPackage, tokenUrl, closedDays, offer}) {
   const router = useRouter()
   const {items, ready, add, remove, clear} = useCart()
   const handledLegacy = useRef(false)
@@ -28,6 +30,8 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
   const lines = items.map(i => ({...i, pkg: packageBySlug(i.slug)}))
   const total = lines.reduce((s, l) => s + (l.pkg.price || 0), 0)
   const hasUnpriced = lines.some(l => !l.pkg.price)
+
+  if (offer && !done) return <OfferFlow offer={offer} tokenUrl={tokenUrl} closedDays={closedDays} onDone={setDone} />
 
   if (done) {
     return (
@@ -128,5 +132,39 @@ export default function StartFlow({step, legacyPackage, tokenUrl, closedDays}) {
         </section>
       )}
     </>
+  )
+}
+
+// A custom package sent from Admin → Offers: no cart, just that package at its price, then the usual form.
+function OfferFlow({offer, tokenUrl, closedDays, onDone}) {
+  if (offer.closed) {
+    const why = {Ordered: 'This offer has already been ordered.', Expired: 'This offer has expired.', Withdrawn: 'This offer is no longer available.'}[offer.closed]
+      || 'We couldn’t find this offer. Please check the link in your email.'
+    return (
+      <div className="empty-order">
+        <h1>Custom package</h1>
+        <p className="lead">{why} Questions? Email us at <a href="mailto:hello@mint35.com">hello@mint35.com</a>.</p>
+        <Link href="/start" className="btn btn-ghost">See our packages</Link>
+      </div>
+    )
+  }
+  const pkg = offerPackage(offer)
+  return (
+    <section className="start-form" aria-labelledby="offer-title">
+      <div className="offer-card">
+        <span className="chosen-label">Your custom package</span>
+        <div className="mini-head">
+          <h1 id="offer-title">{offer.title}</h1>
+          <b className="mini-price">{formatPrice(pkg.price)}</b>
+        </div>
+        <p className="muted">Prepared for {offer.company || offer.client_name}{offer.videos > 1 ? ` · ${offer.videos} videos` : ''}{offer.expires_on ? ` · Offer valid through ${formatDate(offer.expires_on)}` : ''}</p>
+        {offer.message && <p className="offer-message">{offer.message}</p>}
+        {offer.items?.length > 0 && <Yes items={offer.items} />}
+        <p className="order-fine">Fill in your project details below. Your card is saved when you place your order and charged in full when we start your project. Cancel free anytime before then.</p>
+      </div>
+      <ProjectForm lines={[{id: 'offer', slug: pkg.slug, pkg}]} offerToken={offer.token}
+        prefill={{name: offer.client_name, email: offer.email, company: offer.company}}
+        tokenUrl={tokenUrl} closedDays={closedDays} onDone={onDone} />
+    </section>
   )
 }

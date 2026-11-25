@@ -243,7 +243,8 @@ function Reveal({label, children}) {
 // Multi-step order form: 1 You · 2 Your brand · 3 one page per video · 4 Review & pay.
 // Every step stays in one <form> (hidden when not current) so answers and chosen files survive
 // moving back and forth. Text answers are also saved in the browser in case the page is closed.
-export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) {
+// `offerToken` (custom offer link): one line priced by the team, no discount codes; `prefill` = the client's details from the offer.
+export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone, offerToken = null, prefill = null}) {
   const formRef = useRef(null)
   const [state, setState] = useState({phase: 'idle'})
   const [step, setStep] = useState(0)
@@ -332,6 +333,13 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
       if (el.type === 'radio') el.checked = saved[el.name] === el.value
       else if (el.type === 'checkbox') el.checked = !!saved[el.name]
       else el.value = saved[el.name]
+    }
+    // A custom offer knows who it's for: fill in their name, email and organization if still blank.
+    if (prefill) {
+      const [first, ...rest] = (prefill.name || '').trim().split(/\s+/)
+      for (const [k, v] of [['first_name', first], ['last_name', rest.join(' ')], ['email', prefill.email], ['company', prefill.company]]) {
+        if (v && f.elements[k] && !f.elements[k].value) f.elements[k].value = v
+      }
     }
     readWatch()
     loadFiles(saveKey).then(saved => { pendingFiles.current = saved; setFilesLoaded(n => n + 1) })
@@ -525,7 +533,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         ideal_date: g(i, 'ideal_date'), latest_date: g(i, 'latest_date'),
         campaign_link: g(i, 'campaign_link'), goal: g(i, 'goal'), match: g(i, 'match'),
         launch_at: g(i, 'launch_at'), tagline: g(i, 'tagline'), per_video: g(i, 'per_video'),
-        stories: g(i, 'stories'), video_ideas: [1, 2, 3].map(n => g(i, `video_${n}`)),
+        stories: g(i, 'stories'), video_ideas: Array.from({length: Math.max(3, l.pkg.videos || 1)}, (_, n) => g(i, `video_${n + 1}`)),
       })),
       files: files.map(f => ({name: f.file.name, size: f.file.size, kind: f.kind, item: f.item})),
       // Files left out for being too big, from boxes where no link was added: the welcome email reminds them.
@@ -534,7 +542,8 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
         .flatMap(el => JSON.parse(el.dataset.skipped)),
       acceptedDisclaimer: DISCLAIMER_VERSION,
       acceptedPoints: DISCLAIMER_POINTS.filter((_, n) => fd.get(`dp${n}`)).length,
-      discountCode: discount.rule?.code || null,
+      discountCode: offerToken ? null : discount.rule?.code || null,
+      offerToken,
       tax: {exempt: taxed && exempt, reason: taxed && exempt ? fd.get('tax_reason') : null},
     }
 
@@ -835,9 +844,9 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
           <li className="review-tax">{taxed
             ? <><span>{exempt ? 'Sales tax' : SALES_TAX_LABEL}</span><b>{exempt ? 'Exempt' : money(taxTotal)}</b></>
             : <><span>Sales tax <span className="muted">(billing address outside New Jersey)</span></span><b>None</b></>}</li>
-          <li className="review-total"><span>Total <span className="intro-tag">Introductory pricing</span></span><b>{money(total)}</b></li>
+          <li className="review-total"><span>Total {!offerToken && <span className="intro-tag">Introductory pricing</span>}</span><b>{money(total)}</b></li>
         </ul>
-        <div className="discount-box">
+        {!offerToken && <div className="discount-box">
           {discount.rule ? (
             <p className="discount-on">
               <span><b>{discount.rule.code}</b> applied{offTotal > 0 ? `: −${money(offTotal)}` : ', but it doesn’t apply to what’s in this order'}</span>
@@ -854,7 +863,7 @@ export default function ProjectForm({lines, tokenUrl, closedDays = {}, onDone}) 
               {discount.error && <p className="form-error" role="alert">{discount.error}</p>}
             </>
           )}
-        </div>
+        </div>}
         {taxed && <div className="exempt-box">
           <label className="check"><input type="checkbox" name="tax_exempt" checked={exempt} onChange={e => setExempt(e.target.checked)} /><span>My organization is tax-exempt (for example, a nonprofit)</span></label>
           {exempt && (

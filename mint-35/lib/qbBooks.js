@@ -1,7 +1,8 @@
 import 'server-only'
 import {createAdminClient} from './supabase/admin'
 import {qbAccounting, getConnection} from './qb'
-import {packageByName, EXTRA_FORMAT_PRICE, CHECKOUT_EXTRAS} from './packages'
+import {EXTRA_FORMAT_PRICE, CHECKOUT_EXTRAS} from './packages'
+import {jobPackage, OFFER_ITEM} from './offers'
 import {addonByKey} from './addons'
 import {projectRef} from './status'
 import {jobTaxRate, taxCents} from './tax'
@@ -66,10 +67,10 @@ async function customerFor(p) {
 
 // Receipt lines for the job's own charge, mirroring the admin Billing tab.
 async function jobLines(p) {
-  const pkg = packageByName(p.package)
+  const pkg = jobPackage(p) // a listed package, or a custom offer (booked under the "Custom package" item)
   if (!pkg) throw new Error(`The job’s package (“${p.package || 'none'}”) isn’t one of the QuickBooks products. Enter this receipt by hand.`)
   const videos = pkg.videos || 1
-  const lines = [{item: pkg.name, qty: 1, unit: pkg.price * 100, desc: `${pkg.name} · ${projectRef(p.number)}`}]
+  const lines = [{item: pkg.custom ? OFFER_ITEM : pkg.name, qty: 1, unit: Math.round(pkg.price * 100), desc: `${pkg.name}${pkg.custom ? ' (custom package)' : ''} · ${projectRef(p.number)}`}]
   for (const f of p.brief?.extra_formats || []) lines.push({item: 'Extra format', qty: videos, unit: EXTRA_FORMAT_PRICE * 100, desc: `${f} version`})
   for (const k of p.brief?.extras || []) {
     const a = CHECKOUT_EXTRAS.find(x => x.key === k)

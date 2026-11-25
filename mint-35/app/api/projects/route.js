@@ -11,6 +11,8 @@ import {upcomingClosedDays} from '@/lib/holidays'
 import {findDiscount, claimDiscount} from '@/lib/discountCodes'
 import {discountLines, describeDiscount} from '@/lib/discounts'
 import {SALES_TAX_RATE, TAX_STATE, EXEMPT_REASONS} from '@/lib/tax'
+import {findOffer} from '@/lib/offerServer'
+import {offerPackage} from '@/lib/offers'
 import {TITLES, ALERTS, STYLES, STORY, VOICES, TONES, MUSIC, UPLOAD_KINDS, DISCLAIMER_POINTS, US_STATES, MAX_UPLOAD_BYTES, MAX_UPLOAD_MB} from '@/lib/intake'
 
 const ORIENTATIONS = ['9:16 Vertical', '1:1 Square', '16:9 Horizontal', 'Not sure - recommend one']
@@ -70,13 +72,25 @@ export async function POST(request) {
   const rawItems = Array.isArray(body.items) ? body.items : []
   if (!rawItems.length || rawItems.length > MAX_ITEMS) return bad(`An order can have 1 to ${MAX_ITEMS} videos.`)
 
+  // A custom offer link (Admin → Offers): exactly that package, at the team's price, ordered once.
+  let offer = null
+  if (body.offerToken) {
+    const found = await findOffer(body.offerToken)
+    if (found.state !== 'Open') {
+      return bad({Ordered: 'This custom package has already been ordered.', Expired: 'This custom package offer has expired. Please email hello@mint35.com.',
+        Withdrawn: 'This custom package is no longer available. Please email hello@mint35.com.'}[found.state] || 'We couldn’t find this custom package. Please check the link in your email.')
+    }
+    if (rawItems.length !== 1) return bad('Something went wrong with the form. Please refresh and try again.')
+    offer = found.offer
+  }
+
   const closed = upcomingClosedDays()
   const earliest = earliestDelivery(new Date(Date.now() - 3600000), closed)
   const items = []
   for (const [i, it] of rawItems.entries()) {
     const which = rawItems.length > 1 ? ` for video ${i + 1}` : ''
-    const pkg = PACKAGE_NAMES.includes(it?.package) ? it.package : null
-    const momentum = ORG_ONLY_NAMES.includes(pkg)
+    const pkg = offer ? offer.title : PACKAGE_NAMES.includes(it?.package) ? it.package : null
+    const momentum = !offer && ORG_ONLY_NAMES.includes(pkg)
     const brief = {
       kind: momentum ? 'momentum' : 'classic',
       // Momentum: the client approves a script, then a sample video (lib/status.js reviewStage).
@@ -87,6 +101,7 @@ export async function POST(request) {
     }
     // Voice and tone are only asked when narration is chosen.
     if (!brief.story?.startsWith('narration')) { delete brief.voice; delete brief.tone }
+    if (offer) brief.offer = {id: offer.id, title: offer.title, items: offer.items, videos: offer.videos, price_cents: offer.price_cents}
     // Links to footage too big to upload (the client's own Google Drive / Dropbox).
     brief.media_links = str(it?.media_links, 2000)
     const row = {
@@ -126,7 +141,7 @@ export async function POST(request) {
       })
       brief.item_website = str(it?.item_website, 500)
       // Multi-video packages (Campaign 3): general direction, or an idea per video.
-      const videos = packageByName(pkg)?.videos || 1
+      const videos = (offer ? offer.videos : packageByName(pkg)?.videos) || 1
       if (videos > 1) {
         brief.stories = it?.stories === 'ideas' ? 'ideas' : 'general'
         if (brief.stories === 'ideas') {
@@ -161,7 +176,7 @@ export async function POST(request) {
 
   // Listed price per video: package + extra formats + priced extras chosen at checkout.
   const listedCents = items.map(it => {
-    const listed = packageByName(it.package)
+    const listed = offer ? offerPackage(offer) : packageByName(it.package)
     return listed ? (listed.price + extraFormatsCost(listed, it.brief.extra_formats?.length || 0) + checkoutExtrasCost(listed, it.brief.extras)) * 100 : null
   })
   // A discount code is checked again here (the checkout preview isn't trusted) and one use is claimed.
@@ -171,7 +186,8 @@ export async function POST(request) {
   const skipped = (Array.isArray(body.skippedFiles) ? body.skippedFiles : []).map(n => str(n, 200)).filter(Boolean).slice(0, 40)
   if (skipped.length) items.forEach(it => { it.brief.skipped_files = skipped })
 
-  if (typeof body.discountCode === 'string' && body.discountCode.trim()) {
+  // Custom offers are already priced: no discount codes on top.
+  if (!offer && typeof body.discountCode === 'string' && body.discountCode.trim()) {
     const {rule, error: codeError} = await findDiscount(body.discountCode, items.map(it => it.package))
     if (codeError) return bad(`${codeError} Remove it to place your order without it.`)
     off = discountLines(rule, items.map((it, i) => ({package: it.package, cents: listedCents[i] || 0})))
@@ -215,9 +231,16 @@ export async function POST(request) {
   })
 
   const db = createAdminClient()
+  // Claim the offer for this order (only one order per link, even if submitted twice at once).
+  if (offer) {
+    const {data: claimed} = await db.from('custom_offers').update({status: 'ordered', order_id: orderId, ordered_at: new Date().toISOString()})
+      .eq('id', offer.id).eq('status', 'open').select('id')
+    if (!claimed?.length) return bad('This custom package has already been ordered.')
+  }
   const {data: created, error} = await db.from('projects').insert(rows).select('id, number, intake_token, order_item').order('order_item')
   if (error) {
     console.error('Order insert failed', error)
+    if (offer) await db.from('custom_offers').update({status: 'open', order_id: null, ordered_at: null}).eq('id', offer.id).eq('order_id', orderId)
     return NextResponse.json({error: 'We couldn’t save your order. Please try again.'}, {status: 500})
   }
 

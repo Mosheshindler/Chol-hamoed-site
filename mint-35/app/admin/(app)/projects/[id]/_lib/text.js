@@ -1,6 +1,7 @@
 import {STATUSES, formatMoney, forPackage} from '@/lib/status'
 import {addonByKey} from '@/lib/addons'
-import {packageByName, EXTRA_FORMAT_PRICE, CHECKOUT_EXTRAS} from '@/lib/packages'
+import {EXTRA_FORMAT_PRICE, CHECKOUT_EXTRAS} from '@/lib/packages'
+import {jobPackage} from '@/lib/offers'
 import {formatDate, businessDaysUntil} from '@/lib/dates'
 import {upcomingClosedDays} from '@/lib/holidays'
 import {jobTaxRate, taxCents, exemptLabel, SALES_TAX_LABEL} from '@/lib/tax'
@@ -78,7 +79,7 @@ export const checkoutExtras = j => [
 // Everything we hand over for one job, from the order and from add-ons confirmed later.
 // `kind` + `label` say where each one is shared; `note` covers extras that change the video itself.
 export function deliverables(j, addons, files) {
-  const pkg = packageByName(j.package)
+  const pkg = jobPackage(j)
   const videos = pkg?.videos || 1
   const x = videos > 1 ? ` × ${videos}` : ''
   const mine = files.filter(f => f.project_id === j.id)
@@ -105,10 +106,10 @@ export function countdown(date) {
 
 // Price breakdown for one job: what the order form charged for, plus add-ons confirmed later.
 export function billing(j, addons) {
-  const pkg = packageByName(j.package)
+  const pkg = jobPackage(j)
   const videos = pkg?.videos || 1
   const lines = []
-  if (pkg) lines.push({label: `${pkg.name} package`, cents: pkg.price * 100})
+  if (pkg) lines.push(pkg.custom ? {label: `${pkg.name} (custom package)`, detail: pkg.items.join(' · '), cents: Math.round(pkg.price * 100)} : {label: `${pkg.name} package`, cents: pkg.price * 100})
   const per = cents => (videos > 1 ? ` · ${formatMoney(cents)} × ${videos} videos` : '')
   for (const f of j.brief?.extra_formats || []) lines.push({label: `Extra: ${f} version`, detail: 'Separate file to deliver' + per(EXTRA_FORMAT_PRICE * 100), cents: EXTRA_FORMAT_PRICE * videos * 100})
   for (const k of j.brief?.extras || []) {

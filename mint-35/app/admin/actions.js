@@ -18,6 +18,9 @@ import {sendPasswordLink} from '@/lib/passwordLink'
 import {addonEmail} from '@/lib/emailParts'
 import {normalizeCode} from '@/lib/discounts'
 import {PACKAGES} from '@/lib/packages'
+import {offerEmail} from '@/lib/offerEmail'
+import {OFFER_DAYS} from '@/lib/offers'
+import {randomBytes} from 'node:crypto'
 
 async function requireMember() {
   const supabase = await createClient()
@@ -458,5 +461,74 @@ export async function setDiscountActive(formData) {
   if (me.role !== 'owner') return {error: 'Only the owner can change codes.'}
   await supabase.from('discount_codes').update({active: formData.get('active') === 'true'}).eq('id', String(formData.get('id')))
   revalidatePath('/admin/discounts')
+  return {ok: true}
+}
+
+// Custom offers (Admin → Offers): a package with its own name, contents and price for one client, ordered once
+// through a private link. Only the owner creates, sends or withdraws them (like discount codes).
+const offerLink = (origin, token) => `${origin}/start?offer=${token}`
+
+async function emailOffer(supabase, offer) {
+  const link = offerLink(await siteOrigin(), offer.token)
+  const {subject, html} = offerEmail({offer, link})
+  const sent = await sendEmail({to: offer.email, subject, html})
+  if (sent.ok) await supabase.from('custom_offers').update({emailed_at: new Date().toISOString()}).eq('id', offer.id)
+  return sent
+}
+
+export async function createOffer(_, formData) {
+  const {supabase, me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can create offers.'}
+  const s = (k, max) => String(formData.get(k) || '').trim().slice(0, max)
+  const client_name = s('client_name', 200), email = s('email', 320).toLowerCase(), company = s('company', 200) || null
+  const title = s('title', 80)
+  const items = s('items', 3000).split('\n').map(l => l.replace(/^[-•*\s]+/, '').trim()).filter(Boolean).slice(0, 20)
+  const videos = Number(formData.get('videos'))
+  const dollars = Number(String(formData.get('price') || '').replace(/[$,\s]/g, ''))
+  const message = s('message', 2000) || null
+  const expires_on = /^\d{4}-\d{2}-\d{2}$/.test(formData.get('expires_on') || '') ? formData.get('expires_on') : null
+  if (!client_name) return {error: 'Enter the client’s name.'}
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return {error: 'Enter the client’s email.'}
+  if (title.length < 2) return {error: 'Give the package a name.'}
+  if (!Number.isInteger(videos) || videos < 1 || videos > 20) return {error: 'Number of videos: 1 to 20.'}
+  if (!(dollars > 0)) return {error: 'Enter the price.'}
+  const row = {token: randomBytes(18).toString('base64url'), client_name, email, company, title, items, videos,
+    price_cents: Math.round(dollars * 100), message, expires_on, created_by: me.id}
+  const {data: offer, error} = await supabase.from('custom_offers').insert(row).select('*').single()
+  if (error) return {error: 'Couldn’t save the offer. Has the custom offers database update been run?'}
+  const link = offerLink(await siteOrigin(), offer.token)
+  let note = 'Offer saved. Copy the link below and send it to the client.'
+  if (formData.get('send') === 'on') {
+    const sent = await emailOffer(supabase, offer)
+    note = sent.ok ? `Emailed to ${email}.` : `Saved, but the email didn’t send (${String(sent.error).replace(/\.$/, '')}). Copy the link below and send it yourself.`
+  }
+  revalidatePath('/admin/offers')
+  return {ok: true, message: note, link}
+}
+
+export async function resendOffer(formData) {
+  const {supabase, me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can send offers.'}
+  const {data: offer} = await supabase.from('custom_offers').select('*').eq('id', String(formData.get('id'))).single()
+  if (!offer || offer.status !== 'open') return {error: 'That offer can’t be sent any more.'}
+  const sent = await emailOffer(supabase, offer)
+  revalidatePath('/admin/offers')
+  return sent.ok ? {ok: true} : {error: `The email didn’t send (${sent.error}).`}
+}
+
+// Withdraw an open offer (the link stops working), or reopen a withdrawn one. Expired offers can get a new last day.
+export async function setOfferOpen(formData) {
+  const {supabase, me} = await requireMember()
+  if (me.role !== 'owner') return {error: 'Only the owner can change offers.'}
+  const id = String(formData.get('id'))
+  const open = formData.get('open') === 'true'
+  const patch = {status: open ? 'open' : 'withdrawn'}
+  if (open) {
+    const today = new Date().toLocaleDateString('en-CA', {timeZone: 'America/New_York'})
+    const {data: o} = await supabase.from('custom_offers').select('expires_on').eq('id', id).single()
+    if (o?.expires_on && o.expires_on < today) patch.expires_on = new Date(Date.now() + OFFER_DAYS * 864e5).toLocaleDateString('en-CA', {timeZone: 'America/New_York'})
+  }
+  await supabase.from('custom_offers').update(patch).eq('id', id).neq('status', 'ordered')
+  revalidatePath('/admin/offers')
   return {ok: true}
 }
