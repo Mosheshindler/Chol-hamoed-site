@@ -1,14 +1,13 @@
-import {esc, textToHtml} from './emailParts.js'
+import {esc, textToHtml, greetName} from './emailParts.js'
 import {formatMoney} from './status.js'
 import {formatDate} from './dates.js'
 
 // The email that sends a custom package (Admin → Offers) to the client: what's included, the price and the private link.
 export function offerEmail({offer, link}) {
-  const first = (offer.client_name || '').trim().split(/\s+/)[0] || 'there'
   const subject = `Your custom Mint 35 package: ${offer.title}`
   const items = (offer.items || []).length
     ? `<ul style="margin:6px 0 0;padding-left:20px">${offer.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : ''
-  const html = `<p>Hi ${esc(first)},</p>`
+  const html = `<p>Hi ${esc(greetName(offer.client_name))},</p>`
     + (offer.message ? textToHtml(offer.message) : `<p>Here's the custom package we put together for ${esc(offer.company || 'you')}.</p>`)
     + `<div style="border:1px solid #ddd;border-radius:10px;padding:14px 16px;margin:16px 0">`
     + `<p style="margin:0"><b style="font-size:17px">${esc(offer.title)}</b></p>`

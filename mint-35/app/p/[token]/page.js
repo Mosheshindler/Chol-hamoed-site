@@ -1,4 +1,5 @@
 import {notFound} from 'next/navigation'
+import {greetName} from '@/lib/emailParts'
 import Logo from '@/components/Logo'
 import {loadOrderByToken} from '@/lib/customer'
 import {withTax, jobTaxRate} from '@/lib/tax'
@@ -36,7 +37,7 @@ export default async function CustomerPage({params}) {
 
       <main className="container cp-main">
         <section className="cp-intro">
-          <p className="eyebrow">Hi {first.name.split(' ')[0]}</p>
+          <p className="eyebrow">Hi {greetName(first.name)}</p>
           <h1>{jobs.length > 1 ? `Your order of ${jobs.length} projects` : `Your ${first.package || 'Mint 35'} project`}</h1>
           <p className="muted">
             {jobs.map(j => projectRef(j.number)).join(' · ')} · ordered {formatDate(first.created_at)}

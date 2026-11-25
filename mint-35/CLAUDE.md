@@ -152,6 +152,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
   Confirm/Decline show Subject + Message (greeting and body as plain text, prefilled with the standard wording) and a live preview
   (EmailEditor in EmailPreview.js). Receipt, project page link, sign-off and footer stay fixed. Unedited text sends the standard HTML.
   Shared pieces in lib/emailParts.js (esc, toText, FOOTER_*, MESSAGE_SLOT/fillMessage/messagePart, addonEmail).
+  Client greetings use the full name entered (greetName in lib/emailParts.js; owner, Nov 25: "Hi Bnos Esther Malka", not "Hi Bnos").
   Every client email is BCC'd to hello@mint35.com only (owner, Oct 30; EMAIL_COPY_TO overrides); sendEmail({copy:false}) for internal mail.
   Team notifications (new orders, client messages, add-on requests, added files) go to hello@mint35.com (owner, Nov 1;
   TEAM_NOTIFY_EMAIL overrides). hello@mint35.com is a Google Workspace alias of info@mintmediallc.com; EMAIL_REPLY_TO is set to it in Vercel.

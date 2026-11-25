@@ -2,6 +2,9 @@
 // preview the team sees is exactly what the client gets. No server-only imports here.
 import {formatMoney} from './status'
 
+// Client greetings use the full name they entered (owner, Nov 25: "Bnos Esther Malka", not just "Bnos").
+export const greetName = name => String(name || '').trim().replace(/\s+/g, ' ') || 'there'
+
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]))
 
 // Every email carries who it's from and why the reader got it. Spam filters treat HTML-only mail with a
