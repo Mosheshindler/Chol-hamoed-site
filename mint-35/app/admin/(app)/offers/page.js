@@ -10,12 +10,7 @@ export const metadata = {title: 'Offers · Mint 35 admin'}
 
 export default async function OffersPage() {
   const supabase = await createClient()
-  const {data: {user}} = await supabase.auth.getUser()
-  const [{data: me}, {data: offers, error}] = await Promise.all([
-    supabase.from('team_members').select('role').eq('id', user.id).maybeSingle(),
-    supabase.from('custom_offers').select('*').order('created_at', {ascending: false}),
-  ])
-  const isOwner = me?.role === 'owner'
+  const {data: offers, error} = await supabase.from('custom_offers').select('*').order('created_at', {ascending: false})
   const origin = await siteOrigin()
   // Jobs ordered from an offer, to link to them.
   const orderIds = (offers || []).map(o => o.order_id).filter(Boolean)
@@ -53,7 +48,7 @@ export default async function OffersPage() {
                             {job && <p className="small">Ordered {formatDate(o.ordered_at)}: <Link href={`/admin/projects/${job.id}`}>M35-{job.number}</Link></p>}
                           </div>
                         </div>
-                        <OfferActions o={o} link={`${origin}/start?offer=${o.token}`} state={state} isOwner={isOwner} />
+                        <OfferActions o={o} link={`${origin}/start?offer=${o.token}`} state={state} />
                       </li>
                     )
                   })}
@@ -62,9 +57,7 @@ export default async function OffersPage() {
           </section>
         </div>
         <aside className="col-side">
-          {isOwner
-            ? <section className="panel"><h2>New custom package</h2><CreateOffer defaultExpires={defaultExpires} /></section>
-            : <section className="panel"><p className="muted">Only the owner can create offers.</p></section>}
+          <section className="panel"><h2>New custom package</h2><CreateOffer defaultExpires={defaultExpires} /></section>
           <section className="panel">
             <h2>How offers work</h2>
             <ul className="hint-list">
