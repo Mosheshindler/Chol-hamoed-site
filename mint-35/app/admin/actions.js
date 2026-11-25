@@ -465,7 +465,7 @@ export async function setDiscountActive(formData) {
 }
 
 // Custom offers (Admin → Offers): a package with its own name, contents and price for one client, ordered once
-// through a private link. Only the owner creates, sends or withdraws them (like discount codes).
+// through a private link. Any team member can create, send or withdraw them (owner, Nov 25).
 const offerLink = (origin, token) => `${origin}/start?offer=${token}`
 
 async function emailOffer(supabase, offer) {
@@ -478,7 +478,6 @@ async function emailOffer(supabase, offer) {
 
 export async function createOffer(_, formData) {
   const {supabase, me} = await requireMember()
-  if (me.role !== 'owner') return {error: 'Only the owner can create offers.'}
   const s = (k, max) => String(formData.get(k) || '').trim().slice(0, max)
   const client_name = s('client_name', 200), email = s('email', 320).toLowerCase(), company = s('company', 200) || null
   const title = s('title', 80)
@@ -507,8 +506,7 @@ export async function createOffer(_, formData) {
 }
 
 export async function resendOffer(formData) {
-  const {supabase, me} = await requireMember()
-  if (me.role !== 'owner') return {error: 'Only the owner can send offers.'}
+  const {supabase} = await requireMember()
   const {data: offer} = await supabase.from('custom_offers').select('*').eq('id', String(formData.get('id'))).single()
   if (!offer || offer.status !== 'open') return {error: 'That offer can’t be sent any more.'}
   const sent = await emailOffer(supabase, offer)
@@ -518,8 +516,7 @@ export async function resendOffer(formData) {
 
 // Withdraw an open offer (the link stops working), or reopen a withdrawn one. Expired offers can get a new last day.
 export async function setOfferOpen(formData) {
-  const {supabase, me} = await requireMember()
-  if (me.role !== 'owner') return {error: 'Only the owner can change offers.'}
+  const {supabase} = await requireMember()
   const id = String(formData.get('id'))
   const open = formData.get('open') === 'true'
   const patch = {status: open ? 'open' : 'withdrawn'}

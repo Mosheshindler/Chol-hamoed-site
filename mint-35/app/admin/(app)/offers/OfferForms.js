@@ -48,7 +48,7 @@ export function CreateOffer({defaultExpires}) {
 }
 
 // Actions for one offer in the list: copy its link, email it again, withdraw or reopen.
-export function OfferActions({o, link, state, isOwner}) {
+export function OfferActions({o, link, state}) {
   const [pending, start] = useTransition()
   const [msg, setMsg] = useState(null)
   const run = (fn, fields) => start(async () => {
@@ -58,13 +58,11 @@ export function OfferActions({o, link, state, isOwner}) {
   return (
     <div className="offer-actions">
       {state === 'Open' && <CopyLink link={link} />}
-      {isOwner && (
-        <span className="code-actions">
-          {state === 'Open' && <button type="button" className="link-btn" disabled={pending} onClick={() => run(resendOffer, {id: o.id})}>Email again</button>}
+      <span className="code-actions">
+        {state === 'Open' && <button type="button" className="link-btn" disabled={pending} onClick={() => run(resendOffer, {id: o.id})}>Email again</button>}
           {state === 'Open' && <button type="button" className="link-btn" disabled={pending} onClick={() => { if (confirm('Withdraw this offer? The link stops working.')) run(setOfferOpen, {id: o.id, open: 'false'}) }}>Withdraw</button>}
           {(state === 'Withdrawn' || state === 'Expired') && <button type="button" className="link-btn" disabled={pending} onClick={() => run(setOfferOpen, {id: o.id, open: 'true'})}>Reopen</button>}
-        </span>
-      )}
+      </span>
       {msg && <small className="muted">{msg}</small>}
     </div>
   )

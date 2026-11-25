@@ -184,7 +184,7 @@ separate from the Mint Media video site at the repo root (don't touch root files
   PRE_PRODUCTION_STATUSES a pop-up warns that new files may not be included; the team is emailed for every upload or link
   (subject notes the stage when late).
 
-- Custom offers (owner, Nov 25; migration 20261125000000_custom_offers.sql, table `custom_offers`): Admin → Offers (owner only) makes a
+- Custom offers (owner, Nov 25; migration 20261125000000_custom_offers.sql, table `custom_offers`): Admin → Offers (any team member, owner Nov 25) makes a
   package for one client (name, email, org, package name, what's included, videos 1–20, price, note, last day; default 30 days,
   OFFER_DAYS) and emails a private link /start?offer=<token> (offerEmail in lib/offerEmail.js, BCC hello@ as usual; Copy link too).
   The link skips the cart: an offer card (OfferFlow in app/start/StartFlow.js) + the usual ProjectForm (offerToken, prefill), classic
