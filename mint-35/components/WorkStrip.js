@@ -3,12 +3,9 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import VideoSample from './VideoSample'
 import {WORK} from '@/lib/samples'
-import {packageByName} from '@/lib/packages'
-
-const MILESTONES = packageByName('Momentum Pack')?.milestones || []
 
 // The homepage samples as one swipeable row: every card the same height, wide videos and Shorts side by side, captions
-// over the video. A Momentum Pack series is one card holding its milestone videos. Arrows scroll on larger screens.
+// over the video. A Momentum Pack series is one card holding its videos, each with a short label. Arrows scroll on larger screens.
 export default function WorkStrip() {
   const ref = useRef(null)
   const [edge, setEdge] = useState({start: true, end: false})
@@ -41,7 +38,7 @@ export default function WorkStrip() {
               {w.videos.map(v => (
                 <div key={v.id} className="series-video">
                   <VideoSample id={v.id} title={`${w.title}: ${v.label}`} vertical />
-                  <span className="series-cap"><i>{MILESTONES.indexOf(v.milestone) + 1}/{MILESTONES.length}</i>{v.milestone}</span>
+                  <span className="series-cap">{v.label}</span>
                 </div>
               ))}
             </div>

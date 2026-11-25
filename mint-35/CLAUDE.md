@@ -205,8 +205,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   lib/samples.js, in display order. Every card the same height (--wh 320px, 280px on phones), title + style over the bottom of the
   video, arrows on desktop, swipe on phones (wide videos trimmed at the sides on phones until played); videos play in place.
   Shorts take `vertical: true` (9:16, YouTube oardefault cover). A Momentum Pack shows as one series card ({series: true, title, kind,
-  videos: [{id, milestone, label}]}) with each video labeled n/4 + milestone underneath; first: Orlando Torah Academy (Live
-  t5hypa-rZT0, We made it! -cZfgsGZOPA). Add a milestone video to its `videos`. ScrollReveal fades the whole row, not each card.
+  videos: [{id, label}]}) with a short label under each video and no "1 of 4" numbering (owner: Orlando Torah Academy only made 2:
+  "Campaign launch" t5hypa-rZT0, "Goal reached!" -cZfgsGZOPA). Add a video to its `videos`. ScrollReveal fades the whole row, not each card.
   Style sample still missing for "Animated graphics & text" (owner will send); add the YouTube id as `sample` in STYLES (`lib/intake.js`).
 - Twilio texting / WhatsApp alerts (after launch): the form's alert choice is hidden and sends 'email'; restore it
   in ProjectForm step 1, then send alerts per `alert_channel` at each job step. Add SMS wording back to /terms and /privacy.

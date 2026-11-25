@@ -985,8 +985,7 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .series-video { display: grid; gap: 6px; justify-items: start; }
 .work-series .work-item { height: var(--sh); }
 .work-series figcaption { display: none; }
-.series-cap { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; white-space: nowrap; }
-.series-cap i { font-style: normal; padding: 1px 6px; border-radius: 999px; background: var(--lime); color: #0a0c0a; font-size: .68rem; font-weight: 700; }
+.series-cap { font-size: .8rem; font-weight: 600; white-space: nowrap; }
 @media (max-width: 720px) {
   .work-strip-wrap { --wh: 280px; margin-top: 16px; }
   .work-strip-nav { display: none; }
