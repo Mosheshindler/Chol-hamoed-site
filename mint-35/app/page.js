@@ -3,7 +3,8 @@ import Hero from '@/components/Hero'
 import PackageCards from '@/components/PackageCards'
 import Yes from '@/components/Yes'
 import VideoSample from '@/components/VideoSample'
-import {SAMPLES} from '@/lib/samples'
+import VideoSeries from '@/components/VideoSeries'
+import {SAMPLES, SERIES} from '@/lib/samples'
 
 // Samples sit in even rows: every video in a row is the same height, wide (16:9) and Shorts (9:16) side by side.
 // A row holds up to about 4.8 wide videos' worth of width (two wide + two Shorts).
@@ -99,6 +100,7 @@ export default function Home() {
                   {row.map(v => <VideoSample key={v.id} {...v} />)}
                 </div>
               ))}
+              {SERIES.map(x => <VideoSeries key={x.title} {...x} />)}
             </div>
           </div>
         </section>

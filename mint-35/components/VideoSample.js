@@ -4,7 +4,7 @@ import {useState} from 'react'
 
 // Shows the YouTube thumbnail and only loads the player when clicked, to keep the page fast.
 // The thumbnail stays on top until the player has loaded, so there's no black box while it starts.
-export default function VideoSample({id, title, kind, vertical}) {
+export default function VideoSample({id, title, kind, vertical, caption = true}) {
   // Shorts use YouTube's tall cover image; wide videos the 16:9 one.
   const thumb = vertical ? 'oardefault' : 'maxresdefault'
   const [playing, setPlaying] = useState(false)
@@ -31,7 +31,7 @@ export default function VideoSample({id, title, kind, vertical}) {
           </button>
         )}
       </div>
-      <figcaption><b>{title}</b>{kind && <span>{kind}</span>}</figcaption>
+      {caption && <figcaption><b>{title}</b>{kind && <span>{kind}</span>}</figcaption>}
     </figure>
   )
 }

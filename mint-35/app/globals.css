@@ -1011,3 +1011,26 @@ legend { font-weight: 600; font-size: .92rem; margin-bottom: 10px; }
 .cp-bill-total th, .cp-bill-total td { color: var(--text); font-weight: 700; border-top: 1px solid var(--line); padding-top: 10px; }
 .cp-pay { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .9rem; }
 @media (max-width: 640px) { .cp-tiles { grid-template-columns: 1fr; } }
+
+/* Momentum Pack series on the homepage (components/VideoSeries.js): text on the left, the milestone videos on the right. */
+.work-series { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: center; padding: 24px; border: 1px solid rgba(136,192,64,.35); border-radius: var(--radius); background: linear-gradient(135deg, rgba(136,192,64,.08), rgba(16,120,56,.04)); }
+.series-info { display: grid; gap: 10px; align-content: center; }
+.series-info h3 { margin: 0; font-size: 1.6rem; }
+.series-info p { margin: 0; }
+.series-tag { color: var(--lime); font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.series-steps { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.series-steps li { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .9rem; }
+.series-steps li.on { border-color: rgba(136,192,64,.6); color: var(--text); background: rgba(136,192,64,.1); }
+.series-num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,.08); font-size: .75rem; font-weight: 700; flex: none; }
+.series-steps li.on .series-num, .series-video .series-num { background: var(--lime); color: #0a0c0a; }
+.series-videos { display: flex; gap: 16px; align-items: flex-start; }
+.series-video { width: 200px; display: grid; gap: 10px; }
+.series-video .work-item { display: block; }
+.series-cap { margin: 0; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 8px; font-size: .9rem; }
+.series-cap .muted { grid-column: 2; font-size: .85rem; }
+.series-cap b { font-family: var(--display); }
+@media (max-width: 860px) {
+  .work-series { grid-template-columns: 1fr; padding: 20px 16px; }
+  .series-videos { justify-content: center; }
+  .series-video { width: auto; flex: 0 1 200px; min-width: 0; }
+}

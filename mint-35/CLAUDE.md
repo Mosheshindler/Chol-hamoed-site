@@ -201,6 +201,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   final files are shared.
 
 ## Planned (owner asked)
+- Momentum Pack series (owner, Nov 25): SERIES in lib/samples.js renders as one card under the samples (components/VideoSeries.js):
+  title, the pack's 4 milestones as chips (shown ones highlighted), and the milestone Shorts side by side. First: Orlando Torah Academy
+  (Live t5hypa-rZT0, We made it! -cZfgsGZOPA). Add a milestone video by adding {id, milestone, label} to its `videos`.
 - Homepage samples live in lib/samples.js; Shorts take `vertical: true` (9:16, YouTube oardefault cover). Rows are even-height (flex share =
   aspect ratio; app/page.js SAMPLE_ROWS); on phones wide ones stack and Shorts center. Owner is sending more
   (Nov 2: Agudah Go Vote; Nov 10: Khal Hampshire Hills, also the "My own photos and videos only" style sample). Rows fit up to ~4.8
