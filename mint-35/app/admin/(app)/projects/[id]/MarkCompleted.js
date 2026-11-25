@@ -10,10 +10,10 @@ export default function MarkCompleted({id, uncharged}) {
   const [pending, start] = useTransition()
   if (!open) {
     return (
-      <p className="muted small mark-done">
-        Finished outside the system?{' '}
-        <button type="button" className="link-btn" onClick={() => setOpen(true)}>Mark completed</button>
-      </p>
+      <div className="mark-done">
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(true)}>Mark completed</button>
+        <span className="muted small">Finished outside the system? Moves the job to Delivered without emailing the client.</span>
+      </div>
     )
   }
   return (

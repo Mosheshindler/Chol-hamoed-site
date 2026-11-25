@@ -329,6 +329,6 @@ a.job-row:hover { background: rgba(136,192,64,.05); }
 .offer-link { display: flex; gap: 8px; align-items: center; flex: 1 1 260px; min-width: 0; }
 .offer-link input { flex: 1; min-width: 0; font-size: 13px; }
 .offer-link input { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; color: var(--muted); padding: 8px 11px; font: inherit; font-size: 13px; color-scheme: dark; }
-.mark-done { margin: 10px 0 0; }
+.mark-done { margin: 12px 0 0; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
 .mark-done-panel { display: grid; gap: 10px; margin-top: 10px; }
 .mark-done-panel p { margin: 0; }
