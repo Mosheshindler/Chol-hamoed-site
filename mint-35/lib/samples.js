@@ -6,3 +6,16 @@ export const SAMPLES = [
   {id: 'T8xA5fHuLlU', title: 'Agudah: Go Vote', kind: 'AI realistic characters', vertical: true},
   {id: 'Bswpp6_FOuo', title: 'Khal Hampshire Hills', kind: 'Your own photos & videos', vertical: true},
 ]
+
+// A Momentum Pack shown as a series (owner, Nov 25): one production, a video per campaign milestone. `milestone` must be one of
+// the Momentum Pack's milestones in lib/packages.js; the card lists all of them and marks the ones shown here.
+export const SERIES = [
+  {
+    title: 'Orlando Torah Academy',
+    kind: 'Momentum Pack',
+    videos: [
+      {id: 't5hypa-rZT0', milestone: 'Live', label: 'Campaign launch'},
+      {id: '-cZfgsGZOPA', milestone: 'We made it!', label: 'Goal reached'},
+    ],
+  },
+]
