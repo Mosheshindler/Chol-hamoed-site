@@ -4,7 +4,8 @@ import {AddonDecision} from '../CustomerPanel'
 import {PriceForm} from '../JobForm'
 import {loadOrder} from '../_lib/order'
 import {billing} from '../_lib/text'
-import {jobTaxRate} from '@/lib/tax'
+import {jobTaxRate, TAX_STATE, EXEMPT_REASONS} from '@/lib/tax'
+import {TaxExempt} from '../ClientForms'
 import {paymentsReady} from '@/lib/qb'
 import {greetName} from '@/lib/emailParts'
 import QbSync from '../QbSync'
@@ -36,6 +37,9 @@ export default async function Billing({params}) {
                   <tr key={a.id}><th scope="row">Add-on: {a.label}{a.details && <small>{a.details}</small>}</th><td>{formatMoney(a.price_cents)}</td></tr>
                 ))}
                 <tr><th scope="row">Sales tax<small>{b.taxInfo}</small></th><td>{b.tax ? formatMoney(b.tax) : '—'}</td></tr>
+                {!j.charge_id && j.brief?.billing?.state === TAX_STATE && (
+                  <tr className="bill-note"><td colSpan={2}><TaxExempt id={j.id} exempt={!!j.brief?.tax?.exempt} reasons={EXEMPT_REASONS} /></td></tr>
+                )}
                 <tr className="bill-total"><th scope="row">Total</th><td>{formatMoney(b.total)}</td></tr>
               </tbody>
             </table>

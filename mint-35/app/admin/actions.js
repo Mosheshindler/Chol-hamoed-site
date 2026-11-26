@@ -13,7 +13,7 @@ import {chargeCard, paymentsReady, disconnect as qbDisconnect} from '@/lib/qb'
 import {syncCharge} from '@/lib/qbBooks'
 import {currentOwner} from '@/lib/owner'
 import {customerNotice, receipt} from '@/lib/notices'
-import {withTax, jobTaxRate, taxCents} from '@/lib/tax'
+import {withTax, jobTaxRate, taxCents, SALES_TAX_RATE, TAX_STATE, EXEMPT_REASONS, exemptLabel} from '@/lib/tax'
 import {sendPasswordLink} from '@/lib/passwordLink'
 import {addonEmail, greetName} from '@/lib/emailParts'
 import {normalizeCode} from '@/lib/discounts'
@@ -223,6 +223,52 @@ export async function updateJob(formData) {
   revalidatePath('/admin/projects/[id]', 'layout')
   revalidatePath('/admin')
   return {ok: true}
+}
+
+// Project tab → Client → Edit (owner, Nov 26): fix the contact details entered at checkout, e.g. the wrong organization.
+// Applies to every job in the order (they share one point of contact). The job header shows the organization, else the name.
+export async function updateClient(_, formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const t = (k, max) => String(formData.get(k) || '').trim().slice(0, max)
+  const first_name = t('first_name', 100), last_name = t('last_name', 100)
+  const patch = {first_name, last_name, name: [first_name, last_name].filter(Boolean).join(' '),
+    email: t('email', 320), phone: t('phone', 40) || null, company: t('company', 200) || null}
+  if (!first_name) return {error: 'Enter the first name.'}
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(patch.email)) return {error: 'Enter a valid email.'}
+  const {data: p} = await supabase.from('projects').select('id, order_id, name, email, phone, company').eq('id', id).single()
+  if (!p) return {error: 'Job not found. Refresh the page.'}
+  const {error} = await (p.order_id ? supabase.from('projects').update(patch).eq('order_id', p.order_id) : supabase.from('projects').update(patch).eq('id', id))
+  if (error) return {error: 'Couldn’t save. Try again.'}
+  const changed = ['name', 'email', 'phone', 'company'].filter(k => (p[k] || '') !== (patch[k] || ''))
+  if (changed.length) await supabase.from('project_events').insert({project_id: id, actor: me.id, type: 'note',
+    data: {text: `Client details updated: ${changed.map(k => `${k} “${p[k] || '—'}” → “${patch[k] || '—'}”`).join(', ')}`}})
+  revalidatePath('/admin/projects/[id]', 'layout')
+  revalidatePath('/admin')
+  return {ok: true}
+}
+
+// Billing → sales tax (owner, Nov 26): mark a New Jersey order tax-exempt (with a reason) or taxed again, for jobs whose card
+// hasn't been charged yet. Applies to the whole order; later add-ons follow the same setting.
+export async function setTaxExempt(_, formData) {
+  const {supabase, me} = await requireMember()
+  const id = String(formData.get('id'))
+  const exempt = formData.get('exempt') === '1'
+  const reason = exempt ? EXEMPT_REASONS.find(r => r.value === formData.get('reason'))?.value : null
+  if (exempt && !reason) return {error: 'Choose why they’re exempt.'}
+  const {data: p} = await supabase.from('projects').select('id, order_id').eq('id', id).single()
+  if (!p) return {error: 'Job not found. Refresh the page.'}
+  const {data: jobs} = await (p.order_id ? supabase.from('projects').select('id, charge_id, brief').eq('order_id', p.order_id) : supabase.from('projects').select('id, charge_id, brief').eq('id', id))
+  const open = (jobs || []).filter(j => !j.charge_id && j.brief?.billing?.state === TAX_STATE)
+  if (!open.length) return {error: 'Sales tax can only be changed on New Jersey jobs that haven’t been charged yet.'}
+  const tax = exempt ? {exempt: true, reason, rate: 0, set_by_team: true} : {exempt: false, rate: SALES_TAX_RATE}
+  for (const j of open) {
+    await supabase.from('projects').update({brief: {...j.brief, tax}}).eq('id', j.id)
+    await supabase.from('project_events').insert({project_id: j.id, actor: me.id, type: 'note',
+      data: {text: exempt ? `Marked tax-exempt (${exemptLabel(reason)}); no NJ sales tax will be charged.` : 'NJ sales tax turned back on.'}})
+  }
+  revalidatePath('/admin/projects/[id]', 'layout')
+  return {ok: true, skipped: (jobs || []).length - open.length}
 }
 
 export async function addNote(formData) {

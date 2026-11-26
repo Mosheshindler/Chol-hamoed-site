@@ -1,6 +1,7 @@
 import {projectRef} from '@/lib/status'
 import {formatDate, formatDateTime} from '@/lib/dates'
 import {CustomerLink} from '../CustomerPanel'
+import {ClientDetails} from '../ClientForms'
 import DownloadAll from '../DownloadAll'
 import {CLIENT_FILE_DAYS, CLIENT_FILE_KINDS, FINAL_DELETE_DAYS, FINAL_AVAILABLE_DAYS} from '@/lib/retention'
 import {loadOrder} from '../_lib/order'
@@ -96,6 +97,7 @@ export default async function ProjectDetails({params}) {
       <aside className="col-side">
         <section className="panel">
           <h2>Client</h2>
+          <ClientDetails p={{id: p.id, name: p.name, first_name: p.first_name, last_name: p.last_name, email: p.email, phone: p.phone, company: p.company}}>
           <dl className="kv">
             <dt>Name</dt><dd>{[p.title, p.name].filter(Boolean).join(' ')}</dd>
             <dt>Email</dt><dd><a href={`mailto:${p.email}`}>{p.email}</a></dd>
@@ -105,6 +107,7 @@ export default async function ProjectDetails({params}) {
             {p.brief?.billing && <><dt>Billing address</dt><dd>{[p.brief.billing.line1, p.brief.billing.line2].filter(Boolean).join(', ')}<br />{p.brief.billing.city}, {p.brief.billing.state} {p.brief.billing.zip}</dd></>}
             {p.alert_channel && <><dt>Alerts</dt><dd>{ALERT_LABEL[p.alert_channel]}</dd></>}
           </dl>
+          </ClientDetails>
         </section>
         <section className="panel">
           <h2>Client&rsquo;s project page</h2>
