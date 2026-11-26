@@ -169,6 +169,8 @@ separate from the Mint Media video site at the repo root (don't touch root files
   tax-exempt" at checkout, picks a reason (EXEMPT_REASONS) and optionally uploads a certificate (file kind `tax_exempt`,
   migration 20261022020000_tax_exempt_files.sql). Saved per job as brief.tax {exempt, reason, rate}; price_cents stays pre-tax.
   Charges (job and later add-ons) add tax via withTax/jobTaxRate; jobs without brief.tax (ordered before Oct 22) stay untaxed.
+  Billing → "Client is tax-exempt? Remove sales tax" (owner, Nov 26; setTaxExempt, TaxExempt in ClientForms.js): for NJ jobs not charged yet,
+  the team can mark the order exempt with a reason (brief.tax {exempt, reason, rate: 0, set_by_team}) or turn tax back on; logged as notes.
   Shown at checkout, in emails/receipts, on the client's page (incl. tax) and on admin Billing/Project. The certificate upload has no
   "Optional" tag (owner's call) but is still not required.
 
@@ -194,6 +196,9 @@ separate from the Mint Media video site at the repo root (don't touch root files
   orders once. jobPackage(j) in lib/offers.js prices custom jobs for Billing and QuickBooks (item "Custom package", OFFER_ITEM;
   the bookkeeper needs that product/service). Withdraw / Reopen / Email again on the Offers page. Momentum-style (fundraiser) offers aren't supported.
 
+- Client details are editable (owner, Nov 26: an order came in with "Mint Media" as the organization): Project tab → Client → Edit
+  client details (updateClient, ClientDetails in ClientForms.js) changes first/last name, email, cell and organization on every job in
+  the order and logs the change. The job header shows the organization, else the name.
 - Mark completed (owner, Nov 25): some work happens outside the system, so Progress has "Finished outside the system? Mark completed"
   (MarkCompleted.js -> markCompleted in app/admin/actions.js) on any ACTIVE job: moves it to Delivered with no client email, no card
   charge (warns when a saved card wasn't charged) and no final file needed; logged as a status event {offline: true, note}. Retention
